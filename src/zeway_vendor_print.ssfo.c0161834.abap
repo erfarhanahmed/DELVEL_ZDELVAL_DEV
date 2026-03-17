@@ -1,0 +1,24 @@
+
+IF wa_data-UPDATEDT IS INITIAL.
+  SELECT SINGLE CREATIONDT  CREATIONTIME FROM ZEWAY_RES_122 INTO ( wa_data-UPDATEDT ,
+  wa_data-UPDATETIME  )  WHERE BELNR = p_vbeln.
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,32 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>Z280</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>Messages for FI Reporting</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>Z280</ARBGB>
+     <MSGNR>000</MSGNR>
+     <TEXT>This program (&amp;) has been replaced by &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>Z280</ARBGB>
+     <MSGNR>001</MSGNR>
+     <TEXT>Automatic payment transactions are not intended for company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>Z280</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>Payer &amp; is not defined for account &amp; &amp;</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>

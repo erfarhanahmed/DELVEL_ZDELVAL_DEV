@@ -1,0 +1,7 @@
+@EndUserText.label: 'Auth: Item Master Consumption'
+@MappingRole: true
+define role ZR_ITEMMASTER_CONS {
+     grant select on ZC_ItemMaster_Cons
+  where ( Plant   ) = aspect pfcg_auth( M_MATE_WRK, WERKS, ACTVT = '03' )
+    and ( Product ) = aspect pfcg_auth( M_MATE_MAT, BEGRU, ACTVT = '03' );
+}

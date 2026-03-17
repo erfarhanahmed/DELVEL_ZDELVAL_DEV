@@ -1,0 +1,79 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZPAYMENT_VOUCHER_DEC
+*&---------------------------------------------------------------------*
+
+TYPES : BEGIN OF TY_T001,
+          BUKRS TYPE T001-BUKRS,
+          BUTXT TYPE T001-BUTXT,
+        END OF TY_T001,
+        BEGIN OF TY_LFA1,
+          LIFNR      TYPE LFA1-LIFNR,
+          NAME1      TYPE LFA1-NAME1,
+          STREET     TYPE ADRC-STREET,
+          CITY1      TYPE ADRC-CITY1,
+          POST_CODE1 TYPE ADRC-POST_CODE1,
+        END OF TY_LFA1,
+        BEGIN OF TY_BKPF,
+          BELNR TYPE BSAK-BELNR,
+          BUKRS TYPE BSAK-BUKRS,
+          GJAHR TYPE BSAK-GJAHR,
+          AUGBL TYPE BSAK-AUGBL,
+          AUGDT TYPE BSAK-AUGDT,
+          BLART TYPE BSAK-BLART,
+          XBLNR TYPE BKPF-XBLNR,
+          BUDAT TYPE BKPF-BUDAT,
+          BLDAT TYPE BKPF-BLDAT,
+        END OF TY_BKPF,
+        BEGIN OF TY_GROSS,
+          BUKRS TYPE BSEG-BUKRS, "ADDED BY SP ON 16.01.2024
+          GJAHR TYPE BSEG-GJAHR,  "ADDED BY SP ON 16.01.2024
+          BELNR TYPE BSEG-BELNR,
+          BUZEI TYPE BSEG-BUZEI, "ADDED BY SP ON 16.01.2024
+          DMBTR TYPE BSEG-DMBTR,
+          BSCHL TYPE BSEG-BSCHL,
+          KOART TYPE BSEG-KOART,    "ADDED BY SP ON 16.01.2024
+          augbl TYPE BSEG-augbl,    "ADDED BY SP ON 16.01.2024
+          KTOSL TYPE BSEG-KTOSL,
+        END OF TY_GROSS,
+        BEGIN OF TY_TDS,
+          BUKRS TYPE BSEG-BUKRS,
+          GJAHR TYPE BSEG-GJAHR,
+          BELNR TYPE BSEG-BELNR,
+          KTOSL TYPE BSEG-KTOSL,
+          DMBTR TYPE BSEG-DMBTR,
+          BSCHL TYPE BSEG-BSCHL,
+        END OF TY_TDS
+        .
+
+TYPES: BEGIN OF TY_EXCEL ,
+         LINE1(50) TYPE C,
+         LINE2(50) TYPE C,
+         LINE3(50) TYPE C,
+         LINE4(50) TYPE C,
+         LINE5(50) TYPE C,
+         LINE6(50) TYPE C,
+         LINE7(50) TYPE C,
+         LINE8(50) TYPE C,
+         LINE9(50) TYPE C,
+       END OF TY_EXCEL.
+DATA: WA_T001           TYPE TY_T001 ##NEEDED,
+      WA_LFA1           TYPE TY_LFA1 ##NEEDED,
+      WA_HEADER_DETAILS TYPE ZSTR_HEADER_DETAILS_PAY_ADVICE ##NEEDED,
+      WA_BKPF           TYPE TY_BKPF ##NEEDED,
+      IT_BKPF           TYPE TABLE OF TY_BKPF ##NEEDED,
+      IT_GROSS          TYPE TABLE OF TY_GROSS ##NEEDED,
+      IT_GROSS_rej          TYPE TABLE OF TY_GROSS ##NEEDED,
+      IT_GROSS1         TYPE TABLE OF TY_GROSS ##NEEDED,
+      IT_GROSS3         TYPE TABLE OF TY_GROSS ##NEEDED,         "ADD SP ON 01.02.2024
+      IT_TDS         TYPE TABLE OF TY_GROSS ##NEEDED,         "ADD SP ON 01.02.2024
+      IT_GROSS2         TYPE TABLE OF TY_GROSS ##NEEDED,
+*      IT_TDS            TYPE TABLE OF TY_TDS ##NEEDED,
+      IT_FINAL          TYPE TABLE OF ZPAYMENT_ADVICE_STR ##NEEDED,
+      FM_NAME           TYPE RS38L_FNAM ##NEEDED,
+      LS_CTRLOP         TYPE SSFCTRLOP ##NEEDED,
+      GV_JOB_OUTPUT     TYPE SSFCRESCL ##NEEDED,
+      LS_OUTOPT         TYPE SSFCOMPOP ##NEEDED,
+      IT_EXCEL          TYPE TABLE OF TY_EXCEL ##NEEDED,
+      WA_EXCEL          TYPE TY_EXCEL ##NEEDED.
+
+DATA : V_GJAHR TYPE BSAK-GJAHR.

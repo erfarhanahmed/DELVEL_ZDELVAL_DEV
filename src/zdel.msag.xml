@@ -1,0 +1,302 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZDEL</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>DelVal Messages</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>000</MSGNR>
+     <TEXT>Delivery date beyond tolerance limits &amp; &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>001</MSGNR>
+     <TEXT>Vendor Invoice Rate different from PO Rate</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>Record not found.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>003</MSGNR>
+     <TEXT>Order creation not allowed since the old orders are not closed.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>004</MSGNR>
+     <TEXT>The date is before required delivery date &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>005</MSGNR>
+     <TEXT>Vendor has not delivered within &amp; days</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>006</MSGNR>
+     <TEXT>Cancellation is not possible since stock allocated against SO &amp; ITEM &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>007</MSGNR>
+     <TEXT>Enter valid Production Order Number.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>008</MSGNR>
+     <TEXT>Enter valid Delivery Number.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>009</MSGNR>
+     <TEXT>Enter valid Delivery,Item Number.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>010</MSGNR>
+     <TEXT>&amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>011</MSGNR>
+     <TEXT>Invalid Entry. &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>012</MSGNR>
+     <TEXT>Please check if freight is applicable.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>013</MSGNR>
+     <TEXT>Check your authorization for cost center &amp;1.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>014</MSGNR>
+     <TEXT>Check your authorization for profit center &amp;1.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>015</MSGNR>
+     <TEXT>Check your authorization.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>016</MSGNR>
+     <TEXT>Check your authorization for vendor &amp;1.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>017</MSGNR>
+     <TEXT>Check your authorization for customer &amp;1.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>018</MSGNR>
+     <TEXT>Kindly enter the vendor rate in &apos;Unloading Point Field&apos;.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>019</MSGNR>
+     <TEXT>Please enter the Reason For rejection as &apos;UNHOLD&apos;.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>020</MSGNR>
+     <TEXT>Please enter the Reason For rejection as &apos;HOLD&apos;.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>021</MSGNR>
+     <TEXT>Please enter the Reason For rejection as &apos;CANCEL&apos;.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>022</MSGNR>
+     <TEXT>HOLD/Cancel status cannot be used.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>023</MSGNR>
+     <TEXT>Please enter valid Plant code.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>024</MSGNR>
+     <TEXT>Enter at least one select criterion.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>025</MSGNR>
+     <TEXT>No Updates Could Be Performed. &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>026</MSGNR>
+     <TEXT>Dependant requirements for individual and collective requirements &lt;&gt; 1</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>027</MSGNR>
+     <TEXT>Order qty &amp; should not be greater than current date req. &amp; and MOQ &amp; of &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>028</MSGNR>
+     <TEXT>Plant does not exist in database</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>029</MSGNR>
+     <TEXT>No data found. &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>030</MSGNR>
+     <TEXT>Invoice quantity &amp; is greater than accepted quantity &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>031</MSGNR>
+     <TEXT>Usage Decision is not given for the inspection Lot &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>032</MSGNR>
+     <TEXT>&amp; PO is not relesed yet.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>033</MSGNR>
+     <TEXT>Enter Business Place: PUNE and Section Code: PUNE</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>036</MSGNR>
+     <TEXT>Delivery Qty &amp; is greater than the allowed qty &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>037</MSGNR>
+     <TEXT>Delivery Qty &amp;1 is greater than the allowed qty &amp;2</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>038</MSGNR>
+     <TEXT>Please enter quantity greater than or equal to</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>039</MSGNR>
+     <TEXT>Please enter confirmation value</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>040</MSGNR>
+     <TEXT>Enter the heat code in goods recipient for item &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>042</MSGNR>
+     <TEXT>Challan No &amp; is not complete within &amp; days</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>043</MSGNR>
+     <TEXT>You can transfer &amp; only &amp; for PO &amp; line item &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>044</MSGNR>
+     <TEXT>You have transfered full quantity &amp; for PO &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>045</MSGNR>
+     <TEXT>No vendor end stock for material &amp; for PO &amp; .</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>046</MSGNR>
+     <TEXT>You have only &amp; stock of material &amp; at vendor end for PO &amp; .</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>047</MSGNR>
+     <TEXT>Delivery note NO is already exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>120</MSGNR>
+     <TEXT>Please Enter PO Number</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>121</MSGNR>
+     <TEXT>Duplication of BOM is not possible for &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDEL</ARBGB>
+     <MSGNR>122</MSGNR>
+     <TEXT>Order quantity below minimum order quantity &amp; from info record of &amp;</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>

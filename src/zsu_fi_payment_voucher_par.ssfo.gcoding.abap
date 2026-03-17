@@ -1,0 +1,138 @@
+*BREAK-POINT.
+SELECT   BUKRS     ,                 """"""BILL NO
+         BELNR,
+         GJAHR,
+         BUDAT,
+        sum( DMBTR ),
+         AUGBL,
+         BLART,
+         REBZG,
+         WRBTR
+    FROM BSIK
+    INTO TABLE @IT_BSIK
+    WHERE BELNR = @WA_FINAL1-BELNR
+    AND   GJAHR = @WA_FINAL1-GJAHR
+    GROUP BY bukrs,belnr,gjahr,budat,dmbtr,augbl,blart,rebzg,wrbtr.
+
+SELECT   BUKRS
+         BELNR
+         GJAHR
+         BUDAT
+         DMBTR
+         AUGBL
+         BLART
+         REBZG
+         WRBTR
+         XBLNR
+    FROM BSIK
+    INTO TABLE IT_BSIK_N
+    FOR ALL ENTRIES IN IT_BSIK
+    WHERE BELNR = IT_BSIK-REBZG
+    AND   GJAHR = WA_FINAL1-GJAHR.
+
+SELECT   BUKRS                """"""BILL NO
+         BELNR
+         GJAHR
+         DMBTR
+         ZTERM
+         ZFBDT
+  FROM BSEG
+  INTO TABLE IT_BSEG
+  FOR ALL ENTRIES IN IT_BSIK
+  WHERE BELNR = IT_BSIK-REBZG
+  AND KOART EQ 'K'
+  AND GJAHR = IT_BSIK-GJAHR.
+
+
+
+LOOP AT IT_BSIK INTO WA_BSIK.
+  ON CHANGE OF WA_BSIK-REBZG.
+  CLEAR GV_DMBTR.
+  CLEAR GV_sum1.
+LOOP AT IT_BSEG INTO wa_BSEG WHERE BELNR = WA_BSIK-REBZG.
+  GV_DMBTR = GV_DMBTR + wa_BSEG-DMBTR.
+ENDLOOP.
+READ TABLE IT_BSIK_N INTO WA_BSIK_N WITH KEY BELNR =
+WA_BSIK-REBZG.
+*ENDON.
+ WA_FINALN-XBLNR = WA_BSIK_N-XBLNR.
+ WA_FINALN-BELNR = WA_BSIK-REBZG.
+ WA_FINALN-DMBTR = GV_DMBTR.
+ WA_FINALN-ZFBDT = WA_BSIK-BUDAT.
+ WA_FINALN-GV_sum1 = WA_BSIK-DMBTR.
+
+ APPEND WA_FINALN TO IT_FINALN.
+ ENDON.
+ENDLOOP.
+
+DELETE ADJACENT DUPLICATES FROM IT_FINALN COMPARING ALL FIELDS.
+delete IT_FINALN WHERE belnr eq space.
+
+LOOP AT IT_FINALN INTO WA_FINALN.
+    GV_TOTAL = GV_TOTAL + WA_FINALN-DMBTR.
+ENDLOOP.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+*  SELECT BUKRS                           """"""BILL AMOUNT,BILL DATE
+*         BELNR
+*         GJAHR
+*         BUDAT
+*         DMBTR
+*         AUGBL
+*         BLART
+*         REBZG
+*         WRBTR
+*    FROM BSIK
+*    INTO TABLE IT_BSIK1
+*    FOR ALL ENTRIES IN IT_BSIK
+*    WHERE BELNR = IT_BSIK-REBZG
+*    AND   GJAHR = IT_BSIK-GJAHR.

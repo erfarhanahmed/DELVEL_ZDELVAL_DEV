@@ -1,0 +1,24 @@
+
+V_TEXT = WA_ITEM-NETPR.
+SHIFT V_TEXT LEFT DELETING LEADING ' '.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

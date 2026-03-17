@@ -1,0 +1,33 @@
+
+TYPES: BEGIN OF TY_VBRP,
+        VBELN TYPE VBELN,
+        WERKS TYPE WERKS,
+       END OF TY_VBRP.
+
+TYPES: BEGIN OF TY_J_1IMOCOMP,
+        BUKRS     TYPE BUKRS,
+        WERKS     TYPE WERKS_D,
+        J_1IPANNO TYPE J_1IPANNO,
+        J_1ISERN  TYPE J_1ISERN,
+       END OF TY_J_1IMOCOMP.
+
+*TYPES: BEGIN OF TY_T001W,
+*        VBELN TYPE VBELN,
+*        WERKS TYPE WERKS,
+*       END OF TY_VBRP.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

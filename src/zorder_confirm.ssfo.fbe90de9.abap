@@ -1,0 +1,26 @@
+*LOOP AT IT_LINES INTO WA_LINE.
+*  WA_FINAL-TDLINE= WA_LINE-TDLINE.
+*  ENDLOOP.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

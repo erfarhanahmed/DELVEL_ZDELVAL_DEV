@@ -1,0 +1,27 @@
+"Name: \FU:CO_MF_COMPONENT\SE:END\EI
+ENHANCEMENT 0 ZCO02_ENHAN_REQUIRED_QUANTITY3.
+
+
+  IF SY-TCODE = 'CO02'.
+*   BREAK-POINT.
+    IF RESBD-DENMNG > 0.
+
+
+    LOOP AT SCREEN.
+
+      IF SCREEN-NAME = 'RESBD-MENGE'.
+          if ( sy-uname ne'AGHADGE' and  sy-uname ne 'VKALBHOR' and  sy-uname ne 'PRIMUSABAP' )."ADDED BY JYOTI ON 16.12.2024
+
+              SCREEN-INPUT = 0.
+
+             MODIFY SCREEN.
+           ENDIF."ADDED BY JYOTI ON 16.12.2024
+      ENDIF.
+
+    ENDLOOP.
+
+    ENDIF.
+
+    ENDIF.
+
+ENDENHANCEMENT.

@@ -1,0 +1,102 @@
+
+*BREAK-POINT.
+
+TYPES : BEGIN OF TY_BSEG,
+        DMBTR TYPE BSEG-DMBTR,
+        END OF TY_BSEG.
+
+DATA:GS_BSEG TYPE TY_BSEG.
+
+*TYPES : BEGIN OF GY_BSEG,
+*        BUKRS TYPE BSEG-BUKRS,
+*        BELNR TYPE BSEG-BELNR,
+*        GJAHR TYPE BSEG-GJAHR,
+*        BUZID TYPE BSEG-BUZID,
+*        DMBTR TYPE BSEG-DMBTR,
+*        END OF GY_BSEG,
+*        BEGIN OF GY_BKPF,
+*          BUKRS TYPE BKPF-BUKRS,
+*          BELNR TYPE BKPF-BELNR,
+*           BUDAT TYPE BKPF-BUDAT,
+*          END OF GY_BKPF,
+*          BEGIN OF TY_WITH_ITEM,
+*            BUKRS TYPE WITH_ITEM-BUKRS,
+*            BELNR TYPE WITH_ITEM-BELNR,
+*            DMBTR TYPE WITH_ITEM-DMBTR,
+*          END OF TY_WITH_ITEM.
+
+
+*DATA: LT_BSEG TYPE TABLE OF GY_BSEG,
+*      LS_BSEG TYPE GY_BSEG,
+*      LT_BKPF TYPE TABLE OF GY_BKPF,
+*      LS_BKPF TYPE GY_BKPF.
+
+IF WA_HEADER_DETAILS-LIFNR IS NOT INITIAL .
+SELECT  DMBTR FROM BSEG INTO TABLE  @DATA(GT_BSEG)
+                    WHERE BUKRS = @P_BUKRS
+                    AND   LIFNR = @WA_HEADER_DETAILS-LIFNR
+                    AND   BELNR = @P_BELNR
+                    AND   GJAHR = @P_GJAHR
+                    AND   KOART = 'K'.
+
+  LOOP AT GT_BSEG INTO GS_BSEG.
+        LV_DMBTR = LV_DMBTR + GS_BSEG-DMBTR.
+  ENDLOOP.
+ENDIF.
+
+
+*IF WA_HEADER_DETAILS-LIFNR IS NOT INITIAL.
+*SELECT BUKRS, BELNR ,GJAHR,BUZID,DMBTR
+*   FROM BSEG
+*  INTO TABLE @LT_BSEG
+*                    WHERE BUKRS = @P_BUKRS
+*                    AND   BELNR = @P_BELNR
+*                    AND   GJAHR = @P_GJAHR
+*                    AND   KOART = 'K'.
+
+*SELECT BUKRS, BELNR, BUDAT
+*              FROM BKPF
+*              INTO TABLE @LT_BKPF
+*              FOR ALL ENTRIES IN @GT_DMBTR
+*                    WHERE BUKRS = @P_BUKRS
+*                    AND   BELNR = @P_BELNR
+*                    AND   GJAHR = @P_GJAHR
+*                    AND   BLART = 'KZ'.
+
+* GS_FINAL-BELNR  = LS_BKPF-BELNR.
+* GS_FINAL-BUDAT  = LS_BKPF-BUDAT.
+* CONDENSE GS_FINAL-BELNR.
+* CONDENSE GS_FINAL-BUDAT.
+* GS_FINAL-GROSS_AMT  = GV_DMBTR.
+
+*SELECT SUM( DMBTR ) FROM BSEG INTO @DATA(GV_DMBTR01)
+*                    WHERE BUKRS = @P_BUKRS
+*                    AND   BELNR = @P_BELNR
+*                    AND   GJAHR = @P_GJAHR
+*                    AND   KTOSL = 'WIT'.
+*IF LT_DMBTR IS NOT INITIAL.
+*SELECT BUKRS BELNR DMBTR
+*   FROM WITH_ITEM INTO TABLE GV_DMBTR01
+*                    WHERE BUKRS = @LT_DMBTR-BUKRS
+*                    AND   BELNR = @LT_DMBTR-BELNR
+*                    AND   GJAHR = @LT_DMBTR-GJAHR
+*                    AND   BUZID = @LT_DMBTR-BUZID.
+**                    AND   KTOSL = 'WIT'.
+*ENDIF.
+
+*GS_FINAL-TDS_AMT  = GV_DMBTR01.
+*DATA(LV_NETAMT) = GV_DMBTR - GV_DMBTR01.
+*GS_FINAL-NET_AMT  = LV_NETAMT.
+*
+* APPEND GS_FINAL TO GT_FINAL.
+* CLEAR:LV_NETAMT,GS_FINAL,GV_DMBTR,GV_DMBTR,LS_BKPF.
+**ENDIF.
+
+SELECT SINGLE XBLNR
+  FROM BKPF
+  INTO  @LV_XBLNR
+   WHERE BELNR = @P_belnr
+   AND bukrs = @P_bukrs
+  AND GJAHR = @P_GJAHR
+  AND BLART = 'KZ'.
+

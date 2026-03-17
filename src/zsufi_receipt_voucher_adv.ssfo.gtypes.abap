@@ -1,0 +1,20 @@
+
+TYPES : BEGIN OF TY_FINAL1,
+          BELNR TYPE BSID-BELNR,
+          BUDAT TYPE BSID-BUDAT,
+          DMBTR TYPE BSID-DMBTR,
+          DMBTR1 TYPE BSID-DMBTR,
+          XBLNR TYPE BKPF-XBLNR,
+        END OF TY_FINAL1.
+
+
+
+
+
+
+
+
+
+
+
+

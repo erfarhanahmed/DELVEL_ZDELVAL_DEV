@@ -1,0 +1,24 @@
+LVPFRATE = wa_final-kbetr / 10.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

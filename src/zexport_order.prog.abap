@@ -1,0 +1,174 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZORDER_CONFIRM
+*&---------------------------------------------------------------------*
+
+
+
+ TYPES : BEGIN OF TY_VBAK,
+
+           VBELN       TYPE VBAK-VBELN,
+           KUNNR       TYPE VBAK-KUNNR,
+           ERDAT       TYPE VBAK-ERDAT,  " PO REFRANCE DATE
+           VDATU       TYPE VBAK-VDATU,  " CDD DATE
+           WAERK       TYPE VBAK-WAERK,  " DOC CURRENCY
+           AUART       TYPE VBAK-AUART,
+           KNUMV       TYPE VBAK-KNUMV,
+           ZLDFROMDATE TYPE VBAK-ZLDFROMDATE, "LD date
+
+         END OF TY_VBAK.
+
+ DATA : IT_VBAK TYPE STANDARD TABLE OF TY_VBAK,
+        WA_VBAK TYPE TY_VBAK.
+
+ TYPES : BEGIN OF TY_KNA1,   " FOR CUSTOMER ADDRESS
+
+           KUNNR TYPE KNA1-KUNNR,
+           NAME1 TYPE  KNA1-NAME1,
+           NAME2 TYPE  KNA1-NAME2,
+           PSTLZ TYPE  KNA1-PSTLZ,
+           ORT01 TYPE  KNA1-ORT01,
+           STCD3 TYPE  KNA1-STCD3,  " CUSTOMER GST NUMBER
+
+         END OF TY_KNA1.
+
+ DATA : IT_KNA1 TYPE STANDARD TABLE OF TY_KNA1,
+        WA_KNA1 TYPE TY_KNA1.
+
+ TYPES : BEGIN OF TY_KNA12,   " FOR CUSTOMER ADDRESS
+
+           KUNNR2 TYPE  KNA1-KUNNR,
+           NAME12 TYPE  KNA1-NAME1,
+           PSTLZ1 TYPE  KNA1-PSTLZ,
+           ORT012 TYPE  KNA1-ORT01,
+           STCD31 TYPE  KNA1-STCD3,
+
+         END OF TY_KNA12.
+
+ DATA : IT_KNA12 TYPE STANDARD TABLE OF TY_KNA12,
+        WA_KNA12 TYPE TY_KNA12.
+
+
+
+ TYPES : BEGIN OF TY_VBKD,
+
+           VBELN TYPE  VBKD-VBELN,
+           BSTKD TYPE  VBKD-BSTKD,  " CUSTOMER PO NUMBER
+           BSTDK TYPE VBKD-BSTDK,    "PO REF  DATE
+
+
+         END OF TY_VBKD.
+
+ DATA : IT_VBKD TYPE STANDARD TABLE OF TY_VBKD,
+        WA_VBKD TYPE TY_VBKD.
+
+ TYPES : BEGIN OF TY_VBAP,
+           VBELN   TYPE VBAP-VBELN  ,   "SALES DOC NO
+           POSNR   TYPE VBAP-POSNR,
+           MATNR   TYPE VBAP-MATNR  ,   "MATERIAL CODE
+           ARKTX   TYPE VBAP-ARKTX  ,   "DESCRIPTION
+           MEINS   TYPE VBAP-MEINS  ,    "UNIT
+           KWMENG  TYPE VBAP-KWMENG ,    "QTY
+           ZMENG   TYPE  VBAP-ZMENG ,    "QTY
+           DELDATE TYPE VBAP-DELDATE,    "DELIVERY DATE
+           NETPR   TYPE VBAP-NETPR  ,     "PRICE/UNIT
+           NETWR   TYPE VBAP-NETWR  ,     "VALUE
+           ABGRU   TYPE VBAP-ABGRU ,      "Reason for rejection of quotations and sales orders
+           KZWI1   TYPE VBAP-KZWI1,
+
+         END OF TY_VBAP.
+
+ DATA : IT_VBAP TYPE STANDARD TABLE OF TY_VBAP,
+        WA_VBAP TYPE TY_VBAP.
+
+* TYPES : BEGIN OF ty_vbrk,
+*           vbeln TYPE vbrk-vbeln,
+*           knumv TYPE vbrk-knumv,
+*         END OF ty_vbrk.
+*
+* DATA : it_vbrk TYPE STANDARD TABLE OF ty_vbrk,
+*        wa_vbrk TYPE ty_vbrk.
+
+ TYPES : BEGIN OF TY_KONV,
+           KNUMV TYPE PRCD_ELEMENTS-KNUMV,
+           KPOSN TYPE PRCD_ELEMENTS-KPOSN,
+           KSCHL TYPE PRCD_ELEMENTS-KSCHL,
+           KBETR TYPE PRCD_ELEMENTS-KBETR,
+           KNTYP TYPE PRCD_ELEMENTS-KNTYP,
+           KWERT TYPE PRCD_ELEMENTS-KWERT,
+         END OF TY_KONV.
+
+ DATA : IT_KONV TYPE STANDARD TABLE OF TY_KONV,
+        WA_KONV TYPE TY_KONV.
+
+ TYPES : BEGIN OF TY_KONV1,
+           KNUMV TYPE PRCD_ELEMENTS-KNUMV,
+           KSCHL TYPE PRCD_ELEMENTS-KSCHL,
+           KBETR TYPE PRCD_ELEMENTS-KBETR,
+           KNTYP TYPE PRCD_ELEMENTS-KNTYP,
+           KWERT TYPE PRCD_ELEMENTS-KWERT,
+         END OF TY_KONV1.
+
+ DATA : IT_KONV1 TYPE STANDARD TABLE OF TY_KONV1,
+        WA_KONV1 TYPE TY_KONV1.
+
+
+ TYPES : BEGIN OF TY_VBKD1,
+           VBELN TYPE VBKD-VBELN,
+           ZTERM TYPE VBKD-ZTERM,
+         END OF TY_VBKD1.
+
+ DATA : IT_VBKD1 TYPE STANDARD TABLE OF TY_VBKD1,
+        WA_VBKD1 TYPE TY_VBKD1.
+
+ TYPES : BEGIN OF TY_TVZBT,
+           ZTERM TYPE TVZBT-ZTERM,
+           VTEXT TYPE TVZBT-VTEXT,
+           SPRAS TYPE TVZBT-SPRAS,
+         END OF TY_TVZBT.
+
+ DATA : IT_TVZBT TYPE STANDARD TABLE OF TY_TVZBT,
+        WA_TVZBT TYPE TY_TVZBT.
+
+ TYPES : BEGIN OF TY_VBFA,
+           VBELV   TYPE VBFA-VBELV,
+           VBELN1  TYPE VBFA-VBELN,
+           VBTYP_N TYPE VBFA-VBTYP_N,
+         END OF TY_VBFA.
+
+ DATA : IT_VBFA TYPE STANDARD TABLE OF TY_VBFA,
+        WA_VBFA TYPE TY_VBFA.
+
+ TYPES : BEGIN OF TY_VBPA,
+           VBELN  TYPE VBPA-VBELN,
+           KUNNR1 TYPE VBPA-VBELN,
+           PARVW  TYPE VBPA-PARVW,
+         END OF TY_VBPA.
+
+ DATA : IT_VBPA TYPE STANDARD TABLE OF TY_VBPA,
+        WA_VBPA TYPE TY_VBPA.
+
+ TYPES : BEGIN OF TY_VBPA1,
+           VBELN  TYPE VBPA-VBELN,
+           KUNNR3 TYPE VBPA-VBELN,
+           PARVW  TYPE VBPA-PARVW,
+         END OF TY_VBPA1.
+
+ DATA : IT_VBPA1 TYPE STANDARD TABLE OF TY_VBPA1,
+        WA_VBPA1 TYPE TY_VBPA1.
+
+* DATA : it_final TYPE STANDARD TABLE OF zsalesorder_str,
+ DATA : IT_FINAL TYPE  ZSALESORDER_STR_2_TB,
+        WA_FINAL TYPE ZSALESORDER_STR_2.
+
+* DATA : gt_lines TYPE TABLE OF tline,
+ DATA : GT_LINES TYPE  ZTLINE_TBL,
+        LS_LINES TYPE TLINE.
+
+
+ DATA:  FM_NAME TYPE RS38L_FNAM.             " Name of the Function Module
+
+************************************************************************
+* Constant Declaration
+************************************************************************
+
+ CONSTANTS : SF_NAME TYPE FPNAME VALUE  'ZEXPORT_ORDER_SFP_F' . "'ZEXPORT_ORDER'.

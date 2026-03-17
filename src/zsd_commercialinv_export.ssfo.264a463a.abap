@@ -1,0 +1,28 @@
+
+
+CLEAR GS_HD_GEN.
+
+GS_HD_GEN = IS_BIL_INVOICE-HD_GEN.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

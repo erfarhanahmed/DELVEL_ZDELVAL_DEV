@@ -1,0 +1,50 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZDELVAL_MESAGE</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>ZMessage For plant PL01</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDELVAL_MESAGE</ARBGB>
+     <MSGNR>000</MSGNR>
+     <TEXT>ZSTO is not maintained for the Material</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDELVAL_MESAGE</ARBGB>
+     <MSGNR>001</MSGNR>
+     <TEXT>Data is not found.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDELVAL_MESAGE</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>GREEN SUPPLY &amp; NON-GREEN SUPPLY MATERIAL FOUND IN THIS TRANSACTION</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDELVAL_MESAGE</ARBGB>
+     <MSGNR>003</MSGNR>
+     <TEXT>NON-GREEN SUPPLY MATERIAL FOUND IN THIS TRANSACTION</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDELVAL_MESAGE</ARBGB>
+     <MSGNR>004</MSGNR>
+     <TEXT>GREEN SUPPLY MATERIAL FOUND IN THIS TRANSACTION</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZDELVAL_MESAGE</ARBGB>
+     <MSGNR>005</MSGNR>
+     <TEXT>Please enter company code specific Plant</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>

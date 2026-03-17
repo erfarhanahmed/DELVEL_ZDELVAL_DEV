@@ -1,0 +1,33 @@
+*DATA : VAMT(15) TYPE C.
+DATA : TEMP.
+VAMT = GS_TOTAL-KWERT.
+
+IF GS_TOTAL-KWERT < 0.
+  VAMT = - GS_TOTAL-KWERT.
+  SPLIT VAMT AT '-' INTO VAMT TEMP.
+  CONDENSE VAMT.
+  CONCATENATE '-' VAMT INTO VAMT.
+ELSE.
+  VAMT = 0.
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

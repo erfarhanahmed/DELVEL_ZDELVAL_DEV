@@ -1,0 +1,59 @@
+*&---------------------------------------------------------------------*
+*& Include ZVL02_UPLOAD_DETAILS_TOP                          Module Pool      ZVL02_UPLOAD_DETILS
+*&
+*&---------------------------------------------------------------------*
+PROGRAM ZVL02_UPLOAD_DETILS.
+TABLES: ZMATQUAN.
+
+TYPES : BEGIN OF TY_LIKP,
+        VBELN TYPE LIKP-VBELN,
+      END OF TY_LIKP.
+
+TYPES : BEGIN OF ty_vepo,
+  venum TYPE vepo-venum,
+   VBELN TYPE vepo-VBELN,
+  END OF ty_vepo.
+
+
+TYPES : BEGIN OF TY_VEKP,
+        VHILM_KU TYPE VEKP-VHILM_KU,
+        venum TYPE vepo-venum,
+
+      END OF TY_VEKP.
+DATA:     s_mark(1) TYPE C,
+           s_VHILM_KU TYPE VEKP-VHILM_KU,
+           BOX_NO TYPE VEKP-VHILM_KU.
+
+TYPES : BEGIN OF TY_FINAL,
+        mark,
+        VBELN TYPE VEPO-VBELN,
+        VHILM_KU TYPE VEKP-VHILM_KU,
+      END OF TY_FINAL.
+TYPES : BEGIN OF TY_FINAL1,
+         MARK,
+        VHILM_KU TYPE VEKP-VHILM_KU,
+        VBELN TYPE VEPO-VBELN,
+        ZLMAT TYPE ZMATQUAN-ZLMAT ,
+        ZMATQN TYPE ZMATQUAN-ZMATQN,
+      END OF TY_FINAL1.
+
+*TYPES : BEGIN OF TY_FINAL2,
+*        VHILM_KU TYPE ZMATQUAN-VHILM_KU,
+*        VBELN TYPE ZMATQUAN-VBELN,
+*        ZLMAT TYPE ZMATQUAN-ZLMAT ,
+*        ZMATQN TYPE ZMATQUAN-ZMATQN,
+*      END OF TY_FINAL2.
+
+DATA :LT_LIKP TYPE TABLE OF TY_LIKP,
+      LS_LIKP TYPE TY_LIKP,
+      LT_VEPO TYPE TABLE OF TY_VEPO,
+      LS_VEPO TYPE TY_VEPO,
+      LT_VEKP TYPE TABLE OF TY_VEKP,
+      LS_VEKP TYPE TY_VEKP,
+      LT_FINAL TYPE TABLE OF TY_FINAL,
+      LS_FINAL TYPE TY_FINAL,
+      LT_FINAL1 TYPE TABLE OF TY_FINAL1,
+      LS_FINAL1 TYPE TY_FINAL1,
+      LT_FINAL2 TYPE TABLE OF ZMATQUAN,
+      LS_FINAL2 TYPE ZMATQUAN,
+      S_VBELN TYPE VEPO-VBELN.

@@ -1,0 +1,24 @@
+READ TABLE LT_VBRK_J INTO LS_VBRK_J INDEX 1.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

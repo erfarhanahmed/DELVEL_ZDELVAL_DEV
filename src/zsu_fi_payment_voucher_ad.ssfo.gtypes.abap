@@ -1,0 +1,30 @@
+TYPES : BEGIN OF TY_BSAK,
+          BUKRS TYPE BSAK-BUKRS,
+          LIFNR TYPE BSAK-LIFNR,
+          AUGBL TYPE BSAK-AUGBL,
+          GJAHR TYPE BSAK-GJAHR,
+          BELNR TYPE BSAK-BELNR,
+          BLART TYPE BSAK-BLART,
+          DMBTR TYPE BSAK-DMBTR,
+          BUDAT TYPE BSAK-BUDAT,
+          WRBTR TYPE BSAK-WRBTR,
+        END OF TY_BSAK.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

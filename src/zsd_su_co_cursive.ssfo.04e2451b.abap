@@ -1,0 +1,32 @@
+
+SELECT ZOTYPE INTO VOTYPE FROM ZSAORDERCHK
+  WHERE VBELN = WA_FINAL-VBELN.
+ENDSELECT.
+
+
+VCNAMEARABIC = 'شركة ديلفال فلو كونترولز الشرق الأوسط المحدودة'.
+
+DATA : AV_SD2 TYPE CHAR255.
+AV_SD2 = VCNAMEARABIC.
+
+CALL FUNCTION 'STRING_REVERSE'
+  EXPORTING
+    STRING  = AV_SD2
+    LANG    = 'A'
+  IMPORTING
+    RSTRING = AV_SD
+  .
+
+
+
+
+
+
+
+
+
+
+
+
+
+

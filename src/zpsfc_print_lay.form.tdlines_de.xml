@@ -1,0 +1,1273 @@
+﻿<?xml version="1.0" encoding="utf-16"?>
+<abapGit version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <TDLINES>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>BOTTOM</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+     <TDLINE>BOTTOM</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>BO</TDFORMAT>
+     <TDLINE>Benutzer: &amp;sy-uname&amp;,,Datum: &amp;DATE&amp; &amp;TIME(5)&amp; ,, Seite:</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDLINE>&amp;PRINT_CO-actpage&amp;/&amp;SAPSCRIPT-FORMPAGES(3F0)&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_AUART</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Auftragsart</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-auart&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-txt_auart&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_AUFNR</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Auftragsnummer</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;CAUFVD_P-AUFNR&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_DISPO</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Disponent</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-dispo&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-txt_dispo&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_ERDAT</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Erstellungsdatum</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-erdat&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_FEVOR</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Fertigungssteuerer</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-fevor&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-txt_fevor&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_GAMNG</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Auftragsmenge</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-gamng(C)&amp; &amp;caufvd_p-gmein&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_GLTRS</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Ende</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-gltrs&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_GSTRS</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Start</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-gstrs&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_LOGO</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>DEFINE &amp;LOGO_LEFT&amp; = &apos;0.5&apos;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>DEFINE &amp;LOGO_LEFT_UNIT&amp; = &apos;CM&apos;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>INCLUDE ADRS_HEADER_LOGO_BMON_MIDI OBJECT TEXT ID ADRS LANGUAGE DE</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_MATNR</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Materialnummer</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>CL</TDFORMAT>
+     <TDLINE>&lt;FH&gt;&amp;caufvd_p-matnr&amp;&lt;/&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_MSTXT</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Erzeugnisbezeichnung</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-mat_stxt&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_RSNUM</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Reservierungs-Nr.</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-rsnum&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_STTXT</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Status</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-sttxt&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_TITLE</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>CL</TDFORMAT>
+     <TDLINE>&lt;B&gt;&lt;FH&gt;&amp;PRINT_CO-LSTNM&amp;&lt;/&gt;&lt;/&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>CN</TDFORMAT>
+     <TDLINE>&lt;FH&gt;&amp;PRINT_CO-DRTXT&amp;&lt;/&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>H_WERKS</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TI</TDFORMAT>
+     <TDLINE>Werk</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-werks&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DA</TDFORMAT>
+     <TDLINE>&amp;caufvd_p-txt_werk&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/W</TDFORMAT>
+     <TDLINE>MAIN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_LTXT_HEAD</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SH</TDFORMAT>
+     <TDLINE>  Information zum Auftrag</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>LTXT_HEAD</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+     <TDLINE>,,&amp;tline-tdline&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>STXT_HEAD</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+     <TDLINE>,,&amp;caufvd_p-ktext&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>FRAME_TXT_HEAD</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_BC</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>TB</TDFORMAT>
+     <TDLINE>,,Auftragsnummer,,Materialnummer</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>DATA_BC</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;8.75&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DB</TDFORMAT>
+     <TDLINE>,,&lt;BC&gt;&amp;caufvd_p-aufnr&amp;&lt;/&gt;,,&lt;BC&gt;&amp;caufvd_p-matnr&amp;&lt;/&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_COL_ORD</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SH</TDFORMAT>
+     <TDLINE>  Auftragsnetz</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TXT_COL_ROOT</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+     <TDLINE>,,Führender Auftrag</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TXT_COL_DEP</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>CD</TDFORMAT>
+     <TDLINE>,,Auftragsnetz,,:,,&amp;CAUFVD_P-LEAD_AUFNR&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>CD</TDFORMAT>
+     <TDLINE>,,Übergeord. Auftr.,,:,,&amp;CAUFVD_P-MAUFNR&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>CD</TDFORMAT>
+     <TDLINE>,,Ablieferung,,:,,&lt;I&gt;Termin&lt;/&gt; &amp;PPPRCOLORD-BDTER&amp;  &lt;I&gt;Vorg&lt;/&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDLINE>&amp;PPPRCOLORD-VORNR&amp;  &lt;I&gt;APlatz&lt;/&gt; &amp;PPPRCOLORD-ARBPL&amp;  &lt;I&gt;Werk&lt;/&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDLINE>&amp;PPPRCOLORD-WERKS&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_SERIAL</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SH</TDFORMAT>
+     <TDLINE>  Serialnummern</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TXT_SERIAL</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+     <TDLINE>,,&amp;tline-tdline&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_SEQ</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+     <TDLINE> &lt;B&gt;Folge &amp;affld_p-plnfl&amp;&lt;/&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW INTENSITY &apos;40&apos;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>EMPTY_LINE</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>FRAME_SPACE</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SP</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>DATA_SEQ</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;3.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;6.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;9.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;12.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SH</TDFORMAT>
+     <TDLINE>,,Folgenart,,Bezugsfolge,,von Vorgang,,nach Vorgang</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SD</TDFORMAT>
+     <TDLINE>,,&amp;affld_p-seq_txt&amp;,,&amp;affld_p-bezfl&amp;,,&amp;affld_p-vornr1&amp;,,</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>=</TDFORMAT>
+     <TDLINE>&amp;affld_p-vornr2&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_OPR</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+     <TDLINE> &lt;B&gt;Vorgang &amp;afvgd_p-vornr&amp;&lt;/&gt;,, Folge &amp;affld_p-plnfl&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW INTENSITY &apos;15&apos;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>FRAME_OPR</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;0.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;2.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;3.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;11.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;13.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;15.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;17.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>DATA_OPR</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>OH</TDFORMAT>
+     <TDLINE>,,Arbeitsplatz,,Werk,,Beschreibung,,Start,,Ende,,Rückmelde-Nr.</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>OD</TDFORMAT>
+     <TDLINE>,,&lt;FC&gt;&amp;afvgd_p-arbpl&amp;&lt;/&gt;,,&amp;afvgd_p-werks&amp;,,&lt;I&gt;&lt;FC&gt;&amp;tline-tdline&amp;&lt;/&gt;&lt;/&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDLINE>,,&amp;AFVGD_p-SSAVD&amp;,,&amp;AFVGD_p-SSEDD&amp;,,&amp;afvgd_p-rueck&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>LTXT_OPR</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>LO</TDFORMAT>
+     <TDLINE>&lt;I&gt;&amp;tline-tdline&amp;&lt;/&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>PAGE_NEW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>NEW-PAGE</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_CMP</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+     <TDLINE> &lt;B&gt;Komponenten&lt;/&gt; zu Vorgang &amp;afvgd_p-vornr&amp;,, Folge &amp;affld_p-plnfl&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW INTENSITY &apos;3&apos;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>HEADER_CMP</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &apos;1&apos; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;0.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;1.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;12.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;15.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;17.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>MH</TDFORMAT>
+     <TDLINE>,,Pos.-Nr.,,Material,,Menge,,Termin</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>FRAME_CMP</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;0.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;1.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;12.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;15.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;17.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>DATA_CMP</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>MD</TDFORMAT>
+     <TDLINE>,,&lt;FC&gt;&amp;resbd_p-posnr&amp;&lt;/&gt;,,&lt;FC&gt;&amp;resbd_p-matnr&amp;&lt;/&gt;,,&amp;msfcv-maktx&amp; ,,&lt;FC&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>=</TDFORMAT>
+     <TDLINE>&amp;resbd_p-bdmng&amp;&lt;/&gt; ,,&lt;FC&gt;&amp;resbd_p-meins&amp;&lt;/&gt;,,&amp;resbd_p-bdter&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>DATA_CMP1</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>MD</TDFORMAT>
+     <TDLINE>,,&lt;FC&gt;&amp;resbd_p-posnr&amp;&lt;/&gt;,,&lt;FC&gt;&amp;resbd_p-matnr&amp;&lt;/&gt;,,&amp;msfcv-maktx&amp; ,,</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>LTXT_CMP</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>LC</TDFORMAT>
+     <TDLINE>&lt;I&gt;&lt;FC&gt;&amp;tline-tdline&amp;&lt;/&gt;&lt;/&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>HORIZ_LINE</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX HEIGHT 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_PRT</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+     <TDLINE> &lt;B&gt;Fertigungshilfsmittel&lt;/&gt; zu Vorgang &amp;afvgd_p-vornr&amp;,, Folge</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDLINE>&amp;affld_p-plnfl&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW INTENSITY &apos;3&apos;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>HEADER_PRT</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;0.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;1.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;2.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;11.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;13.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;15.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;17.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>FH</TDFORMAT>
+     <TDLINE>,,Pos.-Nr.,,Werk,,Fertigungshilfsmittel,,Menge,,Start,,Ende</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>FRAME_PRT</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;0.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;1.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;2.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;11.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;13.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;15.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;17.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>DATA_PRT</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>FD</TDFORMAT>
+     <TDLINE>,,&lt;FC&gt;&amp;affhd_p-psnfh&amp;&lt;/&gt;,,&lt;FC&gt;&amp;affhd_p-fhwrk&amp;&lt;/&gt;,,&lt;FC&gt;&amp;affhd_p-fhmnr&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>=</TDFORMAT>
+     <TDLINE>&lt;/&gt; ,,&amp;affhd_p-fhktx&amp; ,,&lt;FC&gt;&amp;affhd_p-mgsol(C)&amp;&lt;/&gt;,,&lt;FC&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>=</TDFORMAT>
+     <TDLINE>&amp;affhd_p-mgsoleh&amp;&lt;/&gt; ,,&amp;affhd_p-ssfhd&amp;,,&amp;affhd_p-sefhd&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>DATA_PRT1</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>FD</TDFORMAT>
+     <TDLINE>,,&lt;FC&gt;&amp;affhd_p-psnfh&amp;&lt;/&gt;,,&lt;FC&gt;&amp;affhd_p-fhwrk&amp;&lt;/&gt;,,&lt;FC&gt;&amp;affhd_p-fhmnr&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>=</TDFORMAT>
+     <TDLINE>&lt;/&gt; ,,&amp;affhd_p-fhktx&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>DATA_PRT2</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>FD</TDFORMAT>
+     <TDLINE>,,,,&lt;FC&gt;&amp;affhd_p-fhwrk&amp;&lt;/&gt;,,&lt;FC&gt;&amp;affhd_p-fhmnr&amp;&lt;/&gt; ,,&amp;affhd_p-fhktx&amp; ,,</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>=</TDFORMAT>
+     <TDLINE>&lt;FC&gt;&amp;affhd_p-mgsol(C)&amp;&lt;/&gt;,,&lt;FC&gt;&amp;affhd_p-mgsoleh&amp;&lt;/&gt; ,,&amp;affhd_p-ssfhd&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>=</TDFORMAT>
+     <TDLINE>,,&amp;affhd_p-sefhd&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>LTXT_PRT</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>LP</TDFORMAT>
+     <TDLINE>&amp;tline-tdline&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_SOP</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+     <TDLINE> &lt;B&gt;Untervorgänge&lt;/&gt; zu Vorgang &amp;afvgd_p-vornr&amp; Folge &amp;affld_p-plnfl&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX FRAME 10 TW INTENSITY &apos;3&apos;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/*</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>HEADER_SOP</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;0.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;1.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;3.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;11.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;13.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;15.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;17.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>UH</TDFORMAT>
+     <TDLINE>,,UVrg-Nr.,,Arbeitsplatz,,Beschreibung,,Start,,Ende,,Rückmelde-Nr.</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>FRAME_SOP</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION WINDOW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>POSITION YORIGIN &amp;PSFC_FRAME-POS&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>SIZE HEIGHT  &amp;PSFC_FRAME-HEIGHT&amp; LN</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;0.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;1.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS  &apos;3.0&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;11.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;13.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;15.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/:</TDFORMAT>
+     <TDLINE>BOX XPOS &apos;17.5&apos; CM  WIDTH 0 TW FRAME 10 TW</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>DATA_SOP</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>UD</TDFORMAT>
+     <TDLINE>,,&lt;FC&gt;&amp;afvgd_p-uvorn&amp;&lt;/&gt;,,&lt;FC&gt;&amp;afvgd_p-arbpl&amp;&lt;/&gt; ,,&amp;tline-tdline&amp;,,</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>=</TDFORMAT>
+     <TDLINE>&amp;AFVGD_p-SSAVD&amp;,,&amp;AFVGD_p-SSEDD&amp; ,,&amp;afvgd_p-rueck&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>LTXT_SOP</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>LS</TDFORMAT>
+     <TDLINE>&lt;I&gt;&lt;FC&gt;&amp;tline-tdline&amp;&lt;/&gt;&lt;/&gt;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_LTXT_SEQ</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SH</TDFORMAT>
+     <TDLINE>  Information zur Folge</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>STXT_SEQ</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+     <TDLINE>,,&amp;affld_p-ltxa1&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_CONFIG</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SH</TDFORMAT>
+     <TDLINE>  Konfiguration</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TXT_CONFIG</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>DF</TDFORMAT>
+     <TDLINE>,,&amp;SFC_CONF-ATBEZ&amp;,,&amp;SFC_CONF-ATWTB&amp;</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_PNOTE</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SH</TDFORMAT>
+     <TDLINE>  Fertigungshinweis</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>/E</TDFORMAT>
+     <TDLINE>TITLE_LTXT_ROUT</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SH</TDFORMAT>
+     <TDLINE>  Information zum Arbeitsplan</TDLINE>
+    </TLINE>
+    <TLINE>
+     <TDFORMAT>SK</TDFORMAT>
+    </TLINE>
+   </TDLINES>
+  </asx:values>
+ </asx:abap>
+</abapGit>

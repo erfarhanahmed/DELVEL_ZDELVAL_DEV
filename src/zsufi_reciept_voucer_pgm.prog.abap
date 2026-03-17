@@ -1,0 +1,1171 @@
+*&---------------------------------------------------------------------*
+*& Report ZSUFI_RECIEPT_VOUCER_PGM
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSUFI_RECIEPT_VOUCER_PGM.
+
+
+TABLES : BKPF,BSEG.
+
+
+*TYPES : BEGIN OF TY_BKPF,
+*       BELNR TYPE BKPF-BELNR,
+*         BUDAT TYPE BKPF-BUDAT,
+*        XBLNR TYPE XBLNR1,
+*
+*  END OF TY_BKPF.
+
+TYPES : BEGIN OF TY_BKPF,
+          BUKRS TYPE BKPF-BUKRS,
+          BELNR TYPE BKPF-BELNR,
+          GJAHR TYPE BKPF-GJAHR,
+          BLART TYPE BKPF-BLART,
+          BLDAT TYPE BKPF-BLDAT,
+          BUDAT TYPE BKPF-BUDAT,
+          XBLNR TYPE BKPF-XBLNR,
+          USNAM TYPE BKPF-USNAM,
+          WAERS TYPE BKPF-WAERS,
+          HWAER TYPE BKPF-HWAER,
+        END OF TY_BKPF.
+
+
+
+DATA : IT_BKPF TYPE TABLE OF  TY_BKPF,
+       WA_BKPF TYPE TY_BKPF.
+
+
+
+
+TYPES : BEGIN OF TY_BSEG,
+          BUKRS TYPE BSEG-BUKRS,
+          GJAHR TYPE BSEG-GJAHR,
+          BELNR TYPE BSEG-BELNR,
+          KOART TYPE BSEG-KOART,
+          KUNNR TYPE BSEG-KUNNR,
+          ZLSCH TYPE BSEG-ZLSCH,
+          DMBTR TYPE BSEG-DMBTR,
+          WRBTR TYPE BSEG-WRBTR,
+          SGTXT TYPE BSEG-SGTXT,
+*          WAERS TYPE BKPF-WAERS,
+        END OF TY_BSEG.
+
+DATA:IT_BSEG TYPE TABLE OF TY_BSEG,
+     WA_BSEG TYPE TY_BSEG.
+
+*TYPES : BEGIN OF TY_BSEG,
+*          BUKRS TYPE BSEG-BUKRS,
+*          BELNR TYPE BSEG-BELNR,
+*          GJAHR TYPE BSEG-GJAHR,
+*          BUZEI TYPE BSEG-BUZEI,
+*          BUZID TYPE BSEG-BUZID,
+*          AUGBL TYPE BSEG-AUGBL,
+*          KOART TYPE BSEG-KOART,
+*          LIFNR TYPE BSEG-LIFNR,
+*          ZLSCH TYPE BSEG-ZLSCH,
+*          DMBTR TYPE BSEG-DMBTR,
+*          kunnr TYPE bseg-kunnr,
+*        END OF TY_BSEG.
+*
+*DATA   : IT_BSEG TYPE TABLE OF TY_BSEG,
+*         WA_BSEG TYPE TY_BSEG.
+
+
+TYPES : BEGIN OF TY_KNA1,
+          KUNNR TYPE KNA1-KUNNR,
+          NAME1 TYPE KNA1-NAME1,
+          STRAS TYPE STRAS_GP,
+          ORT01 TYPE ORT01_GP,
+          PSTLZ TYPE PSTLZ,
+        END OF TY_KNA1.
+
+DATA: IT_KNA1 TYPE TABLE OF TY_KNA1,
+      WA_KNA1 TYPE TY_KNA1.
+
+
+TYPES : BEGIN OF TY_T042Z,
+          ZLSCH TYPE BSEG-ZLSCH,
+          TEXT1 TYPE TEXT1,
+          LAND1 TYPE LAND1,
+        END OF TY_T042Z  .
+
+
+DATA: IT_T042Z TYPE TABLE OF TY_T042Z,
+      WA_T042Z TYPE TY_T042Z.
+
+TYPES : BEGIN OF TY_BSAD,
+          BUKRS TYPE BSAD-BUKRS,
+          AUGBL TYPE BSAD-AUGBL,
+          GJAHR TYPE BSAD-GJAHR,
+          BELNR TYPE BSAD-BELNR,
+          BLART TYPE BSAD-BLART,
+          DMBTR TYPE BSAD-DMBTR,
+          BUDAT TYPE BSAD-BUDAT,
+        END OF TY_BSAD.
+
+DATA : IT_BSAD TYPE TABLE OF TY_BSAD,
+       WA_BSAD TYPE TY_BSAD.
+
+
+DATA : IT_FINAL TYPE TABLE OF ZSU_FI_RV,
+       WA_FINAL TYPE ZSU_FI_RV.
+
+DATA : FM_NAME           TYPE RS38L_FNAM,
+       FORMNAME          TYPE TDSFNAME,
+       CONTROL           TYPE SSFCTRLOP,        "CONTROL PARAMETERS
+       OUT_OPT           TYPE SSFCOMPOP,
+       RETURN1           TYPE SSFCRESCL,
+       LS_COMPOSER_PARAM TYPE SSFCOMPOP,
+       GS_CON_SETTINGS   TYPE SSFCTRLOP,
+       LENGTH            TYPE I.
+
+DATA : LT_T003 TYPE TABLE OF T003,
+       LS_T003 TYPE T003.
+
+DATA : LT_T003T TYPE TABLE OF T003T,
+       LS_T003T TYPE T003T.
+
+
+TYPES: BEGIN OF TY_BSID ,
+         BELNR TYPE BKPF-BELNR,
+         BUKRS TYPE BKPF-BUKRS,
+         GJAHR TYPE BKPF-GJAHR,
+         REBZG TYPE BSID-REBZG,
+         REBZI TYPE BSID-REBZJ,
+         BUDAT TYPE BSID-BUDAT,
+         DMBTR TYPE BSID-DMBTR,
+       END OF TY_BSID.
+
+DATA:IT_BSID TYPE TABLE OF TY_BSID,
+     WA_BSID TYPE TY_BSID.
+
+DATA : GV_TOT_LINES          TYPE I.
+DATA : GS_CTRLOP  TYPE SSFCTRLOP,
+       GS_OUTOPT  TYPE SSFCOMPOP,
+       GS_OTFDATA TYPE SSFCRESCL.
+DATA: LS_JOB_INFO  TYPE SSFCRESCL.
+
+
+DATA : LV_TEXT TYPE STRING.
+
+
+
+SELECTION-SCREEN BEGIN OF BLOCK B1 WITH FRAME TITLE TEXT-001.
+PARAMETERS: P_BUKRS TYPE BKPF-BUKRS DEFAULT 'SU00' MODIF ID BU,
+            P_GJAHR TYPE BKPF-GJAHR OBLIGATORY,
+            P_WAERS TYPE BKPF-WAERS OBLIGATORY.
+SELECT-OPTIONS : P_BELNR   FOR BKPF-BELNR OBLIGATORY,
+                 S_BUDAT   FOR BKPF-BUDAT.
+SELECTION-SCREEN END OF BLOCK B1.
+
+
+SELECTION-SCREEN BEGIN OF BLOCK B2 WITH FRAME TITLE TEXT-001.
+PARAMETERS: R_FULL RADIOBUTTON GROUP RAD2 DEFAULT 'X', "Local
+            R_ADV  RADIOBUTTON GROUP RAD2 , "USER-COMMAND flg.
+            R_PART RADIOBUTTON GROUP RAD2.
+SELECTION-SCREEN : END OF BLOCK B2.
+
+
+AT SELECTION-SCREEN OUTPUT.
+  LOOP AT SCREEN.
+    IF SCREEN-GROUP1 = 'BU'.
+      SCREEN-INPUT = '0'.
+      MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
+
+
+
+
+START-OF-SELECTION.
+
+  SELECT BELNR,
+         BUDAT,
+         GJAHR
+    FROM BKPF INTO @DATA(WA_BKPF1)
+    WHERE BELNR IN @P_BELNR
+    AND GJAHR EQ @P_GJAHR
+    AND BUDAT IN @S_BUDAT .
+  ENDSELECT.
+
+  IF  WA_BKPF1 IS INITIAL .
+    MESSAGE : 'Data not found' TYPE 'E' .
+  ENDIF.
+
+  IF NOT R_FULL IS INITIAL.
+
+
+    PERFORM:GET_DATA.
+    PERFORM:GET_DATA1.
+    PERFORM:DISPLAY_DATA.
+
+  ELSEIF NOT R_ADV IS INITIAL.
+
+    PERFORM GET_DATA_R_ADV.
+*    PERFORM PERFORM_R_ADV.
+    PERFORM CALL_SMARTFORM_R_ADV.
+
+  ELSEIF NOT R_PART IS INITIAL.
+
+    PERFORM GET_DATA_PART1.
+    PERFORM CALL_SMARTFORM_PART1.
+
+
+  ENDIF.
+*&---------------------------------------------------------------------*
+*&      Form  GET_DATA
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM GET_DATA .
+
+*  IF P_WAERS NE 'SAR'.
+*  SELECT  BUKRS
+*          BELNR
+*          GJAHR
+*          BLART
+*          BLDAT
+*          BUDAT
+*          XBLNR
+*          USNAM
+*          WAERS
+*          HWAER
+*     FROM BKPF
+*    INTO TABLE IT_BKPF
+*    WHERE BELNR IN P_BELNR
+*    AND GJAHR EQ P_GJAHR
+*    AND WAERS EQ P_WAERS.
+*
+*    ELSE.
+*
+*      SELECT BUKRS
+*             BELNR
+*             GJAHR
+*             BLART
+*             BLDAT
+*             BUDAT
+*             XBLNR
+*             USNAM
+*             WAERS
+*             HWAER
+*     FROM BKPF
+*    INTO TABLE IT_BKPF
+*    WHERE BELNR IN P_BELNR
+*    AND GJAHR EQ P_GJAHR
+*    AND HWAER EQ P_WAERS.
+*
+*        endif.
+
+
+
+
+*  SELECT  BUKRS
+*          GJAHR
+*          BELNR
+*          KOART
+*          KUNNR
+*          ZLSCH
+*          DMBTR
+*          WRBTR
+*         FROM BSEG
+*         INTO TABLE IT_BSEG
+**         FOR ALL ENTRIES IN IT_BKPF
+*         WHERE BELNR = IT_BKPF-BELNR
+*         AND GJAHR = IT_BKPF-GJAHR
+*         AND BUKRS  EQ P_BUKRS
+*         AND KOART = 'D'.
+  SELECT  BUKRS
+           GJAHR
+           BELNR
+           KOART
+           KUNNR
+           ZLSCH
+           DMBTR
+           WRBTR
+*          WAERS
+          FROM BSEG
+          INTO TABLE IT_BSEG
+*         FOR ALL ENTRIES IN IT_BKPF
+          WHERE BELNR IN P_BELNR
+       AND GJAHR EQ P_GJAHR
+*      AND WAERS EQ P_WAERS.
+       AND BUKRS EQ 'SU00'
+          AND KOART = 'D'.
+
+  SELECT
+   BUKRS
+   BELNR
+   GJAHR
+   BLART
+   BLDAT
+   BUDAT
+   XBLNR
+   USNAM
+   FROM BKPF INTO TABLE IT_BKPF
+   WHERE BELNR IN P_BELNR
+    AND BUKRS  EQ P_BUKRS
+   AND  GJAHR EQ P_GJAHR .
+
+
+
+  SELECT BELNR
+         BUKRS
+         GJAHR
+         REBZG
+         FROM BSID INTO TABLE IT_BSID
+         FOR ALL ENTRIES IN IT_BKPF
+         WHERE BELNR = IT_BKPF-BELNR
+         AND BUKRS = IT_BKPF-BUKRS
+         AND GJAHR = IT_BKPF-GJAHR.
+
+
+  SELECT BELNR
+         BUKRS
+         GJAHR
+         REBZG
+         REBZJ
+         BUDAT
+         DMBTR
+    FROM BSID INTO TABLE IT_BSID
+    FOR ALL ENTRIES IN IT_BKPF
+         WHERE BELNR = IT_BKPF-BELNR
+         AND BUKRS = IT_BKPF-BUKRS
+         AND GJAHR = IT_BKPF-GJAHR.
+
+
+  SELECT
+    KUNNR
+    NAME1
+    STRAS
+    ORT01
+    PSTLZ
+    FROM KNA1 INTO TABLE IT_KNA1
+    FOR ALL ENTRIES IN IT_BSEG
+    WHERE KUNNR = IT_BSEG-KUNNR.
+
+
+
+
+  SELECT
+         ZLSCH
+         TEXT1
+         LAND1
+    FROM T042Z
+    INTO TABLE IT_T042Z
+    FOR ALL ENTRIES IN IT_BSEG
+    WHERE ZLSCH = IT_BSEG-ZLSCH
+    AND LAND1 = 'SA'.
+
+  SELECT BUKRS
+           AUGBL
+           GJAHR
+           BELNR
+           BLART
+           DMBTR
+           BUDAT
+      FROM BSAD
+      INTO TABLE IT_BSAD
+      FOR ALL ENTRIES IN IT_BKPF
+      WHERE AUGBL = IT_BKPF-BELNR
+      AND  BUKRS = IT_BKPF-BUKRS
+      AND GJAHR = IT_BKPF-GJAHR
+      AND BLART IN  ('DR','RV','DG').
+
+
+
+*  SELECT BUKRS
+*         AUGBL
+*         GJAHR
+*         BELNR
+*         BLART
+*         DMBTR
+*         BUDAT
+*    FROM BSAD
+*    INTO TABLE IT_BSAD
+*    FOR ALL ENTRIES IN it_bkpf
+*    WHERE AUGBL = it_bkpf-belnr
+*    AND  bukrs = it_bkpf-bukrs
+*    AND  gjahr = it_bkpf-GJAHR
+*    AND BLART = 'DG'.
+*    GROUP BY AUGBL BUKRS GJAHR BELNR BLART BUDAT.
+
+
+*    WHERE BLART IN ('DR','RV')
+*    AND AUGBL IN P_BELNR
+*    AND GJAHR EQ P_GJAHR
+*    GROUP BY AUGBL BUKRS GJAHR BELNR BLART BUDAT.
+
+
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  GET_DATA1
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM GET_DATA1 .
+
+
+  LOOP AT IT_BSEG INTO WA_BSEG .
+*  LOOP AT IT_BSAK INTO WA_BSAK .
+
+
+*rEAD TABLE IT_BSEG INTO WA_BSEG WITH KEY BELNR = WA_BSAK-AUGBL.
+*    WA_FINAL-BELNR1 = WA_BSAd-BELNR.
+    WA_FINAL-BELNR = WA_BSEG-BELNR.
+    WA_FINAL-KUNNR = WA_BSEG-KUNNR.
+    WA_FINAL-DMBTR = WA_BSEG-DMBTR.
+    WA_FINAL-DMBTR = WA_BSEG-WRBTR.
+    WA_FINAL-GJAHR = WA_BSEG-GJAHR.
+    WA_FINAL-BUKRS = WA_BSEG-BUKRS.
+
+    WA_FINAL-WRBTR = WA_BSEG-WRBTR.
+
+    READ TABLE IT_BKPF INTO WA_BKPF WITH KEY BELNR = WA_BSEG-BELNR.
+
+    WA_FINAL-BELNR1 = WA_BKPF-BELNR.
+    WA_FINAL-BUDAT =  WA_BKPF-BUDAT.
+    WA_FINAL-XBLNR  = WA_BKPF-XBLNR.
+
+    READ TABLE IT_KNA1   INTO WA_KNA1 WITH KEY KUNNR = WA_BSEG-KUNNR.
+
+    WA_FINAL-NAME1 = WA_KNA1-NAME1.
+    WA_FINAL-STRAS = WA_KNA1-STRAS.
+    WA_FINAL-ORT01 = WA_KNA1-ORT01.
+    WA_FINAL-PSTLZ = WA_KNA1-PSTLZ.
+
+    READ TABLE IT_T042Z INTO WA_T042Z INDEX 1.
+    WA_FINAL-TEXT1 = WA_T042Z-TEXT1.
+
+    LOOP AT IT_BSAD INTO WA_BSAD . "WHERE AUGBL = wa_bKPF-BELNR .
+
+      WA_FINAL-BELNR   =  WA_BSAD-BELNR.
+      WA_FINAL-BUDAT1   =  WA_BSAD-BUDAT.
+      WA_FINAL-DMBTR2 = WA_BSAD-DMBTR.
+      WA_FINAL-BILL_AMT =  WA_FINAL-BILL_AMT + WA_BSAD-DMBTR .
+
+      WA_FINAL-NET_AMT = WA_FINAL-BILL_AMT - WA_BSAD-DMBTR .
+
+
+    ENDLOOP.
+
+    READ TABLE IT_BSAD INTO WA_BSAD  WITH  KEY AUGBL = WA_BKPF-BELNR .
+
+    WA_FINAL-DMBTR2 = WA_BSAD-DMBTR.
+
+    WA_FINAL-CURR  = P_WAERS.
+
+
+    APPEND  WA_FINAL TO IT_FINAL.
+    CLEAR WA_FINAL.
+
+  ENDLOOP.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  DISPLAY_DATA
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM DISPLAY_DATA .
+
+  DATA FORMNAME    TYPE TDSFNAME VALUE 'ZSUFI_RECIEPT_VOUCHER'.
+  DATA FM_NAME     TYPE RS38L_FNAM.
+
+
+  CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+    EXPORTING
+      FORMNAME           = FORMNAME
+      VARIANT            = ' '
+      DIRECT_CALL        = ' '
+    IMPORTING
+      FM_NAME            = FM_NAME
+    EXCEPTIONS
+      NO_FORM            = 1
+      NO_FUNCTION_MODULE = 2
+      OTHERS             = 3.
+  IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+
+  DATA CONTROL_PARAMETERS   TYPE SSFCTRLOP.
+  DATA OUTPUT_OPTIONS       TYPE SSFCOMPOP.
+  DATA JOB_OUTPUT_INFO      TYPE SSFCRESCL.
+
+  DATA : LS_BIL_INVOICE TYPE LBBIL_INVOICE.
+  DATA : GV_TOT_LINES      TYPE I,
+         GS_CON_SETTINGS   TYPE SSFCTRLOP,
+         LS_COMPOSER_PARAM TYPE SSFCOMPOP.
+*
+  DESCRIBE TABLE IT_FINAL LINES GV_TOT_LINES.
+
+
+  LOOP AT IT_FINAL INTO WA_FINAL.
+
+    IF SY-TABIX = 1.
+* DIALOG AT FIRST LOOP ONLY
+      GS_CON_SETTINGS-NO_DIALOG = ABAP_FALSE.
+* OPEN THE SPOOL AT THE FIRST LOOP ONLY:
+      GS_CON_SETTINGS-NO_OPEN   = ABAP_FALSE.
+* CLOSE SPOOL AT THE LAST LOOP ONLY
+      GS_CON_SETTINGS-NO_CLOSE  = ABAP_TRUE.
+    ELSE.
+* DIALOG AT FIRST LOOP ONLY
+      GS_CON_SETTINGS-NO_DIALOG = ABAP_TRUE.
+* OPEN THE SPOOL AT THE FIRST LOOP ONLY:
+      GS_CON_SETTINGS-NO_OPEN   = ABAP_TRUE.
+    ENDIF.
+    IF SY-TABIX = GV_TOT_LINES.
+* CLOSE SPOOL
+      GS_CON_SETTINGS-NO_CLOSE  = ABAP_FALSE.
+    ENDIF.
+
+*    BREAK-POINT.
+    CALL FUNCTION FM_NAME    "'/1BCDWB/SF00000232'
+      EXPORTING
+*       ARCHIVE_INDEX      = ARCHIVE_INDEX
+*       ARCHIVE_INDEX_TAB  = ARCHIVE_INDEX_TAB
+*       ARCHIVE_PARAMETERS = ARCHIVE_PARAMETERS
+        CONTROL_PARAMETERS = GS_CON_SETTINGS
+*       MAIL_APPL_OBJ      = MAIL_APPL_OBJ
+*       MAIL_RECIPIENT     = MAIL_RECIPIENT
+*       MAIL_SENDER        = MAIL_SENDER
+        OUTPUT_OPTIONS     = LS_COMPOSER_PARAM
+*       USER_SETTINGS      = 'X'
+        WA_FINAL_T         = WA_FINAL
+        BELNR              = WA_FINAL-BELNR1
+        P_GJAHR            = P_GJAHR
+        WAERS              = P_WAERS
+        WA_FINAL           = WA_FINAL
+* IMPORTING
+*       DOCUMENT_OUTPUT_INFO       = DOCUMENT_OUTPUT_INFO
+*       JOB_OUTPUT_INFO    = JOB_OUTPUT_INFO
+*       JOB_OUTPUT_OPTIONS = JOB_OUTPUT_OPTIONS
+*      TABLES
+      EXCEPTIONS
+        FORMATTING_ERROR   = 1
+        INTERNAL_ERROR     = 2
+        SEND_ERROR         = 3
+        USER_CANCELED      = 4
+        OTHERS             = 5.
+    IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+    ENDIF.
+
+    CLEAR: WA_FINAL.
+
+  ENDLOOP.
+ENDFORM.
+
+***************************************Advance payment*************************************
+
+*&---------------------------------------------------------------------*
+*&      Form  GET_DATA_R_ADV
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+
+
+FORM GET_DATA_R_ADV .
+
+*IF P_WAERS NE 'SAR'.
+*  SELECT
+*  BUKRS
+*  BELNR
+*  GJAHR
+*  BLART
+*  BLDAT
+*  BUDAT
+*  XBLNR
+*  USNAM
+*  FROM BKPF INTO TABLE IT_BKPF
+*  WHERE BELNR IN P_BELNR
+*   AND BUKRS  EQ P_BUKRS
+*  AND  GJAHR EQ P_GJAHR .
+*
+*ELSE.
+*
+*  SELECT
+*  BUKRS
+*  BELNR
+*  GJAHR
+*  BLART
+*  BLDAT
+*  BUDAT
+*  XBLNR
+*  USNAM
+*  FROM BKPF INTO TABLE IT_BKPF
+*  WHERE BELNR IN P_BELNR
+*   AND BUKRS  EQ P_BUKRS
+*  AND  GJAHR EQ P_GJAHR .
+*
+*ENDIF.
+
+*  SELECT  BUKRS
+*          GJAHR
+*          BELNR
+*          KOART
+*          KUNNR
+*          ZLSCH
+*          DMBTR
+*         FROM BSEG
+*         INTO TABLE IT_BSEG
+*         FOR ALL ENTRIES IN IT_BKPF
+*         WHERE BELNR = IT_BKPF-BELNR
+*         AND GJAHR = IT_BKPF-GJAHR
+*         AND BUKRS  EQ P_BUKRS
+*         AND KOART = 'D'.
+  SELECT  BUKRS
+            GJAHR
+            BELNR
+            KOART
+            KUNNR
+            ZLSCH
+            DMBTR
+            WRBTR
+            SGTXT
+*            WAERS
+           FROM BSEG
+           INTO TABLE IT_BSEG
+*         FOR ALL ENTRIES IN IT_BKPF
+           WHERE BELNR IN P_BELNR
+        AND GJAHR EQ P_GJAHR
+        AND BUKRS EQ P_BUKRS
+           AND KOART = 'D'.
+
+  SELECT
+   KUNNR
+   NAME1
+   STRAS
+   ORT01
+   PSTLZ
+   FROM KNA1 INTO TABLE IT_KNA1
+   FOR ALL ENTRIES IN IT_BSEG
+   WHERE KUNNR = IT_BSEG-KUNNR.
+
+
+  SELECT
+   BUKRS
+   BELNR
+   GJAHR
+   BLART
+   BLDAT
+   BUDAT
+   XBLNR
+   USNAM
+   FROM BKPF INTO TABLE IT_BKPF
+   WHERE BELNR IN P_BELNR
+    AND BUKRS  EQ P_BUKRS
+   AND  GJAHR EQ P_GJAHR .
+
+
+
+  SELECT BELNR
+         BUKRS
+         GJAHR
+         REBZG
+         FROM BSID INTO TABLE IT_BSID
+         FOR ALL ENTRIES IN IT_BKPF
+         WHERE BELNR = IT_BKPF-BELNR
+         AND BUKRS = IT_BKPF-BUKRS
+         AND GJAHR = IT_BKPF-GJAHR.
+
+
+  SELECT BELNR
+         BUKRS
+         GJAHR
+         REBZG
+         REBZJ
+         BUDAT
+         DMBTR
+    FROM BSID INTO TABLE IT_BSID
+    FOR ALL ENTRIES IN IT_BKPF
+         WHERE BELNR = IT_BKPF-BELNR
+         AND BUKRS = IT_BKPF-BUKRS
+         AND GJAHR = IT_BKPF-GJAHR.
+
+  SELECT
+         ZLSCH
+         TEXT1
+         LAND1
+    FROM T042Z
+    INTO TABLE IT_T042Z
+    FOR ALL ENTRIES IN IT_BSEG
+    WHERE ZLSCH = IT_BSEG-ZLSCH
+    AND LAND1 = 'SA'.
+
+
+  LOOP AT IT_BSEG INTO WA_BSEG .
+*  LOOP AT IT_BSAK INTO WA_BSAK .
+
+
+*rEAD TABLE IT_BSEG INTO WA_BSEG WITH KEY BELNR = WA_BSAK-AUGBL.
+*    WA_FINAL-BELNR1 = WA_BSAd-BELNR.
+
+    WA_FINAL-BELNR = WA_BSEG-BELNR.
+    WA_FINAL-KUNNR = WA_BSEG-KUNNR.
+    WA_FINAL-DMBTR = WA_BSEG-DMBTR.
+    WA_FINAL-WRBTR = WA_BSEG-WRBTR.
+
+    WA_FINAL-SGTXT = WA_BSEG-SGTXT.
+
+    READ TABLE IT_BKPF INTO WA_BKPF WITH KEY BELNR = WA_BSEG-BELNR.
+
+    WA_FINAL-BELNR1 = WA_BKPF-BELNR.
+    WA_FINAL-BUDAT =  WA_BKPF-BUDAT.
+    WA_FINAL-XBLNR  = WA_BKPF-XBLNR.
+
+    READ TABLE IT_KNA1   INTO WA_KNA1 WITH KEY KUNNR = WA_BSEG-KUNNR.
+
+    WA_FINAL-NAME1 = WA_KNA1-NAME1.
+    WA_FINAL-STRAS = WA_KNA1-STRAS.
+    WA_FINAL-ORT01 = WA_KNA1-ORT01.
+    WA_FINAL-PSTLZ = WA_KNA1-PSTLZ.
+
+*  READ TABLE it_bsid INTO wa_bsid WITH  KEY BELNR = wa_bkpf-belnr .
+*
+*    WA_FINAL-rebzg = WA_bsid-rebzg.
+*    WA_FINAL-budat = WA_bsid-budat.
+*    WA_FINAL-DMBTR1 = WA_bsid-DMBTR.
+
+    READ TABLE IT_T042Z INTO WA_T042Z INDEX 1.
+    WA_FINAL-TEXT1 = WA_T042Z-TEXT1.
+
+    WA_FINAL-CURR  = P_WAERS.
+
+    APPEND  WA_FINAL TO IT_FINAL.
+    CLEAR WA_FINAL.
+
+  ENDLOOP.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  CALL_SMARTFORM_R_ADV
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM CALL_SMARTFORM_R_ADV .
+
+*DATA FORMNAME    TYPE TDSFNAME.
+*DATA VARIANT     TYPE TDVARIANT.
+*DATA DIRECT_CALL TYPE TDBOOL.
+*DATA FM_NAME     TYPE RS38L_FNAM.
+
+
+  DATA FORMNAME    TYPE TDSFNAME VALUE 'ZSUFI_RECEIPT_VOUCHER_ADV'.
+  DATA FM_NAME     TYPE RS38L_FNAM.
+
+  CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+    EXPORTING
+      FORMNAME           = FORMNAME
+      VARIANT            = ' '
+      DIRECT_CALL        = ' '
+    IMPORTING
+      FM_NAME            = FM_NAME
+    EXCEPTIONS
+      NO_FORM            = 1
+      NO_FUNCTION_MODULE = 2
+      OTHERS             = 3.
+  IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+
+  DATA CONTROL_PARAMETERS   TYPE SSFCTRLOP.
+  DATA OUTPUT_OPTIONS       TYPE SSFCOMPOP.
+  DATA JOB_OUTPUT_INFO      TYPE SSFCRESCL.
+
+  DATA : LS_BIL_INVOICE TYPE LBBIL_INVOICE.
+  DATA : GV_TOT_LINES      TYPE I,
+         GS_CON_SETTINGS   TYPE SSFCTRLOP,
+         LS_COMPOSER_PARAM TYPE SSFCOMPOP.
+*
+  DESCRIBE TABLE IT_FINAL LINES GV_TOT_LINES.
+
+
+  LOOP AT IT_FINAL INTO WA_FINAL.
+
+    IF SY-TABIX = 1.
+* DIALOG AT FIRST LOOP ONLY
+      GS_CON_SETTINGS-NO_DIALOG = ABAP_FALSE.
+* OPEN THE SPOOL AT THE FIRST LOOP ONLY:
+      GS_CON_SETTINGS-NO_OPEN   = ABAP_FALSE.
+* CLOSE SPOOL AT THE LAST LOOP ONLY
+      GS_CON_SETTINGS-NO_CLOSE  = ABAP_TRUE.
+    ELSE.
+* DIALOG AT FIRST LOOP ONLY
+      GS_CON_SETTINGS-NO_DIALOG = ABAP_TRUE.
+* OPEN THE SPOOL AT THE FIRST LOOP ONLY:
+      GS_CON_SETTINGS-NO_OPEN   = ABAP_TRUE.
+    ENDIF.
+    IF SY-TABIX = GV_TOT_LINES.
+* CLOSE SPOOL
+      GS_CON_SETTINGS-NO_CLOSE  = ABAP_FALSE.
+    ENDIF.
+
+CALL FUNCTION FM_NAME "'/1BCDWB/SF00000241'
+  EXPORTING
+    CONTROL_PARAMETERS         = GS_CON_SETTINGS
+    BELNR                      = WA_FINAL-BELNR
+    P_GJAHR                    = P_GJAHR
+    WAERS                      = P_WAERS
+    WA_FINAL                   = WA_FINAL
+    WA_FINAL_T                 = WA_FINAL
+    OUTPUT_OPTIONS             = LS_COMPOSER_PARAM
+* IMPORTING
+*   DOCUMENT_OUTPUT_INFO       = DOCUMENT_OUTPUT_INFO
+*   JOB_OUTPUT_INFO            = JOB_OUTPUT_INFO
+*   JOB_OUTPUT_OPTIONS         = JOB_OUTPUT_OPTIONS
+ EXCEPTIONS
+   FORMATTING_ERROR           = 1
+   INTERNAL_ERROR             = 2
+   SEND_ERROR                 = 3
+   USER_CANCELED              = 4
+   OTHERS                     = 5
+          .
+IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+ENDIF.
+
+
+CLEAR : WA_FINAL,P_gjahr,P_waers.
+  ENDLOOP.
+ENDFORM.
+
+
+
+
+**********************************Advance Payament******************************************
+
+
+*&---------------------------------------------------------------------*
+*&      Form  GET_DATA_PART1
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM GET_DATA_PART1 .
+
+**IF P_WAERS NE 'SAR'.
+*  SELECT
+*  BUKRS
+*  BELNR
+*  GJAHR
+*  BLART
+*  BLDAT
+*  BUDAT
+*  XBLNR
+*  USNAM
+*  FROM BKPF INTO TABLE IT_BKPF
+*  WHERE BELNR IN P_BELNR
+*   AND BUKRS  EQ P_BUKRS
+*  AND  GJAHR EQ P_GJAHR .
+
+
+*  SELECT  BUKRS
+*          GJAHR
+*          BELNR
+*          KOART
+*          KUNNR
+*          ZLSCH
+*          DMBTR
+*         FROM BSEG
+*         INTO TABLE IT_BSEG
+*         FOR ALL ENTRIES IN IT_BKPF
+*         WHERE BELNR = IT_BKPF-BELNR
+*         AND GJAHR = IT_BKPF-GJAHR
+*         AND BUKRS  EQ P_BUKRS
+*         AND KOART = 'D'.
+
+  SELECT  BUKRS
+            GJAHR
+            BELNR
+            KOART
+            KUNNR
+            ZLSCH
+            DMBTR
+            WRBTR
+*          WAERS
+           FROM BSEG
+           INTO TABLE IT_BSEG
+*         FOR ALL ENTRIES IN IT_BKPF
+           WHERE BELNR IN P_BELNR
+        AND GJAHR EQ P_GJAHR
+*      AND WAERS EQ P_WAERS.
+           AND KOART = 'D'
+           AND BUKRS = 'SU00'.
+
+  SELECT
+  BUKRS
+  BELNR
+  GJAHR
+  BLART
+  BLDAT
+  BUDAT
+  XBLNR
+  USNAM
+  FROM BKPF INTO TABLE IT_BKPF
+  WHERE BELNR IN P_BELNR
+   AND BUKRS  EQ P_BUKRS
+  AND  GJAHR EQ P_GJAHR .
+
+
+
+*ENDIF.
+  SELECT BELNR
+         BUKRS
+         GJAHR
+         REBZG
+         FROM BSID INTO TABLE IT_BSID
+         FOR ALL ENTRIES IN IT_BKPF
+         WHERE BELNR = IT_BKPF-BELNR
+         AND BUKRS = IT_BKPF-BUKRS
+         AND GJAHR = IT_BKPF-GJAHR.
+
+  SELECT BELNR
+         BUKRS
+         GJAHR
+         REBZG
+         REBZJ
+         BUDAT
+         DMBTR
+    FROM BSID INTO TABLE IT_BSID
+    FOR ALL ENTRIES IN IT_BKPF
+         WHERE BELNR = IT_BKPF-BELNR
+         AND BUKRS = IT_BKPF-BUKRS
+         AND GJAHR = IT_BKPF-GJAHR.
+
+  SELECT BELNR,
+       GJAHR,
+       BUKRS,
+       DMBTR
+  FROM BSID
+  INTO TABLE @DATA(IT_BSID1)
+  FOR ALL ENTRIES IN @IT_BSID
+  WHERE BELNR =  @IT_BSID-REBZG.
+
+
+  SELECT
+    KUNNR
+    NAME1
+    STRAS
+    ORT01
+    PSTLZ
+    FROM KNA1 INTO TABLE IT_KNA1
+    FOR ALL ENTRIES IN IT_BSEG
+    WHERE KUNNR = IT_BSEG-KUNNR.
+
+
+
+
+  SELECT
+         ZLSCH
+         TEXT1
+         LAND1
+    FROM T042Z
+    INTO TABLE IT_T042Z
+    FOR ALL ENTRIES IN IT_BSEG
+    WHERE ZLSCH = IT_BSEG-ZLSCH
+    AND LAND1 = 'SA'.
+
+
+  SELECT BUKRS
+   AUGBL
+   GJAHR
+   BELNR
+   BLART
+   DMBTR
+   BUDAT
+FROM BSAD
+INTO TABLE IT_BSAD
+FOR ALL ENTRIES IN IT_BKPF
+WHERE AUGBL = IT_BKPF-BELNR
+AND  BUKRS = IT_BKPF-BUKRS
+AND GJAHR = IT_BKPF-GJAHR
+AND BLART IN  ('DG').
+
+
+  LOOP AT IT_BSEG INTO WA_BSEG .
+*  LOOP AT IT_BSAK INTO WA_BSAK .
+
+*rEAD TABLE IT_BSEG INTO WA_BSEG WITH KEY BELNR = WA_BSAK-AUGBL.
+*    WA_FINAL-BELNR1 = WA_BSAd-BELNR.
+    WA_FINAL-BELNR = WA_BSEG-BELNR.
+    WA_FINAL-BUKRS = WA_BSEG-BUKRS.
+    WA_FINAL-GJAHR = WA_BSEG-GJAHR.
+    WA_FINAL-KUNNR = WA_BSEG-KUNNR.
+    WA_FINAL-DMBTR = WA_BSEG-DMBTR.
+    WA_FINAL-WRBTR = WA_BSEG-WRBTR.
+
+
+    READ TABLE IT_BKPF INTO WA_BKPF WITH KEY BELNR = WA_BSEG-BELNR.
+
+    WA_FINAL-BELNR1 = WA_BKPF-BELNR.
+    WA_FINAL-BUDAT =  WA_BKPF-BUDAT.
+    WA_FINAL-XBLNR  = WA_BKPF-XBLNR.
+
+    READ TABLE IT_KNA1   INTO WA_KNA1 WITH KEY KUNNR = WA_BSEG-KUNNR.
+
+    WA_FINAL-NAME1 = WA_KNA1-NAME1.
+    WA_FINAL-STRAS = WA_KNA1-STRAS.
+    WA_FINAL-ORT01 = WA_KNA1-ORT01.
+    WA_FINAL-PSTLZ = WA_KNA1-PSTLZ.
+
+
+    READ TABLE IT_BSID INTO WA_BSID WITH  KEY BELNR = WA_BKPF-BELNR .
+
+    WA_FINAL-REBZG = WA_BSID-REBZG.
+    WA_FINAL-BUDAT = WA_BSID-BUDAT.
+    WA_FINAL-DMBTR1 = WA_BSID-DMBTR.
+
+
+    READ TABLE IT_T042Z INTO WA_T042Z INDEX 1.
+    WA_FINAL-TEXT1 = WA_T042Z-TEXT1.
+
+    READ TABLE IT_BSID1 INTO DATA(WA_BSID1) INDEX 1 .
+    WA_FINAL-BILL_AMT = WA_BSID1-DMBTR.
+
+
+    LOOP AT IT_BSAD INTO WA_BSAD . "WHERE AUGBL = wa_bKPF-BELNR .
+
+      WA_FINAL-BELNR   =  WA_BSAD-BELNR.
+      WA_FINAL-BUDAT1   =  WA_BSAD-BUDAT.
+      WA_FINAL-DMBTR2 =  WA_BSAD-DMBTR.
+      WA_FINAL-BILL_AMT =  WA_FINAL-BILL_AMT + WA_BSAD-DMBTR .
+
+      WA_FINAL-NET_AMT = WA_FINAL-BILL_AMT - WA_BSAD-DMBTR .
+
+
+    ENDLOOP.
+
+*    BREAK-POINT.
+    WA_FINAL-CURR  = P_WAERS.
+    APPEND  WA_FINAL TO IT_FINAL.
+    CLEAR WA_FINAL.
+
+  ENDLOOP.
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  CALL_SMARTFORM_PART1
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM CALL_SMARTFORM_PART1 .
+
+
+  DATA FORMNAME    TYPE TDSFNAME VALUE 'ZSUFI_RECIEPT_VOUCHER_PAR'.
+  DATA FM_NAME     TYPE RS38L_FNAM.
+
+
+*DATA FORMNAME    TYPE TDSFNAME.
+*DATA VARIANT     TYPE TDVARIANT.
+*DATA DIRECT_CALL TYPE TDBOOL.
+*DATA FM_NAME     TYPE RS38L_FNAM.
+
+  CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+    EXPORTING
+      FORMNAME           = FORMNAME
+*     VARIANT            = ' '
+*     DIRECT_CALL        = ' '
+    IMPORTING
+      FM_NAME            = FM_NAME
+    EXCEPTIONS
+      NO_FORM            = 1
+      NO_FUNCTION_MODULE = 2
+      OTHERS             = 3.
+  IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+  DATA CONTROL_PARAMETERS   TYPE SSFCTRLOP.
+  DATA OUTPUT_OPTIONS       TYPE SSFCOMPOP.
+  DATA JOB_OUTPUT_INFO      TYPE SSFCRESCL.
+
+  DATA : LS_BIL_INVOICE TYPE LBBIL_INVOICE.
+  DATA : GV_TOT_LINES      TYPE I,
+         GS_CON_SETTINGS   TYPE SSFCTRLOP,
+         LS_COMPOSER_PARAM TYPE SSFCOMPOP.
+*
+  DESCRIBE TABLE IT_FINAL LINES GV_TOT_LINES.
+
+
+  LOOP AT IT_FINAL INTO WA_FINAL.
+
+    IF SY-TABIX = 1.
+* DIALOG AT FIRST LOOP ONLY
+      GS_CON_SETTINGS-NO_DIALOG = ABAP_FALSE.
+* OPEN THE SPOOL AT THE FIRST LOOP ONLY:
+      GS_CON_SETTINGS-NO_OPEN   = ABAP_FALSE.
+* CLOSE SPOOL AT THE LAST LOOP ONLY
+      GS_CON_SETTINGS-NO_CLOSE  = ABAP_TRUE.
+    ELSE.
+* DIALOG AT FIRST LOOP ONLY
+      GS_CON_SETTINGS-NO_DIALOG = ABAP_TRUE.
+* OPEN THE SPOOL AT THE FIRST LOOP ONLY:
+      GS_CON_SETTINGS-NO_OPEN   = ABAP_TRUE.
+    ENDIF.
+    IF SY-TABIX = GV_TOT_LINES.
+* CLOSE SPOOL
+      GS_CON_SETTINGS-NO_CLOSE  = ABAP_FALSE.
+    ENDIF.
+
+
+    CALL FUNCTION FM_NAME "'/1BCDWB/SF00000236'
+      EXPORTING
+*       ARCHIVE_INDEX      = ARCHIVE_INDEX
+*       ARCHIVE_INDEX_TAB  = ARCHIVE_INDEX_TAB
+*       ARCHIVE_PARAMETERS = ARCHIVE_PARAMETERS
+        CONTROL_PARAMETERS = GS_CON_SETTINGS
+*       MAIL_APPL_OBJ      = MAIL_APPL_OBJ
+*       MAIL_RECIPIENT     = MAIL_RECIPIENT
+*       MAIL_SENDER        = MAIL_SENDER
+        OUTPUT_OPTIONS     = LS_COMPOSER_PARAM
+*       USER_SETTINGS      = 'X'
+        WA_FINAL2          = WA_FINAL
+        BELNR              = WA_FINAL-BELNR
+        P_GJAHR            = P_GJAHR
+        WAERS              = P_WAERS
+* IMPORTING
+*       DOCUMENT_OUTPUT_INFO       = DOCUMENT_OUTPUT_INFO
+*       JOB_OUTPUT_INFO    = JOB_OUTPUT_INFO
+*       JOB_OUTPUT_OPTIONS = JOB_OUTPUT_OPTIONS
+*      TABLES
+*        IT_FINAL           = IT_FINAL
+      EXCEPTIONS
+        FORMATTING_ERROR   = 1
+        INTERNAL_ERROR     = 2
+        SEND_ERROR         = 3
+        USER_CANCELED      = 4
+        OTHERS             = 5.
+    IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+    ENDIF.
+
+
+
+  ENDLOOP.
+ENDFORM.

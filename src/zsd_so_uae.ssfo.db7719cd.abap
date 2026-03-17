@@ -1,0 +1,47 @@
+
+*CONCATENATE ls_adrc_ag-STR_SUPPL1
+*ls_adrc_ag-STR_SUPPL2 ls_adrc_ag-LOCATION INTO gv_adr.
+
+*CONCATENATE ls_adrc_we-STR_SUPPL1 ls_adrc_we-STR_SUPPL2
+*ls_adrc_we-LOCATION INTO gv_adr1.
+
+DATA:
+  LV_KUNNR TYPE KNA1-KUNNR,
+  LV_ADRNR TYPE KNA1-ADRNR.
+*  lv_tele TYPE kna1-TELF1.
+
+SELECT SINGLE ADRNR
+        FROM  KNA1
+        INTO LV_ADRNR
+        WHERE KUNNR = WA_FINAL-KUNNR.
+SELECT SINGLE SMTP_ADDR
+        FROM  ADR6
+        INTO  GV_EMAIL
+        WHERE ADDRNUMBER = LV_ADRNR.
+
+*DATA : LV_ADRC TYPE ADRC.
+
+SELECT SINGLE *
+              FROM ADRC
+              INTO LV_ADRC
+              WHERE ADDRNUMBER = LV_ADRNR.
+
+
+SELECT FROM ADRC AS A INNER JOIN T005T AS B
+          ON   A~COUNTRY EQ B~LAND1
+            FIELDS B~LANDX
+       WHERE ADDRNUMBER = @LV_ADRNR
+       AND SPRAS EQ 'E'
+      INTO CORRESPONDING FIELDS OF @LV_T005T.
+
+  ENDSELECT.
+*  SELECT LANDX
+*              FROM T005T
+*              INTO LV_T005T
+*              WHERE LAND1 = @lv_adrnr-COUNTRY .
+
+
+
+
+
+

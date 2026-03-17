@@ -1,0 +1,23 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_W3HT" serializer_version="v2.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <NAME>ZDELVAL</NAME>
+   <TEXT>DELVAL_LOGO</TEXT>
+   <PARAMS>
+    <WWWPARAMS>
+     <NAME>fileextension</NAME>
+     <VALUE>.png</VALUE>
+    </WWWPARAMS>
+    <WWWPARAMS>
+     <NAME>filename</NAME>
+     <VALUE>S975292-20170404034016.png</VALUE>
+    </WWWPARAMS>
+    <WWWPARAMS>
+     <NAME>mimetype</NAME>
+     <VALUE>.PNG</VALUE>
+    </WWWPARAMS>
+   </PARAMS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

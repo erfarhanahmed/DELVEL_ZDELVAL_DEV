@@ -1,0 +1,87 @@
+*&---------------------------------------------------------------------*
+*& Report ZQM_STICKER
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZQM_STICKER.
+
+DATA : FMNAME   TYPE RS38L_FNAM,
+       FORMNAME TYPE TDSFNAME.
+
+TABLES: QALS.
+
+
+SELECTION-SCREEN:BEGIN OF BLOCK B1 WITH FRAME TITLE TEXT-001.
+*  PARAMETERS:p_lot TYPE QALS-PRUEFLOS.
+  SELECT-OPTIONS : S_LOT FOR QALS-PRUEFLOS.
+SELECTION-SCREEN:END OF BLOCK B1.
+DATA:  IT_QALS TYPE ZLOT_TT.
+SELECT PRUEFLOS  FROM QALS INTO TABLE @IT_QALS WHERE PRUEFLOS IN @S_LOT.
+
+CALL FUNCTION 'SSF_FUNCTION_MODULE_NAME'
+  EXPORTING
+    FORMNAME = 'ZQM_STICKER'
+*   VARIANT  = ' '
+*   DIRECT_CALL              = ' '
+  IMPORTING
+    FM_NAME  = FMNAME
+* EXCEPTIONS
+*   NO_FORM  = 1
+*   NO_FUNCTION_MODULE       = 2
+*   OTHERS   = 3
+  .
+IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+ENDIF.
+DATA: CONTROL_PARAMETERS TYPE SSFCTRLOP,
+      W_CNT              TYPE I,
+      W_CNT2             TYPE I.
+DESCRIBE TABLE IT_QALS LINES W_CNT.
+
+LOOP AT IT_QALS INTO DATA(WA_QALS).
+  W_CNT2 = SY-TABIX .
+  IF W_CNT = 1 .
+    CONTROL_PARAMETERS-NO_OPEN   = SPACE .
+    CONTROL_PARAMETERS-NO_CLOSE  = SPACE .
+  ELSE.
+
+    CASE W_CNT2.
+      WHEN 1.
+        CONTROL_PARAMETERS-NO_OPEN   = SPACE .
+        CONTROL_PARAMETERS-NO_CLOSE  = 'X' .
+      WHEN W_CNT .
+        CONTROL_PARAMETERS-NO_OPEN   = 'X' .
+        CONTROL_PARAMETERS-NO_CLOSE  = SPACE .
+      WHEN OTHERS.
+        CONTROL_PARAMETERS-NO_OPEN   = 'X' .
+        CONTROL_PARAMETERS-NO_CLOSE  = 'X' .
+    ENDCASE.
+  ENDIF.
+
+  CALL FUNCTION FMNAME
+    EXPORTING
+*     ARCHIVE_INDEX      =
+*     ARCHIVE_INDEX_TAB  =
+*     ARCHIVE_PARAMETERS =
+      CONTROL_PARAMETERS = CONTROL_PARAMETERS
+*     MAIL_APPL_OBJ      =
+*     MAIL_RECIPIENT     =
+*     MAIL_SENDER        =
+*     OUTPUT_OPTIONS     =
+*     USER_SETTINGS      = 'X'
+      P_LOT              = WA_QALS-PRUEFLOS
+* IMPORTING
+*     DOCUMENT_OUTPUT_INFO       =
+*     JOB_OUTPUT_INFO    =
+*     JOB_OUTPUT_OPTIONS =
+* EXCEPTIONS
+*     FORMATTING_ERROR   = 1
+*     INTERNAL_ERROR     = 2
+*     SEND_ERROR         = 3
+*     USER_CANCELED      = 4
+*     OTHERS             = 5
+    .
+  IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+  ENDIF.
+ENDLOOP.

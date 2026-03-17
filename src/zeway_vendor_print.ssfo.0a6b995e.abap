@@ -1,0 +1,24 @@
+
+READ TABLE LT_FINAL_EWAY INTO LS_FINAL_EWAY INDEX 1.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

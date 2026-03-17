@@ -1,0 +1,83 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>PO Print Tax calculation</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZMM_CALC_TAXESTOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZMM_CALC_TAXES</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>ZMM_CALC_TAXES</FUNCNAME>
+     <SHORT_TEXT>PO Print Tax calculation</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>ZXEKKO</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>EKKO</TYP>
+      </RSIMP>
+     </IMPORT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>E_SUB</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>KWERT</TYP>
+      </RSEXP>
+      <RSEXP>
+       <PARAMETER>E_NET</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>KWERT</TYP>
+      </RSEXP>
+     </EXPORT>
+     <TABLES>
+      <RSTBL>
+       <PARAMETER>IT_EKPO</PARAMETER>
+       <DBSTRUCT>EKPO</DBSTRUCT>
+      </RSTBL>
+      <RSTBL>
+       <PARAMETER>IT_KOMV</PARAMETER>
+       <DBSTRUCT>KOMV</DBSTRUCT>
+      </RSTBL>
+      <RSTBL>
+       <PARAMETER>ET_KOMVD</PARAMETER>
+       <DBSTRUCT>KOMVD</DBSTRUCT>
+      </RSTBL>
+     </TABLES>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>ZXEKKO</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Purchasing Document Header</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>E_SUB</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Condition value</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>E_NET</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Condition value</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IT_EKPO</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Purchasing Document Item</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>IT_KOMV</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Pricing Communications-Condition Record</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>ET_KOMVD</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Price Determination Communication-Cond.Record for Printing</STEXT>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

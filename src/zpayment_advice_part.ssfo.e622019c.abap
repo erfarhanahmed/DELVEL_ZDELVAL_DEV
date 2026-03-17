@@ -1,0 +1,40 @@
+
+IF WA_FINAL-NET_DMBTR IS NOT INITIAL.   ""NET AMT
+    LV_TOTAL =  LV_TOTAL + WA_FINAL-NET_DMBTR.
+ENDIF.
+
+IF wa_final-tds_dmbtr IS NOT INITIAL.
+ LV_TDS = LV_TDS  + wa_final-tds_dmbtr.
+ENDIF.
+
+IF wa_final-GROSS_DMBTR IS NOT INITIAL.
+LV_GROSS = LV_GROSS + wa_final-GROSS_DMBTR.
+ENDIF.
+
+IF wa_final  IS NOT INITIAL.
+  LV_REJECTION  = LV_REJECTION + wa_final-REJECTION_DMBTR .
+ENDIF.
+
+IF WA_FINAL-BALANCE IS NOT INITIAL.
+ lv_balance = lv_balance + WA_FINAL-BALANCE.
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

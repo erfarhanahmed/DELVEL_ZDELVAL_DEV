@@ -1,0 +1,52 @@
+*&---------------------------------------------------------------------*
+*& Report ZSU_FI_PAYMENT_VOUCHER
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZSU_FI_PAYMENT_VOUCHER.
+
+INCLUDE ZSU_FI_PAYMENT_VOUCHER_DEC.
+INCLUDE ZSU_FI_PAYMENT_VOUCHER_SS.
+INCLUDE ZSU_FI_PAYMENT_VOUCHER_DATA.
+
+AT SELECTION-SCREEN OUTPUT.
+  LOOP AT SCREEN.
+    IF SCREEN-GROUP1 = 'BU'.
+      SCREEN-INPUT = '0'.
+      MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
+
+START-OF-SELECTION.
+
+  SELECT BELNR,
+         BUDAT,
+         GJAHR,
+         WAERS
+    FROM BKPF INTO @DATA(WA_BKPF1)
+    WHERE BELNR IN @S_BELNR
+    AND GJAHR IN @S_GJAHR
+    AND BUDAT IN @S_BUDAT.
+*    AND WAERS EQ @P_WAERS .
+  ENDSELECT.
+  IF  WA_BKPF1 IS INITIAL .
+    MESSAGE : 'Data not found' TYPE 'E' .
+  ENDIF.
+
+  IF NOT R_FULL IS INITIAL.            """""" FOR FULL PAYMENT
+
+    PERFORM GET_DATA.
+    PERFORM PERFORM.
+    PERFORM CALL_SMARTFORM.
+
+  ELSEIF NOT R_ADV IS INITIAL.         """""" FOR ADVANCE PAYMENT
+
+    PERFORM GET_DATA_R_ADV.
+    PERFORM CALL_SMARTFORM_R_ADV.
+
+  ELSEIF NOT R_PART IS INITIAL.        """""" FOR PARTIAL PAYMENT
+
+    PERFORM GET_DATA_PART.
+    PERFORM CALL_SMARTFORM_PART.
+
+  ENDIF.

@@ -1,0 +1,1796 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZFR</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>Messages for ZFI Reporting</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>000</MSGNR>
+     <TEXT>This program (&amp;) has been replaced by &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>001</MSGNR>
+     <TEXT>Automatic payment transactions are not intended for company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>Payer &amp; is not defined for account &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>003</MSGNR>
+     <TEXT>Payee &amp; is not defined for account &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>004</MSGNR>
+     <TEXT>Currency &amp; could not be found</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>005</MSGNR>
+     <TEXT>Account determination for transaction &amp;1 is missing for account &amp;2 &amp;3 &amp;4</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>006</MSGNR>
+     <TEXT>Account determination missing for transaction &amp;1 GR/IR account &amp;2</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>007</MSGNR>
+     <TEXT>The list(s) were stored under the name &amp;1</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>008</MSGNR>
+     <TEXT>Posting for general ledger account &amp;2 amount &amp;3 set in batch input</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>009</MSGNR>
+     <TEXT>Select different currency types</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>010</MSGNR>
+     <TEXT>&amp; archived documents were selected</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>011</MSGNR>
+     <TEXT>This currency type cannot be used here</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>012</MSGNR>
+     <TEXT>Valuation areas must be different</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>013</MSGNR>
+     <TEXT>For translation, you must translate from currency type 10</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>014</MSGNR>
+     <TEXT>Use a valuation area</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>015</MSGNR>
+     <TEXT>Specify either a posting date or a fiscal year</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>016</MSGNR>
+     <TEXT>You want to selecte new documents; specify a fiscal year</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>017</MSGNR>
+     <TEXT>No action required</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>018</MSGNR>
+     <TEXT>&amp;1 data record(s) successfully changed</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>019</MSGNR>
+     <TEXT>No open items were found</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>020</MSGNR>
+     <TEXT>&amp;1 of &amp;2 data records successfully changed</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>021</MSGNR>
+     <TEXT>The notification created is displayed in a new window</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>022</MSGNR>
+     <TEXT>No text has been maintained for reference &amp;1</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>023</MSGNR>
+     <TEXT>A reference with long text &amp;1 already exists</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>024</MSGNR>
+     <TEXT>A reference with the name &amp;1 already exists</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>025</MSGNR>
+     <TEXT>The text for reference &amp;1 does not exist in language &amp;2</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>026</MSGNR>
+     <TEXT>Save the data before editing the text</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>027</MSGNR>
+     <TEXT>The name of the reference must start with &quot;Z&quot;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>028</MSGNR>
+     <TEXT>The company codes specified do not exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>029</MSGNR>
+     <TEXT>No suitable documents found</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>030</MSGNR>
+     <TEXT>Document display is called up in a new screen</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>031</MSGNR>
+     <TEXT>From now on, you assign the reference number manually</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>032</MSGNR>
+     <TEXT>The function was terminated at your request</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>033</MSGNR>
+     <TEXT>Information for determination of reference number incomplete</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>034</MSGNR>
+     <TEXT>Information for determination of reference number incomplete</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>035</MSGNR>
+     <TEXT>The height of the area is too small</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>036</MSGNR>
+     <TEXT>The height of the area cannot be determined</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>037</MSGNR>
+     <TEXT>Select a line with one company code pair</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>038</MSGNR>
+     <TEXT>The texts for the account groups are not complete in language &quot;&amp;1&quot;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>039</MSGNR>
+     <TEXT>Enter a user name</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>040</MSGNR>
+     <TEXT>Specify a company code</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>041</MSGNR>
+     <TEXT>Specify partner company code</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>042</MSGNR>
+     <TEXT>The texts for the account groups are not complete in language &quot;&amp;1&quot;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>043</MSGNR>
+     <TEXT>Message could not be signed</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>044</MSGNR>
+     <TEXT>Message could not be created.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>045</MSGNR>
+     <TEXT>Text cannot be changed.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>046</MSGNR>
+     <TEXT>The required text could not be read.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>047</MSGNR>
+     <TEXT>Select a document number by drag</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>048</MSGNR>
+     <TEXT>Error in translating &amp;1 to &amp;2.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>049</MSGNR>
+     <TEXT>Reference number does not have to be maintained; no differences exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>050</MSGNR>
+     <TEXT>Invalid cursor position.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>051</MSGNR>
+     <TEXT>Invalid cursor position.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>052</MSGNR>
+     <TEXT>Invalid cursor position.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>053</MSGNR>
+     <TEXT>Invalid cursor position.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>054</MSGNR>
+     <TEXT>Invalid cursor position.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>055</MSGNR>
+     <TEXT>Select at least one line</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>056</MSGNR>
+     <TEXT>No documents selected</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>057</MSGNR>
+     <TEXT>No documents selected</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>058</MSGNR>
+     <TEXT>Enter a valid exchange rate type</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>059</MSGNR>
+     <TEXT>Enter a valid currency key</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>060</MSGNR>
+     <TEXT>Invalid cursor position.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>061</MSGNR>
+     <TEXT>You do not have authorization to change data in company code &amp;1.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>062</MSGNR>
+     <TEXT>Document with number &amp;1 cannot be changed.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>063</MSGNR>
+     <TEXT>Reference number does not have to be maintained; no differences exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>064</MSGNR>
+     <TEXT>You do not have authorization for company code &amp;1.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>065</MSGNR>
+     <TEXT>The required texts are not maintained in &amp;1.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>066</MSGNR>
+     <TEXT>You do not have authorization to maintain this text.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>067</MSGNR>
+     <TEXT>Invalid selection</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>068</MSGNR>
+     <TEXT>Required texts are not maintained.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>069</MSGNR>
+     <TEXT>Curreny missing for tolerance amount.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>070</MSGNR>
+     <TEXT>Selection is not made using taxes on sales/purchases group</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>071</MSGNR>
+     <TEXT>Taxes on sales/purchases group &amp; does not exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>072</MSGNR>
+     <TEXT>Target entry entered; long text will not be copied</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>073</MSGNR>
+     <TEXT>Company code &amp;1 uses a different chart of accounts than company code &amp;2</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>074</MSGNR>
+     <TEXT>Display tolerance was changed; update preliminary lists</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>075</MSGNR>
+     <TEXT>Do not enter a posting date</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>076</MSGNR>
+     <TEXT>Entry missing in table FOTETAXC for &amp;1 &amp;2 &amp;3</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>077</MSGNR>
+     <TEXT>Reset of balance valuation requires inverse posting reason</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>078</MSGNR>
+     <TEXT>Valuation for account &amp;1 could not be reset; check</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>079</MSGNR>
+     <TEXT>Transfer data is not entered completely</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>080</MSGNR>
+     <TEXT>Entry already exists in PNBK</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>081</MSGNR>
+     <TEXT>Entry does not exist in PNBK</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>082</MSGNR>
+     <TEXT>No entry found in PAYR for this settlement result</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>083</MSGNR>
+     <TEXT>No entry found in PAYR for this settlement result</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>084</MSGNR>
+     <TEXT>No entries found in PAYR for this selection</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>085</MSGNR>
+     <TEXT>This check cannot be changed</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>086</MSGNR>
+     <TEXT>No entry found in REGUH for run &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>087</MSGNR>
+     <TEXT>An entry for company code &amp; does not exist in T001</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>088</MSGNR>
+     <TEXT>Entry &amp; &amp; does not exist in T042Z</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>089</MSGNR>
+     <TEXT>The check file is blocked by user &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>090</MSGNR>
+     <TEXT>Error when calling &amp;: Only one entry allowed in REGUH for run &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>091</MSGNR>
+     <TEXT>Last log contains only comparison with the entry view</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>092</MSGNR>
+     <TEXT>Last log does not contain any differences</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>093</MSGNR>
+     <TEXT>No differences logged in subledger accounts in fiscal year &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>094</MSGNR>
+     <TEXT>No differences logged in G/L accounts in fiscal year &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>095</MSGNR>
+     <TEXT>Individual documents inconsistent - no automatic comparison possible</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>096</MSGNR>
+     <TEXT>You can only display documents with a special function in the G/L view</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>097</MSGNR>
+     <TEXT>Output option &amp;1: Parameter &amp;2 set to &amp;3</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>098</MSGNR>
+     <TEXT>Monthly execution of the report is not permitted before 2010</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>099</MSGNR>
+     <TEXT>Chart of accounts &amp; has not been created</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>100</MSGNR>
+     <TEXT>Company code &amp; does not exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>101</MSGNR>
+     <TEXT>Company codes and charts of accounts entered are incompatible</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>102</MSGNR>
+     <TEXT>Enter a summarization level between 0 and 4</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>103</MSGNR>
+     <TEXT>Enter a summarization level between 0 and 4</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>104</MSGNR>
+     <TEXT>Enter subtotal formation only from position 0 to 9</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>105</MSGNR>
+     <TEXT>Enter 1 or 2 only for account sorting</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>106</MSGNR>
+     <TEXT>Enter summarization level between 0 and 3</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>107</MSGNR>
+     <TEXT>Acct address is only possible with summarization level 0 (stand.version)</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>108</MSGNR>
+     <TEXT>One-time acct data can only be displayed with summarization level 0</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>109</MSGNR>
+     <TEXT>Enter a key date</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>110</MSGNR>
+     <TEXT>No other selections are possible with short list</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>111</MSGNR>
+     <TEXT>Select a document class</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>112</MSGNR>
+     <TEXT>Enter 1, 2, 3, or 4 for account sorting</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>113</MSGNR>
+     <TEXT>Enter a summarization level between 0 and 4</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>114</MSGNR>
+     <TEXT>One-time account data cannot be displayed with account sorting 3</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>115</MSGNR>
+     <TEXT>Select an evaluation type</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>116</MSGNR>
+     <TEXT>Select a document class (normal or special documents)</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>117</MSGNR>
+     <TEXT>Enter the item selection</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>118</MSGNR>
+     <TEXT>Enter the key date</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>119</MSGNR>
+     <TEXT>Account &amp; &amp; &amp; does not exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>120</MSGNR>
+     <TEXT>Dunning run &amp; &amp; does not exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>121</MSGNR>
+     <TEXT>Selection for dunning run &amp; &amp; was not carried out</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>122</MSGNR>
+     <TEXT>Only account types &apos;K&apos; (vendor) and &apos;D&apos; (customer) are permitted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>123</MSGNR>
+     <TEXT>Only customers OR vendors are permitted for certain special G/L trans.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>124</MSGNR>
+     <TEXT>Select an evaluation</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>125</MSGNR>
+     <TEXT>No open items were selected during run &amp;, &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>126</MSGNR>
+     <TEXT>Enter a file path</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>127</MSGNR>
+     <TEXT>File path entered does not exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>128</MSGNR>
+     <TEXT>Extract file: &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>129</MSGNR>
+     <TEXT>Specify a bill of exchange usage type</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>130</MSGNR>
+     <TEXT>No records have been found for the selection specified</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>131</MSGNR>
+     <TEXT>Specify reporting quarter, month, or posting date</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>132</MSGNR>
+     <TEXT>Entry of quarter or month is ignored</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>133</MSGNR>
+     <TEXT>Enter the year of the reporting quarter</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>134</MSGNR>
+     <TEXT>File &amp; cannot be opened</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>135</MSGNR>
+     <TEXT>File &amp; cannot be read</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>136</MSGNR>
+     <TEXT>Error when accessing file &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>137</MSGNR>
+     <TEXT>Drive specification is missing</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>138</MSGNR>
+     <TEXT>Name of the OS/2 or DOS files should have the format OTYY(old)/OPYY(new)</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>139</MSGNR>
+     <TEXT>Evaluation is possible over a maximum of 1 time interval</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>140</MSGNR>
+     <TEXT>Login of the host to the PC &amp; unsuccessful</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>141</MSGNR>
+     <TEXT>Drive &amp; not found</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>142</MSGNR>
+     <TEXT>Drive &amp; directory &amp; not permitted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>143</MSGNR>
+     <TEXT>Select at least one of the functions (transfer, print, delete)</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>144</MSGNR>
+     <TEXT>Select at least one of the functions (transfer, print, delete)</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>145</MSGNR>
+     <TEXT>There is already a file &amp; on the data medium in drive &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>146</MSGNR>
+     <TEXT>Specify subdirectory on the drive</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>147</MSGNR>
+     <TEXT>Only entries &apos;B&apos; and &apos;ESP&apos; are permitted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>148</MSGNR>
+     <TEXT>Drive &amp; is not a valid one</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>149</MSGNR>
+     <TEXT>Entry must be between &amp; and &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>150</MSGNR>
+     <TEXT>Correspondence type &amp; does not exist in table T048</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>151</MSGNR>
+     <TEXT>No corresponding withholding tax types exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>152</MSGNR>
+     <TEXT>Incorrect parameter entry for country variant</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>153</MSGNR>
+     <TEXT>UNIX file does not correspond to the DME norm</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>154</MSGNR>
+     <TEXT>No form specified - form &amp; will be used</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>155</MSGNR>
+     <TEXT>Select one of the specified functions</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>156</MSGNR>
+     <TEXT>Only select one function</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>157</MSGNR>
+     <TEXT>Last dunning date is later than the current dunning date</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>158</MSGNR>
+     <TEXT>0 is an invalid entry</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>159</MSGNR>
+     <TEXT>Account &amp; is not defined for bill liability in comp.code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>160</MSGNR>
+     <TEXT>Select documents</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>161</MSGNR>
+     <TEXT>No clearing account has been created for account &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>162</MSGNR>
+     <TEXT>End of interval &amp; is before start of interval &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>163</MSGNR>
+     <TEXT>Spool request &amp; of errors generated</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>164</MSGNR>
+     <TEXT>No masked entry is possible for form</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>165</MSGNR>
+     <TEXT>&amp; pages have been printed</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>166</MSGNR>
+     <TEXT>Posting period for account &amp; is not opened</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>167</MSGNR>
+     <TEXT>Specify either &apos;Immediately&apos; or start time</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>168</MSGNR>
+     <TEXT>Start time must be in the future</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>169</MSGNR>
+     <TEXT>Document date is in the future</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>170</MSGNR>
+     <TEXT>Account &amp; is not created in company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>171</MSGNR>
+     <TEXT>No bills of exchange payable were selected</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>172</MSGNR>
+     <TEXT>No update jobs exist for account &amp; in company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>173</MSGNR>
+     <TEXT>Select correct line item</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>174</MSGNR>
+     <TEXT>&amp; bill of exchange documents are already blocked for update jobs</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>175</MSGNR>
+     <TEXT>All bill of exchange documnents are already blocked for update jobs</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>176</MSGNR>
+     <TEXT>All bill of exchange documnents are already blocked for update jobs</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>177</MSGNR>
+     <TEXT>Select an output type</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>178</MSGNR>
+     <TEXT>Specify file for output</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>179</MSGNR>
+     <TEXT>No interval entry possible</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>180</MSGNR>
+     <TEXT>Specify company code</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>181</MSGNR>
+     <TEXT>Company codes do not have the same currency</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>182</MSGNR>
+     <TEXT>File &amp; cannot be opened</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>183</MSGNR>
+     <TEXT>Calculation period is not absolutely necessary</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>184</MSGNR>
+     <TEXT>Data file &amp; cannot be read</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>185</MSGNR>
+     <TEXT>Data file &amp; is not correct</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>186</MSGNR>
+     <TEXT>Put in formatted disk in drive &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>187</MSGNR>
+     <TEXT>Specify target file</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>188</MSGNR>
+     <TEXT>Target drive is missing -&gt; see long text</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>189</MSGNR>
+     <TEXT>In drive &amp; under sub-directory &amp; file &amp; already exists</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>190</MSGNR>
+     <TEXT>Evaluation is only possible via a company code</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>191</MSGNR>
+     <TEXT>Does fiscal year correspond to selected posting period ?</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>192</MSGNR>
+     <TEXT>Import parameter &amp; not permitted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>193</MSGNR>
+     <TEXT>Enter a valid bill of exchange usage proposal</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>194</MSGNR>
+     <TEXT>Documents posted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>195</MSGNR>
+     <TEXT>In table &amp;, entry &amp; &amp; &amp; not found</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>196</MSGNR>
+     <TEXT>Target tax code in &amp; not maintained for entry &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>197</MSGNR>
+     <TEXT>Incorrect target tax account in &amp; for entry &amp; &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>198</MSGNR>
+     <TEXT>Entry &apos;UMBUCHNG&apos; is missing in T041A</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>199</MSGNR>
+     <TEXT>Entry &apos;SL-AG/BELNR&apos; is missing in T021R</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>200</MSGNR>
+     <TEXT>Company codes have different fiscal year variants</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>201</MSGNR>
+     <TEXT>Reporting year is not between 1950 and 2049</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>202</MSGNR>
+     <TEXT>Enter a valid bill of exchange usage proposal</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>203</MSGNR>
+     <TEXT>Documents posted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>204</MSGNR>
+     <TEXT>In table &amp;, entry &amp; &amp; &amp; not found</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>205</MSGNR>
+     <TEXT>Target tax code in &amp; not maintained for entry &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>206</MSGNR>
+     <TEXT>Incorrect target tax account in &amp; for entry &amp; &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>207</MSGNR>
+     <TEXT>Entry &apos;UMBUCHNG&apos; is missing in T041A</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>208</MSGNR>
+     <TEXT>Entry &apos;SL-AG/BELNR&apos; is missing in T021R</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>209</MSGNR>
+     <TEXT>Company codes have different fiscal year variants</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>210</MSGNR>
+     <TEXT>Reporting year is not between 1950 and 2049</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>211</MSGNR>
+     <TEXT>Only a connected interval is possible as reporting period</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>212</MSGNR>
+     <TEXT>Only a connected interval is possible as reporting period</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>213</MSGNR>
+     <TEXT>Period &amp; is special period</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>214</MSGNR>
+     <TEXT>Period &amp; does not exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>215</MSGNR>
+     <TEXT>Company code &amp; is not allocated to a fiscal year variant</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>216</MSGNR>
+     <TEXT>Previous period to period &amp; &amp; is not defined in variant &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>217</MSGNR>
+     <TEXT>Period &amp; &amp; is not defined in variant &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>218</MSGNR>
+     <TEXT>Enter a batch input session name</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>219</MSGNR>
+     <TEXT>Enter the posting date for the batch input posting</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>220</MSGNR>
+     <TEXT>Posting date is not in reporting period &amp; - &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>221</MSGNR>
+     <TEXT>Transfer posting date is before/same as adjustment posting date</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>222</MSGNR>
+     <TEXT>Posting date is before reporting period upper limit &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>223</MSGNR>
+     <TEXT>Enter document type</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>224</MSGNR>
+     <TEXT>Select a breakdown option</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>225</MSGNR>
+     <TEXT>You are working with test selections</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>226</MSGNR>
+     <TEXT>Batch input session(s) &amp; &amp; generated</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>227</MSGNR>
+     <TEXT>Enter a valid file type</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>228</MSGNR>
+     <TEXT>Name of OS/2 or DOS file should have the form &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>229</MSGNR>
+     <TEXT>Entry of quarter is ignored for selection</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>230</MSGNR>
+     <TEXT>Specify company code or chart of acounts</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>231</MSGNR>
+     <TEXT>Company code entered and chart of accounts are not compatible</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>232</MSGNR>
+     <TEXT>Enter search text</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>233</MSGNR>
+     <TEXT>Due date of the remaining risk items to be cancelled is in the future</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>234</MSGNR>
+     <TEXT>Specify due date for cancellation of remaining risk noted items</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>235</MSGNR>
+     <TEXT>Specify special G/L indicator for remaining risk noted items</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>236</MSGNR>
+     <TEXT>Specify document type for remaining risk noted items</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>237</MSGNR>
+     <TEXT>Specify posting key for remaining risk noted items</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>238</MSGNR>
+     <TEXT>Specify document type for presentation of bills of exchange</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>239</MSGNR>
+     <TEXT>Name of the OS/2 or DOS files should have the format INMMYY</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>240</MSGNR>
+     <TEXT>List can have too many entries since comp.code data not fully maintained</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>241</MSGNR>
+     <TEXT>Only the entries &apos;DE&apos;, &apos;DO&apos;, &apos;DX&apos;, &apos;ES&apos;, &apos;IT&apos; and &apos;FR&apos; are permitted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>242</MSGNR>
+     <TEXT>Search text was not found</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>243</MSGNR>
+     <TEXT>No authorization for displaying G/L accounts</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>244</MSGNR>
+     <TEXT>Only currencies without decimal places (Lire) are permitted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>245</MSGNR>
+     <TEXT>Data file type is not allowed</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>246</MSGNR>
+     <TEXT>Specify presenting bank</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>247</MSGNR>
+     <TEXT>Account &amp; does not exist in company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>248</MSGNR>
+     <TEXT>House bank ID is missing for account &amp; in company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>249</MSGNR>
+     <TEXT>House bank account ID is missing for account &amp; in company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>250</MSGNR>
+     <TEXT>House bank ID &amp; does not exist in company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>251</MSGNR>
+     <TEXT>Account ID &amp; does not exist in company code &amp; for house bank ID &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>252</MSGNR>
+     <TEXT>Only currencies without decimal places (Pesetas) are permitted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>253</MSGNR>
+     <TEXT>Payment method &amp; is already assigned to a bill of exchange type</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>254</MSGNR>
+     <TEXT>Specify a document currency (Pesetas)</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>255</MSGNR>
+     <TEXT>Specify a document currency (Lire)</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>256</MSGNR>
+     <TEXT>In table &amp;, entry &amp; not found</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>257</MSGNR>
+     <TEXT>Incorrect account determination: &amp;1 &amp;2 &amp;3</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>258</MSGNR>
+     <TEXT>No form exists for company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>259</MSGNR>
+     <TEXT>No sender details exist for company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>260</MSGNR>
+     <TEXT>No posting keys found in table T041A</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>261</MSGNR>
+     <TEXT>Sales area &amp; &amp; &amp; does not exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>262</MSGNR>
+     <TEXT>Purchasing organization &amp; does not exist</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>263</MSGNR>
+     <TEXT>Enter a sales area</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>264</MSGNR>
+     <TEXT>Enter one company code only</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>265</MSGNR>
+     <TEXT>Enter a purchasing organization</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>266</MSGNR>
+     <TEXT>Only exact interval possible for clearing date</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>267</MSGNR>
+     <TEXT>&amp; documents were posted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>268</MSGNR>
+     <TEXT>Account &amp; has not been created</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>269</MSGNR>
+     <TEXT>No change documents found in selected area</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>270</MSGNR>
+     <TEXT>Select a data area</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>271</MSGNR>
+     <TEXT>Correspondence type &amp; is not an allowed correspondence type</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>272</MSGNR>
+     <TEXT>Specify a different batch input document type (see long text)</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>273</MSGNR>
+     <TEXT>Report cannot be called up online</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>274</MSGNR>
+     <TEXT>Account &amp; in company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>275</MSGNR>
+     <TEXT>Standard texts are not stored for all company codes</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>276</MSGNR>
+     <TEXT>No form stored for &amp; &amp; &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>277</MSGNR>
+     <TEXT>Printer must be specified</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>278</MSGNR>
+     <TEXT>Option cannot be selected</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>279</MSGNR>
+     <TEXT>Choose a selection parameter</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>280</MSGNR>
+     <TEXT>Enter sorting between 1 and 4</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>281</MSGNR>
+     <TEXT>Select a document form</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>282</MSGNR>
+     <TEXT>Only specify receiving company codes for external documents</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>283</MSGNR>
+     <TEXT>No cross-system company codes selected (sending)</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>284</MSGNR>
+     <TEXT>No cross-system company codes selected (receiving)</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>285</MSGNR>
+     <TEXT>Only sorting 2 possible for &apos;Docs with prelim.entries&apos; doc.form</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>286</MSGNR>
+     <TEXT>No authorization for displaying G/L acct changes in comp.code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>287</MSGNR>
+     <TEXT>Select an account form</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>288</MSGNR>
+     <TEXT>Do not select any company code data for sample accounts</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>289</MSGNR>
+     <TEXT>A breakdown is already running for company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>290</MSGNR>
+     <TEXT>Company code &amp;: Last key date &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>291</MSGNR>
+     <TEXT>&amp; documents were posted</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>292</MSGNR>
+     <TEXT>Select a company code</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>293</MSGNR>
+     <TEXT>Corp.grp versn and sort.3 only possible with translatn into output curr.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>294</MSGNR>
+     <TEXT>Maintain specifications for translating into output currency</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>295</MSGNR>
+     <TEXT>Fiscal year variant &amp; does not exist for company code &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFR</ARBGB>
+     <MSGNR>296</MSGNR>
+     <TEXT>Specify posting date before or on the same day as key date</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>

@@ -1,0 +1,25 @@
+CLEAR : OBJNAME.
+OBJNAME = VBRP_VBELN.
+PERFORM get_text USING OBJNAME 'VBBK' 'Z037' 'E' CHANGING policy_no_txt.
+
+CLEAR : OBJNAME, COMP_NAME_TXT.
+FIND REGEX '(/([a-z|A-Z|\s|\.|\:]+))$' IN policy_no_txt SUBMATCHES OBJNAME comp_name_txt.
+REPLACE OBJNAME IN POLICY_NO_TXT WITH ''.
+
+CONDENSE : POLICY_NO_TXT, COMP_NAME_TXT.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

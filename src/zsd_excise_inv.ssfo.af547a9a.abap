@@ -1,0 +1,24 @@
+DATA V TYPE INT4.
+V = CRGBX_COUNT + WDNBX_COUNT.
+V_TEXT = V.
+CONDENSE V_TEXT.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

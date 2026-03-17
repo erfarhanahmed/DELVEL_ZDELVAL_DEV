@@ -1,0 +1,629 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_CLAS" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <VSEOCLASS>
+    <CLSNAME>ZJ_1IG_CL_IRN_CUSTOM</CLSNAME>
+    <LANGU>E</LANGU>
+    <DESCRIPT>Link IRN to Document</DESCRIPT>
+    <STATE>1</STATE>
+    <CLSCCINCL>X</CLSCCINCL>
+    <FIXPT>X</FIXPT>
+    <UNICODE>X</UNICODE>
+    <MSG_ID>J_1IG_MSGS</MSG_ID>
+   </VSEOCLASS>
+   <TPOOL>
+    <item>
+     <ID>I</ID>
+     <KEY>T01</KEY>
+     <ENTRY>Unable to restrict Select Options</ENTRY>
+     <LENGTH>66</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T02</KEY>
+     <ENTRY>Please enter India Company Code</ENTRY>
+     <LENGTH>62</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T04</KEY>
+     <ENTRY>Select the Directory Path</ENTRY>
+     <LENGTH>50</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T05</KEY>
+     <ENTRY>No data found for given input</ENTRY>
+     <LENGTH>58</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T07</KEY>
+     <ENTRY>Invalid ODN</ENTRY>
+     <LENGTH>21</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T09</KEY>
+     <ENTRY>Data stored successfully</ENTRY>
+     <LENGTH>48</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T10</KEY>
+     <ENTRY>Failed to store data</ENTRY>
+     <LENGTH>40</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T11</KEY>
+     <ENTRY>Unable to lock the table</ENTRY>
+     <LENGTH>48</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T12</KEY>
+     <ENTRY>Please enter Company Code</ENTRY>
+     <LENGTH>50</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T13</KEY>
+     <ENTRY>Please select File</ENTRY>
+     <LENGTH>28</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T14</KEY>
+     <ENTRY>Please select Directory Path</ENTRY>
+     <LENGTH>56</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T16</KEY>
+     <ENTRY>Please enter Fiscal Year</ENTRY>
+     <LENGTH>48</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T19</KEY>
+     <ENTRY>ODN</ENTRY>
+     <LENGTH>13</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T20</KEY>
+     <ENTRY>ODN/IRN/QR Code/Invoice details are missing</ENTRY>
+     <LENGTH>86</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T21</KEY>
+     <ENTRY>Execute this option in foreground only</ENTRY>
+     <LENGTH>76</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T22</KEY>
+     <ENTRY>No Authorization for the action</ENTRY>
+     <LENGTH>62</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T23</KEY>
+     <ENTRY>No data found for given input</ENTRY>
+     <LENGTH>58</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T24</KEY>
+     <ENTRY>Invalid file data</ENTRY>
+     <LENGTH>27</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T25</KEY>
+     <ENTRY>No files in the given Directory</ENTRY>
+     <LENGTH>62</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T26</KEY>
+     <ENTRY>Entry exists with this IRN in Active status</ENTRY>
+     <LENGTH>86</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T27</KEY>
+     <ENTRY>Business Place is not maintained for Document</ENTRY>
+     <LENGTH>90</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T28</KEY>
+     <ENTRY>Document Business Place &amp;1 is not matching</ENTRY>
+     <LENGTH>84</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T29</KEY>
+     <ENTRY>Selection Screen Business Place &amp;2</ENTRY>
+     <LENGTH>68</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T30</KEY>
+     <ENTRY>GSTIN is not maintained</ENTRY>
+     <LENGTH>46</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T31</KEY>
+     <ENTRY>Document GSTIN &amp;1 is not matching with File Seller GSTIN &amp;2</ENTRY>
+     <LENGTH>118</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T32</KEY>
+     <ENTRY>Failed to get files from directory</ENTRY>
+     <LENGTH>68</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T33</KEY>
+     <ENTRY>Failed to get the Directory</ENTRY>
+     <LENGTH>54</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T34</KEY>
+     <ENTRY>Failed to get the filename</ENTRY>
+     <LENGTH>52</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T35</KEY>
+     <ENTRY>Failed to upload data from file</ENTRY>
+     <LENGTH>62</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T36</KEY>
+     <ENTRY>Business Place does not belong to this</ENTRY>
+     <LENGTH>76</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T37</KEY>
+     <ENTRY>Company Code</ENTRY>
+     <LENGTH>22</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T38</KEY>
+     <ENTRY>latest entry of this IRN status is not Active</ENTRY>
+     <LENGTH>90</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T39</KEY>
+     <ENTRY>No entry exists in table with this IRN</ENTRY>
+     <LENGTH>76</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T40</KEY>
+     <ENTRY>Document Company Code &amp;1 is not matching with</ENTRY>
+     <LENGTH>90</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T41</KEY>
+     <ENTRY>Selection Screen Company Code &amp;2</ENTRY>
+     <LENGTH>64</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T42</KEY>
+     <ENTRY>EWay Bill number length should be 12 characters</ENTRY>
+     <LENGTH>94</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T43</KEY>
+     <ENTRY>EWay Bill Number exists in the table with Document Number</ENTRY>
+     <LENGTH>114</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T44</KEY>
+     <ENTRY>Valid To Date</ENTRY>
+     <LENGTH>23</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T45</KEY>
+     <ENTRY>is less than Valid From Date</ENTRY>
+     <LENGTH>56</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T46</KEY>
+     <ENTRY>Valid To Time</ENTRY>
+     <LENGTH>23</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T47</KEY>
+     <ENTRY>is less than Valid From Time</ENTRY>
+     <LENGTH>56</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T48</KEY>
+     <ENTRY>Entry exists in table with Active status for EWay Bill Number</ENTRY>
+     <LENGTH>122</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T49</KEY>
+     <ENTRY>Ewaybill table J_1IG_EWAYBILL not exist in system</ENTRY>
+     <LENGTH>98</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T50</KEY>
+     <ENTRY>IRN is already cancelled</ENTRY>
+     <LENGTH>48</LENGTH>
+    </item>
+    <item>
+     <ID>I</ID>
+     <KEY>T51</KEY>
+     <ENTRY>EWaybill is still active, IRN cannot be cancelled</ENTRY>
+     <LENGTH>98</LENGTH>
+    </item>
+   </TPOOL>
+   <DESCRIPTIONS>
+    <SEOCOMPOTX>
+     <CMPNAME>C_ACTIVE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Active</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>C_ASC</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>File Type</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>C_CANCEL</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Cancelled</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>C_IN</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Component of the Version Number</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>C_KIND_S</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>ABAP: Type of selection</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>C_MODE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Lock mode</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>C_OPT_LIST</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Name of an options list for SELECT-OPTIONS restrictions</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>C_SEP</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Separator</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>C_SIGN_EQ</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>OPTION field in structure of SELECT-OPTIONS tables</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>C_SIGN_I</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>SIGN field in creation of SELECT-OPTIONS tables</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GET_DIRECTORY_PATH</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Get Directory Path</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GT_DATE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Date</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GT_OB_DOC</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Document Numbers</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_AUTOMATE_PROCESS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_BUKRS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Company Code</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_DIR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Directory Path</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_DIR1</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Longer file name</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_DISP_GJAHR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Fiscal Year</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_FILE</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>File Path</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_GJAHR</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Fiscal Year</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_INT_NUM_FLAG</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_MANUAL_PROCESS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_OB_DIS</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOCOMPOTX>
+    <SEOCOMPOTX>
+     <CMPNAME>GV_OB_INV</CMPNAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Outgoing SD</DESCRIPT>
+    </SEOCOMPOTX>
+   </DESCRIPTIONS>
+   <DESCRIPTIONS_SUB>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_AUTOMATE_PROCESS</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_BG</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_BP</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Business Place</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_BULK</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_BUPLA</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Business Place</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_CCODE</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Company Code</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_DATE</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Date</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_DIR</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Directory Path</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_DIR1</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Long path name</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_DISP_FYEAR</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Fiscal Year</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_FG</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_FILE</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>File Path</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_FYEAR</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Fiscal Year</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_MANUAL_PROCESS</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_OB_DIS</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_OB_INV</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Outgoing SD</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_ODN</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>ODN</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>CONSTRUCTOR</CMPNAME>
+     <SCONAME>IM_SING</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>DECODE_QRCODE</CMPNAME>
+     <SCONAME>EX_DOC_DATE</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>System Date</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>DECODE_QRCODE</CMPNAME>
+     <SCONAME>EX_ODN</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Official Document Number</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>DECODE_QRCODE</CMPNAME>
+     <SCONAME>EX_SEL_GSTIN</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Tax Number 3</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>DECODE_QRCODE</CMPNAME>
+     <SCONAME>IM_QRCODE</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Signed QR Code</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>GET_DIRECTORY_PATH</CMPNAME>
+     <SCONAME>EX_DIR</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Directory Path</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>GET_DIRECTORY_PATH</CMPNAME>
+     <SCONAME>EX_DIR1</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Long path name</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>GET_DIRECTORY_PATH</CMPNAME>
+     <SCONAME>IM_FG</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>GET_FILENAME</CMPNAME>
+     <SCONAME>EX_FILE</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Local file for upload/download</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>GET_FILES</CMPNAME>
+     <SCONAME>EX_SUBRC</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Return Code</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>LOCK_UNLOCK_TABLES</CMPNAME>
+     <SCONAME>EX_LOCK</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>LOCK_UNLOCK_TABLES</CMPNAME>
+     <SCONAME>IM_LOCK</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>LOCK_UNLOCK_TABLES</CMPNAME>
+     <SCONAME>IM_T_TABLES</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>PREP_FILE_DATA</CMPNAME>
+     <SCONAME>IM_VALUE</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Local file for upload/download</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>PREP_OB_DATA</CMPNAME>
+     <SCONAME>EX_T_EWAYBILL</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Table data</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>PREP_OB_DATA</CMPNAME>
+     <SCONAME>EX_T_INVREFNUM</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Table data</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>VAL_PREP_EBILL</CMPNAME>
+     <SCONAME>EX_ERROR</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>General Flag</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>VAL_PREP_EBILL</CMPNAME>
+     <SCONAME>EX_EWAYBILL</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>Link E-Way Bill to Document</DESCRIPT>
+    </SEOSUBCOTX>
+    <SEOSUBCOTX>
+     <CMPNAME>VAL_PREP_EBILL</CMPNAME>
+     <SCONAME>IM_INVREFNUM</SCONAME>
+     <LANGU>E</LANGU>
+     <DESCRIPT>GST India: Link IRN details to Document</DESCRIPT>
+    </SEOSUBCOTX>
+   </DESCRIPTIONS_SUB>
+  </asx:values>
+ </asx:abap>
+</abapGit>

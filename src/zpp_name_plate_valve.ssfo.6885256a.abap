@@ -1,0 +1,23 @@
+
+IF WA_FINAL-BRAND = 'BFV'.
+  V_BD = WA_FINAL-DISC.
+  ELSEIF
+WA_FINAL-BRAND = 'BLV'.
+  V_BD = WA_FINAL-BALL.
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

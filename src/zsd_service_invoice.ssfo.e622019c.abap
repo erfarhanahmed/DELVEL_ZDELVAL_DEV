@@ -1,0 +1,24 @@
+gv_total = gv_total + GS_KONV-KWERT.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

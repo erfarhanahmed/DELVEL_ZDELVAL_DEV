@@ -1,0 +1,29 @@
+
+TYPES:BEGIN OF GY_FINAL,
+      BELNR TYPE BKPF-BELNR,
+      BUDAT TYPE BKPF-BUDAT,
+      GROSS_AMT TYPE DMBTR,
+      TDS_AMT TYPE DMBTR,
+      NET_AMT TYPE DMBTR,
+      END OF GY_FINAL.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

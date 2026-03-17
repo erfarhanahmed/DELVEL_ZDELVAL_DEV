@@ -1,0 +1,17 @@
+
+LOOP AT IT_FINAL INTO WA_FINAL.
+V_QTY = WA_FINAL-LFIMG.
+CONDENSE V_QTY.
+ENDLOOP.
+
+
+
+
+
+
+
+
+
+
+
+

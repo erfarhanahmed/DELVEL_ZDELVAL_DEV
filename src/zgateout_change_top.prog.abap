@@ -1,0 +1,47 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZGATEOUT_CHANGE_TOP
+*&---------------------------------------------------------------------*
+TABLES : VBRP.
+
+TYPES : BEGIN OF TY_MPP,
+          ZV_DATE        TYPE  ZGATE_OUT-ZV_DATE,
+          ZVEH_NUM       TYPE  ZGATE_OUT-ZVEH_NUM,
+          ZOUT_TIME      TYPE  ZGATE_OUT-ZOUT_TIME,
+          ZOUT_DATE      TYPE  ZGATE_OUT-ZOUT_DATE,
+          ZV_DRIVER_NAME TYPE  ZGATE_OUT-ZV_DRIVER_NAME,
+          ZTRANS_NAME    TYPE  ZGATE_OUT-ZTRANS_NAME,
+          ZINVOICE_NO    TYPE  ZGATE_OUT-ZINVOICE_NO,
+          ZCRETED_BY     TYPE  ZGATE_OUT-ZCRETED_BY,
+          ZV_REMARK      TYPE  ZGATE_OUT-ZV_REMARK,
+          ZNUMBER_01     TYPE  ZGATE_OUT-ZNUMBER_01,
+          ZSEC_NAME      TYPE  ZGATE_OUT-ZSEC_NAME,
+          ZCHANGE_REMARK TYPE  ZGATE_OUT-ZCHANGE_REMARK,
+          ZREFE_NO       TYPE  ZGATE_OUT-ZREFE_NO,
+          ZFSTORAGE_LOC  TYPE  ZGATE_OUT-ZFSTORAGE_LOC,
+          ZTSTORAGE_LOC  TYPE  ZGATE_OUT-ZTSTORAGE_LOC,
+        END OF TY_MPP.
+
+DATA : IT_MPP TYPE TABLE OF TY_MPP,
+       WA_MPP TYPE TY_MPP.
+
+TYPES : BEGIN OF TY_DATA,
+          POSNR      TYPE VBRP-POSNR,
+          ARKTX      TYPE VBRP-ARKTX,
+          VRKME      TYPE VBRP-VRKME,
+          NETWR      TYPE VBRP-NETWR,
+          MATNR      TYPE VBRP-MATNR,
+          VKORG_AUFT TYPE VBRP-VKORG_AUFT,
+          MWSBP      TYPE VBRP-MWSBP,
+          WERKS      TYPE VBRP-WERKS,
+          AUBEL      TYPE VBRP-AUBEL,
+          FKIMG      TYPE VBRP-FKIMG,
+          KUNAG      TYPE VBRK-KUNAG,
+          LGORT      TYPE VBRP-LGORT,      "ADDED BY SUPRIYA ON 05.07.2024
+        END OF TY_DATA.
+
+DATA : IT_DATA TYPE TABLE OF TY_DATA,
+       WA_DATA TYPE TY_DATA.
+
+CONTROLS TAB TYPE TABLEVIEW USING SCREEN 0101.
+
+DATA lv_sr_no TYPE char2.

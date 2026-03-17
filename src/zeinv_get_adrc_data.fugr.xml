@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>Get Adrc data for REG DIS SHP CMB</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZEINV_GET_ADRC_DATATOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZEINV_GET_ADRC_DATA</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>ZEINV_GET_ADRC_DATA</FUNCNAME>
+     <SHORT_TEXT>Get Adrc data for REG DIS SHP CMB</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>I_VBRP</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>ZEINV_VBRP</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>I_LIKP</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>ZEINV_LIKP</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>I_INVTYP</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>CHAR3</TYP>
+      </RSIMP>
+     </IMPORT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>E_SEL_ADDR</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>ZEINV_ADRC</TYP>
+      </RSEXP>
+      <RSEXP>
+       <PARAMETER>E_DIS_ADDR</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>ZEINV_ADRC</TYP>
+      </RSEXP>
+      <RSEXP>
+       <PARAMETER>E_BUY_ADDR</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>ZEINV_ADRC</TYP>
+      </RSEXP>
+      <RSEXP>
+       <PARAMETER>E_SHP_ADDR</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>ZEINV_ADRC</TYP>
+      </RSEXP>
+     </EXPORT>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>I_VBRP</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>E-invoice: Billing Document Item Data</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>I_LIKP</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>E-invoice: Delivery header data</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>I_INVTYP</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>3-Byte field</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>E_SEL_ADDR</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>E-invoice: Addresses (Business Address Services)</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>E_DIS_ADDR</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>E-invoice: Addresses (Business Address Services)</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>E_BUY_ADDR</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>E-invoice: Addresses (Business Address Services)</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>E_SHP_ADDR</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>E-invoice: Addresses (Business Address Services)</STEXT>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

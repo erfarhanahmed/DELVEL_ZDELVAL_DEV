@@ -1,0 +1,7 @@
+@EndUserText.label: 'Auth: Item Master Composite'
+@MappingRole: true
+define role ZR_ITEMMASTER_COMPOSITE {
+  grant select on ZC_ItemMaster_Composite
+  where ( Plant   ) = aspect pfcg_auth( M_MATE_WRK, WERKS, ACTVT = '03' )
+    and ( Product ) = aspect pfcg_auth( M_MATE_MAT, BEGRU, ACTVT = '03' );
+}

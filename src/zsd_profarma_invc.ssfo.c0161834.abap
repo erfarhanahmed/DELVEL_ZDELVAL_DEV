@@ -1,0 +1,26 @@
+
+
+IF WA_FINAL-FKIMG IS NOT INITIAL .
+  LV_QTY =  WA_FINAL-FKIMG .
+
+  LV_TQTY = wA_FINAL-TOT_qty_1.
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

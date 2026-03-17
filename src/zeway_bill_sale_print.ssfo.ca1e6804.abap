@@ -1,0 +1,25 @@
+
+SELECT SINGLE CONEWAYNO INTO GV_CONS_NO FROM ZEWAY_NUMBER WHERE
+  EWAY_BILL = P_EBILLNO.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

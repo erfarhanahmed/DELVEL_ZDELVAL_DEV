@@ -1,0 +1,24 @@
+
+
+GV_TOTAL = GV_TOTAL + LS_ITEMLIST-taxableamount.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,20 @@
+*BREAK-POINT.
+GV_CTAXINVTEXT = '       Correct Tax Invoice           '.
+LV_CNM = 'DelVal Flow Controls Middle East Co. Ltd.                                '.
+LV_VNO = 'VAT Registration Number 311562365300003             '.
+GV_QIDT = 'Invoice Date '.
+*BREAK-POINT.
+CONCATENATE LS_BIL_INVOICE-HD_GEN-BIL_DATE+0(4) '-'
+            LS_BIL_INVOICE-HD_GEN-BIL_DATE+4(2) '-'
+            LS_BIL_INVOICE-HD_GEN-BIL_DATE+6(2)
+INTO GV_QIDTF.
+
+SELECT ERZET INTO GV_QTM FROM VBRK
+  WHERE VBELN = LS_BIL_INVOICE-HD_GEN-BIL_NUMBER.
+ENDSELECT.
+GV_QIAMT = 'Invoice Amount '.
+LV_BAMT = LS_BIL_INVOICE-HD_GEN-BIL_NETWR + LS_BIL_INVOICE-HD_GEN-BIL_TAX.
+
+
+GV_QTAMT = 'Tax Amount '.
+LV_TAMT = LS_BIL_INVOICE-HD_GEN-BIL_TAX.

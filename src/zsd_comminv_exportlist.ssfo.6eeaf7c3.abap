@@ -1,0 +1,7 @@
+DATA : V    TYPE I.
+
+V = TOT_QTY.
+V_TEXT = V.
+CONDENSE V_TEXT.
+
+CLEAR V.

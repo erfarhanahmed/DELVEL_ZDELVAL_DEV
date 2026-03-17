@@ -1,0 +1,5 @@
+PROCESS BEFORE OUTPUT.
+ MODULE init_1112.
+
+PROCESS AFTER INPUT.
+  module act_user_command.

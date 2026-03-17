@@ -1,0 +1,24 @@
+total = total + w_vekp-ntgew.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

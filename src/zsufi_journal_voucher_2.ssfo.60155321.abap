@@ -1,0 +1,22 @@
+Read TABLE IT_BSEG INTO wa_bseg with key belnr =  wa_final-belnr.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

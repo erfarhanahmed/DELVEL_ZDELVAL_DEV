@@ -1,0 +1,1017 @@
+*&---------------------------------------------------------------------*
+*&  Include           ZSU_FI_VAT_RETURN_SUB
+*&---------------------------------------------------------------------*
+***************structure for refreshable file download
+
+CLASS LCL_CUST_COLL_CLS DEFINITION .
+  PUBLIC SECTION.
+
+    DATA : GO_ALV    TYPE REF TO CL_SALV_TABLE,
+           GO_COLS   TYPE REF TO CL_SALV_COLUMNS_TABLE,
+           GO_LAYOUT TYPE REF TO CL_SALV_LAYOUT,
+           GO_SORT   TYPE REF TO CL_SALV_SORTS,
+           GO_TOOL   TYPE REF TO CL_SALV_FUNCTIONS_LIST,
+           GS_KEY    TYPE SALV_S_LAYOUT_KEY.
+
+
+    TYPES : BEGIN OF STRUCT2,
+              COLOR TYPE LVC_T_SCOL.
+        INCLUDE TYPE ZSU_FI_VAT_RET. "<<< COLOR COLUMN
+    TYPES   END OF STRUCT2.
+
+    DATA : GT_FINAL TYPE TABLE OF STRUCT2,
+           WA_FINAL TYPE  STRUCT2.
+
+
+
+    TYPE-POOLS TRUXS.
+    DATA: IT_CSV TYPE TRUXS_T_TEXT_DATA,
+          WA_CSV TYPE LINE OF TRUXS_T_TEXT_DATA,
+          HD_CSV TYPE LINE OF TRUXS_T_TEXT_DATA.
+    DATA: LV_FILE(30).
+    DATA: LV_FULLFILE TYPE STRING,
+          LV_DAT(10),
+          LV_TIM(4).
+    DATA: LV_MSG(80).
+
+    TYPES : BEGIN OF TY_DOWN,
+              SR_NO       TYPE CHAR100,
+              PARTICULARS TYPE CHAR100,
+              HWBAS(16)   TYPE P DECIMALS 2,
+              HWSTE(16)   TYPE P DECIMALS 2,
+              REF         TYPE CHAR11,                                                  "ADDED BY MA ON 20.02.2024.
+              REF_TIME    TYPE CHAR15,                                                  "ADDED BY MA ON 20.02.2024.
+            END OF TY_DOWN.
+    DATA : IT_DOWN TYPE TABLE OF TY_DOWN,
+           WA_DOWN TYPE TY_DOWN.
+
+    METHODS : GET_DATA,
+      ALV_FACTORY,
+      SET_COLOR,
+      DOWNLOAD.
+
+    METHODS TOP_OF_PAGE1 CHANGING CO_ALV TYPE REF TO  CL_SALV_TABLE.
+
+ENDCLASS.
+
+CLASS LCL_CUST_COLL_CLS IMPLEMENTATION .
+  METHOD GET_DATA.
+
+    " VAT on Sales :
+    WA_FINAL-SR_NO = 'VAT on Sales :'.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL.
+**********************************************************************
+
+    " Standard Rated Sales (15%)
+    WA_FINAL-SR_NO = '1.'.
+    WA_FINAL-PARTICULARS = 'Standard Rated Sales (15%)'.
+    SELECT SUM( HWBAS ) AS HWBAS,
+           SUM( HWSTE ) AS HWSTE,
+           BSET~SHKZG
+    FROM BKPF AS BKPF INNER JOIN BSET AS BSET
+    ON BKPF~BELNR = BSET~BELNR
+    AND BKPF~GJAHR = BSET~GJAHR
+    AND BKPF~BUKRS = BSET~BUKRS
+    INTO TABLE @DATA(LT_SRS)
+    WHERE BKPF~BUDAT IN @S_BUDAT
+    AND   BKPF~BUKRS EQ @P_BUKRS
+    AND   BKPF~GJAHR IN @S_GJAHR
+    AND   BKPF~XREVERSAL NE 'X'
+    AND   BSET~MWSKZ = 'L1'
+    GROUP BY SHKZG .
+******************************ADDEED BY JYOTI ON 23.07.2024
+    IF LT_SRS IS NOT INITIAL.
+      SELECT SUM( DMBTR ) AS DMBTR,
+              BSEG~SHKZG
+       FROM BKPF AS BKPF INNER JOIN BSEG AS BSEG
+       ON  BKPF~BELNR = BSEG~BELNR
+       AND BKPF~GJAHR = BSEG~GJAHR
+       AND BKPF~BUKRS = BSEG~BUKRS
+       INTO TABLE @DATA(LT_SRS_NEW)
+       WHERE BKPF~BUDAT IN @S_BUDAT
+       AND   BKPF~BUKRS EQ @P_BUKRS
+       AND   BKPF~GJAHR IN @S_GJAHR
+*       AND   BKPF~XREVERSAL NE 'X'
+        AND bseg~buzid EQ ' '
+      AND BSEG~MWSKZ EQ ' '
+        AND BSEG~HKONT EQ '0000240203'
+       GROUP BY SHKZG.
+    ENDIF.
+*******************************************************
+
+
+    READ TABLE LT_SRS INTO DATA(LS_SRS_S) WITH KEY SHKZG = 'S'.
+    READ TABLE LT_SRS INTO DATA(LS_SRS_H) WITH KEY SHKZG = 'H'.
+    READ TABLE LT_SRS_NEW INTO DATA(LS_SRS_S_NEW) WITH KEY SHKZG = 'S'."ADDED BY JYOTI ON 23.07.2024
+    READ TABLE LT_SRS_NEW INTO DATA(LS_SRS_H_NEW) WITH KEY SHKZG = 'H'.           "added by saurabh on 5.9.2024
+    WA_FINAL-HWBAS = LS_SRS_S-HWBAS + ( LS_SRS_H-HWBAS * -1 )." + LS_SRS_S_NEW-DMBTR.
+    DATA(SRS_HWBAS) = WA_FINAL-HWBAS.
+*    WA_FINAL-HWSTE = LS_SRS_S-HWSTE + ( LS_SRS_H-HWSTE * -1 ) + LS_SRS_S_NEW-DMBTR.
+    WA_FINAL-HWSTE = LS_SRS_S-HWSTE + ( LS_SRS_H-HWSTE * -1 ) + ( LS_SRS_S_NEW-DMBTR + (  LS_SRS_H_NEW-DMBTR * -1 ) )." + " ( LS_SRS_H_NEW-DMBTR * -1 ).
+    DATA(SRS_HWSTE) = WA_FINAL-HWSTE.
+*****************************ADDED BY JYOTI ON 03.05.2024**************
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    IF  WA_FINAL-HWSTE LT 0.
+      WA_FINAL-HWSTE =  WA_FINAL-HWSTE * -1.
+    ENDIF.
+
+*************************************************************************************
+
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL,LS_SRS_S,LS_SRS_H.
+******************************************************************************
+    " Sales on which the government bears the VAT
+    WA_FINAL-SR_NO = '2.'.
+    WA_FINAL-PARTICULARS = 'Sales on which the government bears the VAT'.
+*    WA_FINAL-REF   = LV_REF.
+*    WA_FINAL-REF_TIME = LV_REF_TIME.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL.
+******************************************************************************
+    " Zero rated domestic sales
+    WA_FINAL-SR_NO = '3.'.
+    WA_FINAL-PARTICULARS = 'Zero rated domestic sales'.
+    SELECT SUM( HWBAS ) AS HWBAS,
+           SUM( HWSTE ) AS HWSTE,
+           BSET~SHKZG
+    FROM BKPF AS BKPF INNER JOIN BSET AS BSET
+    ON BKPF~BELNR = BSET~BELNR
+    AND BKPF~GJAHR = BSET~GJAHR
+    AND BKPF~BUKRS = BSET~BUKRS
+    INTO TABLE @DATA(LT_ZRDS)
+    WHERE BKPF~BUDAT IN @S_BUDAT
+    AND   BKPF~BUKRS EQ @P_BUKRS
+    AND   BKPF~GJAHR IN @S_GJAHR
+    AND   BKPF~XREVERSAL NE 'X'
+    AND   BSET~MWSKZ EQ 'L0'
+    GROUP BY SHKZG.
+
+******************************ADDEED BY JYOTI ON 23.07.2024
+*  IF LT_ZRDS IS NOT INITIAL.
+*   SELECT SUM( DMBTR ) AS DMBTR,
+*           BSEG~SHKZG
+*    FROM BKPF AS BKPF INNER JOIN BSEG AS BSEG
+*    ON  BKPF~BELNR = BSEG~BELNR
+*    AND BKPF~GJAHR = BSEG~GJAHR
+*    AND BKPF~BUKRS = BSEG~BUKRS
+*    INTO TABLE @DATA(LT_ZRDS_NEW)
+*    WHERE BKPF~BUDAT IN @S_BUDAT
+*    AND   BKPF~BUKRS EQ @P_BUKRS
+*    AND   BKPF~GJAHR IN @S_GJAHR
+*    AND   BKPF~XREVERSAL NE 'X'
+*
+*    GROUP BY SHKZG.
+*ENDIF.
+*******************************************************
+*    READ TABLE LT_ZRDS_NEW INTO DATA(LS_ZRDS_S_NEW) WITH KEY SHKZG = 'S'."ADDED BY JYOTI ON 23.07.2024
+    READ TABLE LT_ZRDS INTO DATA(LS_ZRDS_S) WITH KEY SHKZG = 'S'.
+    READ TABLE LT_ZRDS INTO DATA(LS_ZRDS_H) WITH KEY SHKZG = 'H'.
+*    READ TABLE LT_ZRDS_NEW INTO DATA(LS_ZRDS_S_NEW) WITH KEY SHKZG = 'S'.
+*    READ TABLE LT_ZRDS_NEW INTO DATA(LS_ZRDS_H_NEW) WITH KEY SHKZG = 'H'.
+    WA_FINAL-HWBAS = LS_ZRDS_S-HWBAS + ( LS_ZRDS_H-HWBAS  * -1 ) ."+ LS_ZRDS_S_NEW-DMBTR.
+    DATA(ZRDS_HWBAS) = WA_FINAL-HWBAS.
+*    WA_FINAL-HWSTE = LS_ZRDS_S-HWSTE + ( LS_ZRDS_H-HWSTE * -1 ) .
+    WA_FINAL-HWSTE = LS_ZRDS_S-HWSTE + ( LS_ZRDS_H-HWSTE * -1 ) ."+ ( LS_ZRDS_S_NEW-DMBTR +( LS_ZRDS_H_NEW-DMBTR * -1 ) )." + LS_ZRDS_S_NEW-DMBTR.
+    DATA(ZRDS_HWSTE) = WA_FINAL-HWSTE.
+
+*****************************ADDED BY JYOTI ON 03.05.2024**************
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    IF WA_FINAL-HWSTE LT 0.
+      WA_FINAL-HWSTE =  WA_FINAL-HWSTE * -1.
+    ENDIF.
+
+*************************************************************************************
+
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL,LS_ZRDS_S,LS_ZRDS_H.
+*************************************************************************************
+    " Exports
+    WA_FINAL-SR_NO = '4.'.
+    WA_FINAL-PARTICULARS = 'Exports'.
+    SELECT SUM( HWBAS ) AS HWBAS,
+           SUM( HWSTE ) AS HWSTE,
+           BSET~SHKZG
+    FROM BKPF AS BKPF INNER JOIN BSET AS BSET
+    ON BKPF~BELNR = BSET~BELNR
+    AND BKPF~GJAHR = BSET~GJAHR
+    AND BKPF~BUKRS = BSET~BUKRS
+    INTO TABLE @DATA(LT_EXPORT)
+    WHERE BKPF~BUDAT IN @S_BUDAT
+    AND   BKPF~BUKRS EQ @P_BUKRS
+    AND   BKPF~GJAHR IN @S_GJAHR
+    AND   BKPF~XREVERSAL NE 'X'
+    AND   BSET~MWSKZ IN ('L2','L3','L4')
+    GROUP BY SHKZG.
+*******************************ADDEED BY JYOTI ON 23.07.2024
+*   SELECT SUM( DMBTR ) AS DMBTR,
+*           BSEG~SHKZG
+*    FROM BKPF AS BKPF INNER JOIN BSEG AS BSEG
+*    ON  BKPF~BELNR = BSEG~BELNR
+*    AND BKPF~GJAHR = BSEG~GJAHR
+*    AND BKPF~BUKRS = BSEG~BUKRS
+*    INTO TABLE @DATA(LT_EXPORT_NEW)
+*    WHERE BKPF~BUDAT IN @S_BUDAT
+*    AND   BKPF~BUKRS EQ @P_BUKRS
+*    AND   BKPF~GJAHR IN @S_GJAHR
+*    AND   BKPF~XREVERSAL NE 'X'
+*    GROUP BY SHKZG.
+
+*******************************************************
+*    READ TABLE LT_EXPORT_NEW INTO DATA(LS_EXPORT_S_NEW) WITH KEY SHKZG = 'S'."ADDED BY JYOTI ON 23.07.2024
+
+    READ TABLE LT_EXPORT INTO DATA(LS_EXPORT_S) WITH KEY SHKZG = 'S'.
+    READ TABLE LT_EXPORT INTO DATA(LS_EXPORT_H) WITH KEY SHKZG = 'H'.
+    WA_FINAL-HWBAS = LS_EXPORT_S-HWBAS + ( LS_EXPORT_H-HWBAS * -1 )." + LS_EXPORT_S_NEW-DMBTR.
+    DATA(EXPORT_HWBAS) = WA_FINAL-HWBAS.
+    WA_FINAL-HWSTE = LS_EXPORT_S-HWSTE + ( LS_EXPORT_H-HWSTE * -1 ) ."+ LS_EXPORT_S_NEW-DMBTR.
+    DATA(EXPORT_HWSTE) = WA_FINAL-HWSTE.
+*****************************ADDED BY JYOTI ON 03.05.2024**************
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    IF  WA_FINAL-HWSTE LT 0.
+      WA_FINAL-HWSTE =  WA_FINAL-HWSTE * -1.
+    ENDIF.
+
+*************************************************************************************
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL,LS_EXPORT_S,LS_EXPORT_H.
+**************************************************************************************
+    " Exempt Sales
+    WA_FINAL-SR_NO = '5.'.
+    WA_FINAL-PARTICULARS = 'Exempt Sales'.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL.
+*************************************************************************************
+    " VAT on FOC
+*    WA_FINAL-SR_NO = 'VAT on FOC :'.
+*    APPEND WA_FINAL TO GT_FINAL.
+*    CLEAR : WA_FINAL.
+*************************************************************************************
+    " Total Sales
+    WA_FINAL-SR_NO = '6.'.
+    WA_FINAL-PARTICULARS = 'RCM VAT Payable'.
+    SELECT SUM( HWBAS ) AS HWBAS,
+           SUM( HWSTE ) AS HWSTE,
+           BSET~SHKZG
+    FROM BKPF AS BKPF INNER JOIN BSET AS BSET
+    ON BKPF~BELNR = BSET~BELNR
+    AND BKPF~GJAHR = BSET~GJAHR
+    AND BKPF~BUKRS = BSET~BUKRS
+    INTO TABLE @DATA(LT_RCM)
+    WHERE BKPF~BUDAT IN @S_BUDAT
+    AND   BKPF~BUKRS EQ @P_BUKRS
+    AND   BKPF~GJAHR IN @S_GJAHR
+    AND   BKPF~XREVERSAL NE 'X'
+*    AND   BSET~MWSKZ IN ('B1','B2','BA','BB')"BA , BB ADDED BY JYOTI ON 03.05.2024
+    AND   BSET~MWSKZ IN ('B1','BA','BB')"BA , BB ADDED BY JYOTI ON 23.07.2024
+*    AND   BSET~KSCHL EQ 'NLXA'           " commented by Snehal Rajale on 20.06.2024
+    AND   BSET~KSCHL EQ 'NLXV'           " Added by Snehal Rajale on 20.06.2024
+    GROUP BY SHKZG.
+******************************ADDEED BY JYOTI ON 23.07.2024
+    SELECT SUM( DMBTR ) AS DMBTR,
+            BSEG~SHKZG
+     FROM BKPF AS BKPF INNER JOIN BSEG AS BSEG
+     ON  BKPF~BELNR = BSEG~BELNR
+     AND BKPF~GJAHR = BSEG~GJAHR
+     AND BKPF~BUKRS = BSEG~BUKRS
+     INTO TABLE @DATA(LT_RCM_NEW)
+     WHERE BKPF~BUDAT IN @S_BUDAT
+     AND   BKPF~BUKRS EQ @P_BUKRS
+     AND   BKPF~GJAHR IN @S_GJAHR
+*     AND   BKPF~XREVERSAL NE 'X'
+    AND BSEG~HKONT IN ( '0000240204', '0000240205' )
+     GROUP BY SHKZG.
+
+*******************************************************
+    READ TABLE LT_RCM_NEW INTO DATA(LS_RCM_S_NEW) WITH KEY SHKZG = 'S'."ADDED BY JYOTI ON 23.07.2024
+    READ TABLE LT_RCM_NEW INTO DATA(LS_RCM_H_NEW) WITH KEY SHKZG = 'H'.
+    READ TABLE LT_RCM INTO DATA(LS_RCM_S) WITH KEY SHKZG = 'S'.
+    READ TABLE LT_RCM INTO DATA(LS_RCM_H) WITH KEY SHKZG = 'H'.
+    WA_FINAL-HWBAS = LS_RCM_S-HWBAS + ( LS_RCM_H-HWBAS * -1 ) ."+ LS_RCM_S_NEW-DMBTR.
+    DATA(RCM_HWBAS) = WA_FINAL-HWBAS .
+    WA_FINAL-HWSTE = LS_RCM_S-HWSTE + ( LS_RCM_H-HWSTE * -1 ).       "added by saurabh
+*    WA_FINAL-HWSTE = LS_RCM_S-HWSTE + ( LS_RCM_H-HWSTE * -1 ) + LS_RCM_S_NEW-DMBTR.   original commented
+*    WA_FINAL-HWSTE = LS_RCM_S-HWSTE + ( LS_RCM_H-HWSTE * -1 ) + ( LS_RCM_S_NEW-DMBTR + ( LS_RCM_H_NEW-DMBTR * -1 ) ).   added & commented by saurabh
+    DATA(RCM_HWSTE) = WA_FINAL-HWSTE .
+*****************************ADDED BY JYOTI ON 03.05.2024**************
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    IF  WA_FINAL-HWSTE LT 0.
+      WA_FINAL-HWSTE = WA_FINAL-HWSTE * -1.
+    ENDIF.
+
+*************************************************************************************
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL,LS_RCM_S,LS_RCM_H.
+*************************************************************************************
+    " Total Sales
+    WA_FINAL-SR_NO = '7.'.
+    WA_FINAL-PARTICULARS = 'Total Sales'.
+
+    IF SRS_HWBAS LT 0.
+      SRS_HWBAS = SRS_HWBAS * -1.
+    ENDIF.
+
+    IF ZRDS_HWBAS LT 0.
+      ZRDS_HWBAS = ZRDS_HWBAS * -1.
+    ENDIF.
+
+    IF EXPORT_HWBAS LT 0.
+      EXPORT_HWBAS = EXPORT_HWBAS * -1.
+    ENDIF.
+
+    IF RCM_HWBAS LT 0.
+      RCM_HWBAS = RCM_HWBAS * -1.
+    ENDIF.
+
+    WA_FINAL-HWBAS = SRS_HWBAS + ZRDS_HWBAS + EXPORT_HWBAS + RCM_HWBAS.
+    DATA(TOT_SALES_HWBAS) = WA_FINAL-HWBAS.
+
+    IF SRS_HWSTE LT 0.
+      SRS_HWSTE = SRS_HWSTE * -1.
+    ENDIF.
+
+    IF ZRDS_HWSTE LT 0.
+      ZRDS_HWSTE = ZRDS_HWSTE * -1.
+    ENDIF.
+
+    IF EXPORT_HWSTE LT 0.
+      EXPORT_HWSTE = EXPORT_HWSTE * -1.
+    ENDIF.
+
+    IF RCM_HWSTE LT 0.
+      RCM_HWSTE = RCM_HWSTE * -1.
+    ENDIF.
+
+    WA_FINAL-HWSTE = SRS_HWSTE + ZRDS_HWSTE + EXPORT_HWSTE + RCM_HWSTE.
+    DATA(TOT_SALES_HWSTE) = WA_FINAL-HWSTE.
+
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    IF  WA_FINAL-HWSTE LT 0.
+      WA_FINAL-HWSTE =  WA_FINAL-HWSTE * -1.
+    ENDIF.
+
+
+
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL.
+*************************************************************************************
+    " VAT on Purchases :
+    WA_FINAL-SR_NO = 'VAT on Purchases :'.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL.
+*************************************************************************************
+    " Standard rated domestic purchases (15%)
+    WA_FINAL-SR_NO = '8.'.
+    WA_FINAL-PARTICULARS = 'Standard rated domestic purchases (15%)'.
+*    SELECT SUM( HWBAS ) AS HWBAS,
+*           SUM( HWSTE ) AS HWSTE,
+*           BSET~SHKZG
+*    FROM BKPF AS BKPF INNER JOIN BSET AS BSET
+*    ON BKPF~BELNR = BSET~BELNR
+*    AND BKPF~GJAHR = BSET~GJAHR
+*    AND BKPF~BUKRS = BSET~BUKRS
+*    INTO TABLE @DATA(LT_SRDP)
+*    WHERE BKPF~BUDAT IN @S_BUDAT
+*    AND   BKPF~BUKRS EQ @P_BUKRS
+*    AND   BKPF~GJAHR IN @S_GJAHR
+*    AND   BKPF~XREVERSAL NE 'X'
+*    AND   BSET~MWSKZ IN ('I1','B1','BA')
+*    AND   BSET~KSCHL IN ('NLXV' , 'MWVS' )
+*    GROUP BY SHKZG.
+*********ADDED  BY JYOTI ON 10.04.2024**************************
+    SELECT SUM( HWBAS ) AS HWBAS,
+           SUM( HWSTE ) AS HWSTE,
+           BSET~SHKZG
+    FROM BKPF AS BKPF INNER JOIN BSET AS BSET
+    ON BKPF~BELNR = BSET~BELNR
+    AND BKPF~GJAHR = BSET~GJAHR
+    AND BKPF~BUKRS = BSET~BUKRS
+    INTO TABLE @DATA(LT_SRDP_I1)
+    WHERE BKPF~BUDAT IN @S_BUDAT
+    AND   BKPF~BUKRS EQ @P_BUKRS
+    AND   BKPF~GJAHR IN @S_GJAHR
+    AND   BKPF~XREVERSAL NE 'X'
+    AND   BSET~MWSKZ EQ 'I1'
+    AND   BSET~KSCHL EQ 'MWVS'
+    GROUP BY SHKZG.
+******************************ADDEED BY JYOTI ON 23.07.2024
+    SELECT SUM( DMBTR ) AS DMBTR,
+            BSEG~SHKZG
+     FROM BKPF AS BKPF INNER JOIN BSEG AS BSEG
+     ON  BKPF~BELNR = BSEG~BELNR
+     AND BKPF~GJAHR = BSEG~GJAHR
+     AND BKPF~BUKRS = BSEG~BUKRS
+     INTO TABLE @DATA(LT_SRDP_I1_NEW)
+     WHERE BKPF~BUDAT IN @S_BUDAT
+     AND   BKPF~GJAHR IN @S_GJAHR
+     AND   BKPF~BUKRS EQ @P_BUKRS
+     AND BSEG~HKONT EQ '0000440550'
+      AND bseg~buzid EQ ' '
+      AND BSEG~MWSKZ EQ ' '
+*      AND BSEG~SHKZG EQ 'S'
+     GROUP BY SHKZG.
+
+*******************************************************
+
+
+    READ TABLE LT_SRDP_I1_NEW INTO DATA(LS_SRDP_S_I1_NEW) WITH KEY SHKZG = 'S'.
+    READ TABLE LT_SRDP_I1_NEW INTO DATA(LS_SRDP_H_I1_NEW) WITH KEY SHKZG = 'H'.
+    READ TABLE LT_SRDP_I1 INTO DATA(LS_SRDP_S_I1) WITH KEY SHKZG = 'S'.
+    READ TABLE LT_SRDP_I1 INTO DATA(LS_SRDP_H_I1) WITH KEY SHKZG = 'H'.
+*****************8888COMMENTED BY JYOTI ON 03.05.2024*******************************
+*      SELECT SUM( HWBAS ) AS HWBAS,
+*           SUM( HWSTE ) AS HWSTE,
+*           BSET~SHKZG
+*    FROM BKPF AS BKPF INNER JOIN BSET AS BSET
+*    ON BKPF~BELNR = BSET~BELNR
+*    AND BKPF~GJAHR = BSET~GJAHR
+*    AND BKPF~BUKRS = BSET~BUKRS
+*    INTO TABLE @DATA(LT_SRDP_B1)
+*    WHERE BKPF~BUDAT IN @S_BUDAT
+*    AND   BKPF~BUKRS EQ @P_BUKRS
+*    AND   BKPF~GJAHR IN @S_GJAHR
+*    AND   BKPF~XREVERSAL NE 'X'
+*    AND   BSET~MWSKZ EQ 'B1'
+*    AND   BSET~KSCHL EQ 'NLXV'
+*    GROUP BY SHKZG.
+*
+*
+*    READ TABLE LT_SRDP_B1 INTO DATA(LS_SRDP_S_B1) WITH KEY SHKZG = 'S'.
+*    READ TABLE LT_SRDP_B1 INTO DATA(LS_SRDP_H_B1) WITH KEY SHKZG = 'H'.
+*
+*
+*      SELECT SUM( HWBAS ) AS HWBAS,
+*           SUM( HWSTE ) AS HWSTE,
+*           BSET~SHKZG
+*    FROM BKPF AS BKPF INNER JOIN BSET AS BSET
+*    ON BKPF~BELNR = BSET~BELNR
+*    AND BKPF~GJAHR = BSET~GJAHR
+*    AND BKPF~BUKRS = BSET~BUKRS
+*    INTO TABLE @DATA(LT_SRDP_BA)
+*    WHERE BKPF~BUDAT IN @S_BUDAT
+*    AND   BKPF~BUKRS EQ @P_BUKRS
+*    AND   BKPF~GJAHR IN @S_GJAHR
+*    AND   BKPF~XREVERSAL NE 'X'
+*    AND   BSET~MWSKZ EQ 'BA'
+*    AND   BSET~KSCHL EQ 'NLXV'
+*    GROUP BY SHKZG.
+*
+*   READ TABLE LT_SRDP_BA INTO DATA(LS_SRDP_S_BA) WITH KEY SHKZG = 'S'.
+*    READ TABLE LT_SRDP_BA INTO DATA(LS_SRDP_H_BA) WITH KEY SHKZG = 'H'.
+*************************************************************************************************
+    DATA: LV_HHWBAS TYPE BSET-HWBAS.                                                ""ADDED BY MA ON 29.03.2024
+    DATA: LV_HHWSTE TYPE BSET-HWSTE.                                                ""ADDED BY MA ON 29.03.2024
+    LV_HHWBAS = LS_SRDP_S_I1-HWBAS ."+ LS_SRDP_S_I1_NEW-DMBTR."+ LS_SRDP_S_B1-HWBAS + LS_SRDP_S_BA-HWBAS.
+*    LV_HHWSTE = LS_SRDP_S_I1-HWSTE + LS_SRDP_S_I1_NEW-DMBTR.."+ LS_SRDP_S_B1-HWSTE + LS_SRDP_S_BA-HWSTE.
+*    LV_HHWSTE = LS_SRDP_S_I1-HWSTE + ( LS_SRDP_S_I1_NEW-DMBTR + ( LS_SRDP_H_I1_NEW-DMBTR * -1 ) )."+ LS_SRDP_S_B1-HWSTE + LS_SRDP_S_BA-HWSTE.                ORIGINAL COMMENTED BY SAURABH ON 6.9.2024
+     LV_HHWSTE = LS_SRDP_S_I1-HWSTE + ( LS_SRDP_H_I1_NEW-DMBTR * -1 ).       "  added by saurabh on 6.9.2024
+*    REPLACE ALL OCCURRENCES OF '-' IN LV_HHWBAS WITH ''.                        ""ADDED BY MA ON 29.03.2024
+*    REPLACE ALL OCCURRENCES OF '-' IN LV_HHWSTE WITH ''.                    "ADDED BY MA ON 29.03.2024
+*    DATA(LS_SRDP_H-HWBAS) = LV_HHWBAS.
+*    DATA(LS_SRDP_H-HWSTE) = LV_HHWSTE.
+    IF LS_SRDP_H_I1-HWBAS GT 0.
+      LS_SRDP_H_I1-HWBAS = LS_SRDP_H_I1-HWBAS * -1.
+    ENDIF.
+*        IF LS_SRDP_H_B1-HWBAS GT 0.
+*         LS_SRDP_H_B1-HWBAS = LS_SRDP_H_B1-HWBAS * -1.
+*       ENDIF.
+*
+*        IF LS_SRDP_H_BA-HWBAS GT 0.
+*         LS_SRDP_H_BA-HWBAS = LS_SRDP_H_BA-HWBAS * -1.
+*       ENDIF.
+
+*    WA_FINAL-HWBAS = LS_SRDP_S-HWBAS + ( LS_SRDP_H_I1-HWBAS * -1 ) + ( LS_SRDP_H_B1-HWBAS * -1 ) + ( LS_SRDP_H_BB-HWBAS * -1 ).
+*    WA_FINAL-HWBAS = LV_HHWBAS + ( LS_SRDP_H_I1-HWBAS * -1 ) + ( LS_SRDP_H_B1-HWBAS * -1 ) + ( LS_SRDP_H_BA-HWBAS * -1 ).
+*       WA_FINAL-HWBAS = LV_HHWBAS + LS_SRDP_H_I1-HWBAS + LS_SRDP_H_B1-HWBAS + LS_SRDP_H_BA-HWBAS."ADDED BY JYOTI ON 11.04.2024
+    WA_FINAL-HWBAS = LV_HHWBAS + LS_SRDP_H_I1-HWBAS ."ADDED BY JYOTI ON 03.05.2024
+    DATA(SRDP_HWBAS) = WA_FINAL-HWBAS .
+
+    IF  LS_SRDP_H_I1-HWSTE GT 0.
+      LS_SRDP_H_I1-HWSTE =  LS_SRDP_H_I1-HWSTE * -1.
+    ENDIF.
+************************8ADDED BY JYOTI ON 03.05.2024*********************
+*        IF LS_SRDP_H_B1-HWSTE GT 0.
+*        LS_SRDP_H_B1-HWSTE = LS_SRDP_H_B1-HWSTE * -1.
+*       ENDIF.
+*
+*        IF LS_SRDP_H_BA-HWSTE GT 0.
+*         LS_SRDP_H_BA-HWSTE = LS_SRDP_H_BA-HWSTE * -1.
+*       ENDIF.
+
+
+*    WA_FINAL-HWSTE = LS_SRDP_S-HWSTE + ( LS_SRDP_H_I1-HWSTE * -1 ) + ( LS_SRDP_H_B1-HWSTE * -1 ) + ( LS_SRDP_H_BB-HWSTE * -1 ).
+*    WA_FINAL-HWSTE = LV_HHWSTE + ( LS_SRDP_H_I1-HWSTE * -1 ) + ( LS_SRDP_H_B1-HWSTE * -1 ) + ( LS_SRDP_H_BA-HWSTE * -1 ).
+*         WA_FINAL-HWSTE = LV_HHWSTE + LS_SRDP_H_I1-HWSTE + LS_SRDP_H_B1-HWSTE + LS_SRDP_H_BA-HWSTE."ADDED BY JYOTI ON 11.04.2024
+    WA_FINAL-HWSTE = LV_HHWSTE + LS_SRDP_H_I1-HWSTE ."ADDED BY JYOTI ON 03.05.2024
+
+    DATA(SRDP_HWSTE) = WA_FINAL-HWSTE .
+
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    IF WA_FINAL-HWSTE LT 0.
+      WA_FINAL-HWSTE =  WA_FINAL-HWSTE * -1.
+    ENDIF.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL,LS_SRDP_S_I1,LS_SRDP_H_I1.
+*************************************************************************
+    " Imports subject to VAT paid on import (15%)
+    WA_FINAL-SR_NO = '9.'.
+    WA_FINAL-PARTICULARS = 'Imports subject to VAT paid on import (15%)'.
+    SELECT SUM( HWBAS ) AS HWBAS,
+           SUM( HWSTE ) AS HWSTE,
+           BSET~SHKZG
+    FROM BKPF AS BKPF INNER JOIN BSET AS BSET
+    ON BKPF~BELNR = BSET~BELNR
+    AND BKPF~GJAHR = BSET~GJAHR
+    AND BKPF~BUKRS = BSET~BUKRS
+    INTO TABLE @DATA(LT_ISVPI)
+    WHERE BKPF~BUDAT IN @S_BUDAT
+    AND   BKPF~BUKRS EQ @P_BUKRS
+    AND   BKPF~GJAHR IN @S_GJAHR
+    AND   BKPF~XREVERSAL NE 'X'
+    AND   BSET~MWSKZ EQ 'IM'
+    GROUP BY SHKZG.
+******************************ADDEED BY JYOTI ON 23.07.2024
+    SELECT SUM( DMBTR ) AS DMBTR,
+           BSEG~SHKZG
+     FROM BKPF AS BKPF INNER JOIN BSEG AS BSEG
+     ON  BKPF~BELNR = BSEG~BELNR
+     AND BKPF~GJAHR = BSEG~GJAHR
+     AND BKPF~BUKRS = BSEG~BUKRS
+     INTO TABLE @DATA(LT_ISVPI_NEW)
+     WHERE BKPF~BUDAT IN @S_BUDAT
+     AND   BKPF~BUKRS EQ @P_BUKRS
+     AND   BKPF~GJAHR IN @S_GJAHR
+     AND bseg~buzid EQ ' '
+     AND BSEG~MWSKZ EQ ' '
+*     AND   BKPF~XREVERSAL NE 'X'
+      AND BSEG~HKONT = '0000440553'" '440550'              "ADDED BY AAKASHK 06.08.2024
+    GROUP BY SHKZG.                                     "commented by aakashk 06.08.2024
+
+*******************************************************
+
+    READ TABLE LT_ISVPI_NEW INTO DATA(LS_ISVPI_S_NEW) WITH KEY SHKZG = 'S'.
+    READ TABLE LT_ISVPI INTO DATA(LS_ISVPI_S) WITH KEY SHKZG = 'S'.
+    READ TABLE LT_ISVPI INTO DATA(LS_ISVPI_H) WITH KEY SHKZG = 'H'.
+    WA_FINAL-HWBAS = LS_ISVPI_S-HWBAS + ( LS_ISVPI_H-HWBAS * -1 ) ."+ LS_ISVPI_S_NEW-DMBTR.
+    DATA(ISVPI_HWBAS) = WA_FINAL-HWBAS .
+*    WA_FINAL-HWSTE = LS_ISVPI_S-HWSTE + ( LS_ISVPI_H-HWSTE * -1 ) + LS_ISVPI_S_NEW-DMBTR.         ORIGINAL COMMENTED BY SAURABH ON 5.9.2024
+    WA_FINAL-HWSTE = LS_ISVPI_S-HWSTE + ( LS_ISVPI_H-HWSTE * -1 ).                                 "ADDED BY SAURABH ON 5.9.2024
+    DATA(ISVPI_HWSTE) = WA_FINAL-HWSTE .
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    IF  WA_FINAL-HWSTE LT 0.
+      WA_FINAL-HWSTE =  WA_FINAL-HWSTE * -1.
+    ENDIF.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL,LS_ISVPI_S."LS_SRDP_H.
+**********************************************************************************
+    " Import subject to VAT accounted for through the reverse charge mechanism (15%)
+*    BREAK-POINT.
+    WA_FINAL-SR_NO = '10.'.
+    WA_FINAL-PARTICULARS = 'Import subject to VAT accounted for through the reverse charge mechanism (15%)'.
+    SELECT SUM( HWBAS ) AS HWBAS,
+           SUM( HWSTE ) AS HWSTE,
+           BSET~SHKZG
+    FROM BKPF AS BKPF INNER JOIN BSET AS BSET
+    ON BKPF~BELNR = BSET~BELNR
+    AND BKPF~GJAHR = BSET~GJAHR
+    AND BKPF~BUKRS = BSET~BUKRS
+    INTO TABLE @DATA(LT_ISVRCM)
+    WHERE BKPF~BUDAT IN @S_BUDAT
+    AND   BKPF~BUKRS EQ @P_BUKRS
+    AND   BKPF~GJAHR IN @S_GJAHR
+    AND   BSET~MWSKZ EQ 'B2'",'BB')"BB COMMENTED BY JYOTI ON 03.06.2024
+    AND   BKPF~XREVERSAL NE 'X'
+    AND   BSET~KSCHL EQ 'NLXV'
+    GROUP BY SHKZG.
+******************************ADDEED BY JYOTI ON 23.07.2024
+    SELECT SUM( DMBTR ) AS DMBTR,
+            BSEG~SHKZG
+     FROM BKPF AS BKPF INNER JOIN BSEG AS BSEG
+     ON  BKPF~BELNR = BSEG~BELNR
+     AND BKPF~GJAHR = BSEG~GJAHR
+     AND BKPF~BUKRS = BSEG~BUKRS
+     INTO TABLE @DATA(LT_ISVRCM_NEW)
+     WHERE BKPF~BUDAT IN @S_BUDAT
+     AND   BKPF~BUKRS EQ @P_BUKRS
+     AND   BKPF~GJAHR IN @S_GJAHR
+*     AND   BKPF~XREVERSAL NE 'X'
+      AND bseg~buzid EQ ' '
+     AND BSEG~MWSKZ EQ ' '
+        AND BSEG~HKONT = '0000440552'
+     GROUP BY SHKZG.
+
+*******************************************************
+    READ TABLE LT_ISVRCM_NEW INTO DATA(LS_ISVRCM_S_NEW) WITH KEY SHKZG = 'S'.  "ADDEED BY JYOTI ON 23.07.2024
+    READ TABLE LT_ISVRCM INTO DATA(LS_ISVRCM_S) WITH KEY SHKZG = 'S'.
+    READ TABLE LT_ISVRCM INTO DATA(LS_ISVRCM_H) WITH KEY SHKZG = 'H'.
+    DATA:LS_ISVRCM_H_HWBAS TYPE STRING,
+         LS_ISVRCM_H_HWSTE TYPE STRING.
+    LS_ISVRCM_H_HWBAS  = LS_ISVRCM_H-HWBAS.
+    LS_ISVRCM_H_HWSTE  = LS_ISVRCM_H-HWSTE .
+    REPLACE ALL OCCURRENCES OF '-' IN LS_ISVRCM_H_HWBAS WITH ''.                      ""ADDED BY MA ON 29.03.2024
+    REPLACE ALL OCCURRENCES OF '-' IN LS_ISVRCM_H_HWSTE WITH ''.                      ""ADDED BY MA ON 29.03.2024
+    LS_ISVRCM_H-HWBAS = LS_ISVRCM_H_HWBAS.
+    LS_ISVRCM_H-HWSTE = LS_ISVRCM_H_HWSTE.
+******************88ADDED BY PRIMUS JYOTI  ON 11.04.2024
+    IF LS_ISVRCM_H-HWBAS GT 0.
+      LS_ISVRCM_H-HWBAS =  LS_ISVRCM_H-HWBAS * -1 .
+    ENDIF.
+
+    IF LS_ISVRCM_H-HWSTE GT 0.
+      LS_ISVRCM_H-HWSTE =  LS_ISVRCM_H-HWSTE * -1 .
+    ENDIF.
+
+*******************************************************************
+
+*    WA_FINAL-HWBAS = LS_ISVRCM_S-HWBAS + ( LS_ISVRCM_H-HWBAS * -1 ).
+*    WA_FINAL-HWBAS = LS_ISVRCM_S-HWBAS + LS_ISVRCM_H-HWBAS ." + LS_ISVRCM_S_NEW-DMBTR."ADDED BY PRIMUS JYOTI  ON 11.04.2024        ORIGINAL COMMENTED BY SAURABH ON 5.9.2024
+    WA_FINAL-HWBAS = LS_ISVRCM_S-HWBAS - LS_ISVRCM_H-HWBAS .                                            "ADDED BY SAURABH ON 5.9.2024
+    DATA(ISVRCM_HWBAS) = WA_FINAL-HWBAS .
+*    WA_FINAL-HWSTE = LS_ISVRCM_S-HWSTE + ( LS_ISVRCM_H-HWSTE * -1 ).
+*    WA_FINAL-HWSTE = LS_ISVRCM_S-HWSTE + LS_ISVRCM_H-HWSTE + LS_ISVRCM_S_NEW-DMBTR.                     ORIGINAL COMMENTED BY SAURABH ON 5.9.2024
+    WA_FINAL-HWSTE = LS_ISVRCM_S-HWSTE + LS_ISVRCM_H-HWSTE - LS_ISVRCM_S_NEW-DMBTR.                     "ADDED BY SAURABH ON 5.9.2024
+    DATA(ISVRCM_HWSTE) = WA_FINAL-HWSTE .
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    IF  WA_FINAL-HWSTE LT 0.
+      WA_FINAL-HWSTE =  WA_FINAL-HWSTE * -1.
+    ENDIF.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL,LS_ISVRCM_S,LS_ISVRCM_H.
+***************************************************************************************
+    " Zero rated purchases
+    WA_FINAL-SR_NO = '11.'.
+    WA_FINAL-PARTICULARS = 'Zero rated purchases'.
+    SELECT SUM( HWBAS ) AS HWBAS,
+           SUM( HWSTE ) AS HWSTE,
+           BSET~SHKZG
+    FROM BKPF AS BKPF INNER JOIN BSET AS BSET
+    ON BKPF~BELNR = BSET~BELNR
+    AND BKPF~GJAHR = BSET~GJAHR
+    AND BKPF~BUKRS = BSET~BUKRS
+    INTO TABLE @DATA(LT_ZRP)
+    WHERE BKPF~BUDAT IN @S_BUDAT
+    AND   BKPF~BUKRS EQ @P_BUKRS
+    AND   BKPF~GJAHR IN @S_GJAHR
+    AND   BKPF~XREVERSAL NE 'X'
+    AND   BSET~MWSKZ EQ 'I0'",'I2','I3')"I2 ,I3 COMMENTED BY JYOTI ON 03.05.2024
+    GROUP BY SHKZG .
+******************************ADDEED BY JYOTI ON 23.07.2024
+*    SELECT SUM( DMBTR ) AS DMBTR,
+*            BSEG~SHKZG
+*     FROM BKPF AS BKPF INNER JOIN BSEG AS BSEG
+*     ON  BKPF~BELNR = BSEG~BELNR
+*     AND BKPF~GJAHR = BSEG~GJAHR
+*     AND BKPF~BUKRS = BSEG~BUKRS
+*     INTO TABLE @DATA(LT_ZRP_NEW)
+*     WHERE BKPF~BUDAT IN @S_BUDAT
+*     AND   BKPF~BUKRS EQ @P_BUKRS
+*     AND   BKPF~GJAHR IN @S_GJAHR
+**     AND   BKPF~XREVERSAL NE 'X'
+*       AND bseg~buzid EQ ' '
+*     AND BSEG~MWSKZ EQ ' '
+*      AND BSEG~HKONT = '0000440552'
+*     GROUP BY SHKZG.
+
+*******************************************************
+*    READ TABLE LT_ZRP_NEW INTO DATA(LS_ZRP_S_NEW) WITH KEY SHKZG = 'S'.  "ADDEED BY JYOTI ON 23.07.2024
+    READ TABLE LT_ZRP INTO DATA(LS_ZRP_S) WITH KEY SHKZG = 'S'.
+    READ TABLE LT_ZRP INTO DATA(LS_ZRP_H) WITH KEY SHKZG = 'H'.
+    WA_FINAL-HWBAS = LS_ZRP_S-HWBAS + ( LS_ZRP_H-HWBAS * -1 ) ."+ LS_ZRP_S_NEW-DMBTR.
+    DATA(ZRP_HWBAS) = WA_FINAL-HWBAS .
+    WA_FINAL-HWSTE = LS_ZRP_S-HWSTE + ( LS_ZRP_H-HWSTE * -1 )." + LS_ZRP_S_NEW-DMBTR.
+    DATA(ZRP_HWSTE) = WA_FINAL-HWSTE .
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    IF  WA_FINAL-HWSTE LT 0.
+      WA_FINAL-HWSTE =  WA_FINAL-HWSTE * -1.
+    ENDIF.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL,LS_ZRP_S,LS_ZRP_H.
+*************************************************************************************
+    " Exempt purchases
+    WA_FINAL-SR_NO = '12.'.
+    WA_FINAL-PARTICULARS = 'Exempt purchases'.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL.
+*************************************************************************************
+    " Total Purchase
+    WA_FINAL-SR_NO = '13.'.
+    WA_FINAL-PARTICULARS = 'Total Purchase'.
+*    WA_FINAL-HWBAS = SRDP_HWBAS + ISVPI_HWBAS + ISVRCM_HWBAS + ZRP_HWBAS.
+    IF SRDP_HWBAS LT 0.
+      SRDP_HWBAS =  SRDP_HWBAS * -1.
+    ENDIF.
+    IF ISVPI_HWBAS LT 0.
+      ISVPI_HWBAS =  ISVPI_HWBAS * -1.
+    ENDIF.
+    IF ISVRCM_HWBAS LT 0.
+      ISVRCM_HWBAS =  ISVRCM_HWBAS * -1.
+    ENDIF.
+    IF ZRP_HWBAS LT 0.
+      ZRP_HWBAS =  ZRP_HWBAS * -1.
+    ENDIF.
+    WA_FINAL-HWBAS = SRDP_HWBAS + ISVPI_HWBAS + ISVRCM_HWBAS + ZRP_HWBAS.
+    DATA(TOT_PUR_HWBAS) = WA_FINAL-HWBAS.
+    IF SRDP_HWSTE LT 0.
+      SRDP_HWSTE =  SRDP_HWSTE * -1.
+    ENDIF.
+    IF ISVPI_HWSTE LT 0.
+      ISVPI_HWSTE =  ISVPI_HWSTE * -1.
+    ENDIF.
+    IF ISVRCM_HWSTE LT 0.
+      ISVRCM_HWSTE =  ISVRCM_HWSTE * -1.
+    ENDIF.
+    IF ZRP_HWSTE LT 0.
+      ZRP_HWSTE =  ZRP_HWSTE * -1.
+    ENDIF.
+    WA_FINAL-HWSTE = SRDP_HWSTE + ISVPI_HWSTE + ISVRCM_HWSTE + ZRP_HWSTE.
+    DATA(TOT_PUR_HWSTE) = WA_FINAL-HWSTE.
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL.
+
+*************************************************************************************
+    " Total VAT due for current period
+    WA_FINAL-SR_NO = '14.'.
+    WA_FINAL-PARTICULARS = 'Total VAT due for current period '.
+    WA_FINAL-HWBAS = TOT_SALES_HWBAS - TOT_PUR_HWBAS.
+    WA_FINAL-HWSTE = TOT_SALES_HWSTE - TOT_PUR_HWSTE.
+    IF WA_FINAL-HWBAS LT 0.
+      WA_FINAL-HWBAS = WA_FINAL-HWBAS * -1.
+    ENDIF.
+    IF  WA_FINAL-HWSTE LT 0.
+      WA_FINAL-HWSTE =  WA_FINAL-HWSTE * -1.
+
+    ENDIF.
+    DATA(GV_HWSTE_14) =   WA_FINAL-HWSTE.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL.
+*************************************************************************************
+    " Correction from previous period (bewtween SAR = 150000)
+    WA_FINAL-SR_NO = '15.'.
+    WA_FINAL-PARTICULARS = 'Correction from previous period '.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR : WA_FINAL.
+
+
+***************ADD SUPRIYA ON 13.08.2024*********************************************
+ DATA: LV_CURRENT_MONTH_VAT TYPE HWSTE,
+       LV_DIFF_VAT  TYPE HWSTE.
+*       lv_memory_id TYPE char20.
+
+*BREAK-POINT.
+
+    WA_FINAL-SR_NO = '16.'.
+    WA_FINAL-PARTICULARS = 'VAT credit carried forward from previous periods(s)'.
+
+
+      DATA : LV_DATE TYPE BKPF-BUDAT,
+           LV_MONTH TYPE BKPF-BUDAT,
+           LV_MONTH1 TYPE BKPF-BUDAT.
+*
+    CALL FUNCTION 'OIL_LAST_DAY_OF_PREVIOUS_MONTH'
+      EXPORTING
+        I_DATE_OLD       = S_BUDAT-LOW
+     IMPORTING
+       E_DATE_NEW       = LV_DATE.
+
+    DATA : LV_BDATE TYPE BKPF-BUDAT,
+           LV_EDATE TYPE BKPF-BUDAT.
+*
+CALL FUNCTION 'HR_JP_MONTH_BEGIN_END_DATE'
+  EXPORTING
+    IV_DATE                   = LV_DATE
+ IMPORTING
+   EV_MONTH_BEGIN_DATE       =  LV_BDATE
+   EV_MONTH_END_DATE         =  LV_EDATE.
+
+****************BELOW LOGIC FOR LAST MONTH CARRY FORWRD AMOUNT(
+****OPENING BALANCE)
+S_BUDAT1-SIGN = 'I'.
+S_BUDAT1-OPTION = 'BT'.
+S_BUDAT1-LOW = LV_BDATE.
+S_BUDAT1-HIGH = LV_EDATE.
+APPEND S_BUDAT1 TO S_BUDAT1.
+
+SUBMIT ZSU_FI_VAT_RETURN_N_NEW with S_BUDAT IN S_BUDAT1" BETWEEN S_BUDAT-LOW AND S_BUDAT-HIGH
+*                            with S_BUDAT-high eq LV_EDATE
+                            with BKPF~BUKRS EQ P_BUKRS
+                            with   BKPF~GJAHR IN S_GJAHR
+                            EXPORTING LIST TO MEMORY
+                             AND RETURN.
+*
+ IMPORT GV_HWSTE_14_1 TO LV_DIFF_VAT FROM MEMORY ID 'VAT'.
+
+   WA_FINAL-HWSTE = LV_DIFF_VAT.
+    APPEND WA_FINAL TO GT_FINAL.
+    CLEAR: WA_FINAL.
+
+
+    ME->SET_COLOR( ).
+    ME->ALV_FACTORY( ).
+    IF P_DOWN EQ 'X'.
+      ME->DOWNLOAD( ).
+    ENDIF.
+
+***************************************************************************************
+  ENDMETHOD.
+  METHOD ALV_FACTORY.
+    DATA: TOOLBAR TYPE REF TO CL_SALV_FUNCTIONS_LIST .
+    TRY.
+        CALL METHOD CL_SALV_TABLE=>FACTORY(
+          IMPORTING
+            R_SALV_TABLE = DATA(GO_ALV)
+          CHANGING
+            T_TABLE      = GT_FINAL ).
+      CATCH CX_SALV_MSG.
+    ENDTRY.
+
+    TOOLBAR = GO_ALV->GET_FUNCTIONS( ) .
+    TOOLBAR->SET_ALL(
+          VALUE  = IF_SALV_C_BOOL_SAP=>TRUE
+           ).
+
+    GO_COLS = GO_ALV->GET_COLUMNS( ).
+    GO_COLS->SET_OPTIMIZE( ABAP_TRUE ).
+
+    DATA : LO_COLUMN TYPE REF TO CL_SALV_COLUMN_TABLE.
+
+    TRY.
+        LO_COLUMN ?= GO_COLS->GET_COLUMN( 'SR_NO' ).
+        LO_COLUMN->SET_ALIGNMENT( IF_SALV_C_ALIGNMENT=>RIGHT ).
+      CATCH CX_SALV_NOT_FOUND.
+    ENDTRY.
+
+*    setting color column
+    GO_COLS->SET_COLOR_COLUMN( 'COLOR' ).
+
+    GO_LAYOUT = GO_ALV->GET_LAYOUT( ).
+    GO_LAYOUT->SET_SAVE_RESTRICTION( IF_SALV_C_LAYOUT=>RESTRICT_NONE ).
+    GS_KEY-REPORT = SY-REPID.
+    GO_LAYOUT->SET_KEY( GS_KEY ).
+    GO_LAYOUT->SET_DEFAULT( ABAP_TRUE ).
+    GO_TOOL = GO_ALV->GET_FUNCTIONS( ).
+    GO_TOOL->SET_ALL( VALUE = IF_SALV_C_BOOL_SAP=>TRUE ).
+
+
+    CALL METHOD ME->TOP_OF_PAGE1
+      CHANGING
+        CO_ALV = GO_ALV.
+
+    GO_ALV->DISPLAY( ).
+
+  ENDMETHOD.
+
+  METHOD TOP_OF_PAGE1.
+    DATA: LO_HEADER  TYPE REF TO CL_SALV_FORM_LAYOUT_GRID,
+          LO_H_LABEL TYPE REF TO CL_SALV_FORM_LABEL,
+          LO_H_FLOW  TYPE REF TO CL_SALV_FORM_LAYOUT_FLOW,
+          LV_STRING  TYPE STRING,
+          LV_FROM    TYPE CHAR10,
+          LV_TO      TYPE CHAR10.
+    CONSTANTS :  GC_DOT    TYPE CHAR01 VALUE '.'.
+
+
+    CREATE OBJECT LO_HEADER.
+
+    LO_HEADER->CREATE_HEADER_INFORMATION( ROW = 1 COLUMN = 1 TEXT = 'VAT Return(Saudi)' TOOLTIP = 'VAT Return(Saudi)'  ).
+
+    "Add blank row
+    LO_HEADER->ADD_ROW( ).
+    LO_HEADER->ADD_ROW( ).
+    LO_HEADER->ADD_ROW( ).
+    LO_HEADER->ADD_ROW( ).
+
+    " Selection - Date
+    IF S_BUDAT IS NOT INITIAL.
+      LO_H_FLOW = LO_HEADER->CREATE_FLOW( ROW     = 3
+                                          COLUMN  = 1 ).
+
+      CLEAR : LV_STRING,LV_FROM,LV_TO.
+      LV_FROM = S_BUDAT-LOW+6(2) && GC_DOT && S_BUDAT-LOW+4(2) && GC_DOT &&  S_BUDAT-LOW+0(4).
+      LV_TO   = S_BUDAT-HIGH+6(2) && GC_DOT && S_BUDAT-HIGH+4(2) && GC_DOT &&  S_BUDAT-HIGH+0(4).
+
+      CONCATENATE TEXT-005  SPACE LV_FROM TEXT-006 LV_TO INTO LV_STRING SEPARATED BY SPACE.
+      LO_H_FLOW = LO_HEADER->CREATE_FLOW( ROW     = 3
+                                          COLUMN  = 1 ).
+      LO_H_FLOW->CREATE_TEXT( EXPORTING TEXT = LV_STRING ).
+    ENDIF.
+
+    CO_ALV->SET_TOP_OF_LIST( LO_HEADER ).
+
+    CO_ALV->SET_TOP_OF_LIST_PRINT( LO_HEADER ).
+
+  ENDMETHOD.
+
+  METHOD SET_COLOR.
+* Set color to a particular row based on your condition.
+    FIELD-SYMBOLS: <LWA_FINAL> TYPE STRUCT2.
+    DATA: LS_COLOR             TYPE LVC_S_SCOL.
+
+    LOOP AT GT_FINAL ASSIGNING <LWA_FINAL> WHERE SR_NO EQ 'VAT on Sales :' OR
+                                                 SR_NO EQ 'VAT on Purchases :'.
+
+*     <LWA_FINAL>-SR_NO = 'VAT on FOC :'.
+*     LS_COLOR-FNAME = 'SR_NO' .
+      LS_COLOR-COLOR-COL = 3.
+      LS_COLOR-COLOR-INT = 0.
+      LS_COLOR-COLOR-INV = 0.
+      APPEND LS_COLOR TO <LWA_FINAL>-COLOR.
+    ENDLOOP.
+  ENDMETHOD.
+
+  METHOD DOWNLOAD .
+    DATA: L_FIELD_SEPERATOR.
+
+*    **********************ADDED BY MA REFRESHABLE DATE AND TIME 20.02.2024 **************************
+    DATA : LV_REF      TYPE CHAR11,
+           LV_REF_TIME TYPE CHAR15.
+
+    CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+      EXPORTING
+        INPUT  = SY-DATUM
+      IMPORTING
+        OUTPUT = LV_REF.
+
+    CONCATENATE LV_REF+0(2) LV_REF+2(3) LV_REF+5(4)
+                    INTO LV_REF SEPARATED BY '-'.
+
+    LV_REF_TIME = SY-UZEIT.
+    CONCATENATE LV_REF_TIME+0(2) ':' LV_REF_TIME+2(2)  INTO LV_REF_TIME.
+
+*************************************************************************************
+
+
+    LOOP AT GT_FINAL INTO WA_FINAL.
+      MOVE-CORRESPONDING WA_FINAL TO WA_DOWN.
+      WA_DOWN-REF =  LV_REF .
+      WA_DOWN-REF_TIME = LV_REF_TIME.
+      APPEND WA_DOWN TO IT_DOWN.
+    ENDLOOP.
+
+    CALL FUNCTION 'SAP_CONVERT_TO_TXT_FORMAT'
+      TABLES
+        I_TAB_SAP_DATA       = IT_DOWN
+      CHANGING
+        I_TAB_CONVERTED_DATA = IT_CSV
+      EXCEPTIONS
+        CONVERSION_FAILED    = 1
+        OTHERS               = 2.
+    IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+    ENDIF.
+
+    L_FIELD_SEPERATOR = CL_ABAP_CHAR_UTILITIES=>HORIZONTAL_TAB.
+
+    CONCATENATE 'Sr.No'
+                'Particulars'
+                'Basic Amount (SAR)'
+                'VAT Amt (SAR)'
+                'Refresh Date'
+                'Refresh Time'
+    INTO HD_CSV SEPARATED BY L_FIELD_SEPERATOR.
+
+    LV_FILE = 'ZVAT_RETURN.TXT'.
+
+    CONCATENATE P_FOLDER '/'  LV_FILE INTO LV_FULLFILE.
+
+    WRITE: / 'ZVAT_RETURN_RECO Download started on', SY-DATUM, 'at', SY-UZEIT.
+    OPEN DATASET LV_FULLFILE
+      FOR OUTPUT IN TEXT MODE ENCODING DEFAULT.
+    IF SY-SUBRC = 0.
+      TRANSFER HD_CSV TO LV_FULLFILE.
+      LOOP AT IT_CSV INTO WA_CSV.
+        IF SY-SUBRC = 0.
+          TRANSFER WA_CSV TO LV_FULLFILE.
+        ENDIF.
+      ENDLOOP.
+      CLOSE DATASET LV_FULLFILE.
+      CONCATENATE 'File' LV_FULLFILE 'downloaded' INTO LV_MSG SEPARATED BY SPACE.
+      MESSAGE LV_MSG TYPE 'S'.
+    ENDIF.
+
+  ENDMETHOD.
+
+ENDCLASS.

@@ -1,0 +1,166 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>ZCREATE_TEXT</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZCREATE_TEXTTOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZCREATE_TEXT</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>ZCREATE_TEXT</FUNCNAME>
+     <SHORT_TEXT>SAPscript-Textbausteine direkt anlegen</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>FID</PARAMETER>
+       <DBFIELD>THEAD-TDID</DBFIELD>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>FLANGUAGE</PARAMETER>
+       <DBFIELD>THEAD-TDSPRAS</DBFIELD>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>FNAME</PARAMETER>
+       <DBFIELD>THEAD-TDNAME</DBFIELD>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>FOBJECT</PARAMETER>
+       <DBFIELD>THEAD-TDOBJECT</DBFIELD>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>SAVE_DIRECT</PARAMETER>
+       <DEFAULT>&apos;X&apos;</DEFAULT>
+       <OPTIONAL>X</OPTIONAL>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>FFORMAT</PARAMETER>
+       <DBFIELD>TLINE-TDFORMAT</DBFIELD>
+       <DEFAULT>&apos;*&apos;</DEFAULT>
+       <OPTIONAL>X</OPTIONAL>
+      </RSIMP>
+     </IMPORT>
+     <TABLES>
+      <RSTBL>
+       <PARAMETER>FLINES</PARAMETER>
+       <DBSTRUCT>TLINE</DBSTRUCT>
+      </RSTBL>
+     </TABLES>
+     <EXCEPTION>
+      <RSEXC>
+       <EXCEPTION>NO_INIT</EXCEPTION>
+      </RSEXC>
+      <RSEXC>
+       <EXCEPTION>NO_SAVE</EXCEPTION>
+      </RSEXC>
+     </EXCEPTION>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>FID</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Text ID of the text to be created</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>FLANGUAGE</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Language of the text to be created</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>FNAME</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Name of the text to be created</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>FOBJECT</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Object of the text to be created</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>SAVE_DIRECT</PARAMETER>
+       <KIND>P</KIND>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>FFORMAT</PARAMETER>
+       <KIND>P</KIND>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>FLINES</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Lines of the text to be created</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>NO_INIT</PARAMETER>
+       <KIND>X</KIND>
+       <STEXT>Creation of text did not work</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>NO_SAVE</PARAMETER>
+       <KIND>X</KIND>
+       <STEXT>Saving of the text did not work</STEXT>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+   </FUNCTIONS>
+   <LONGTEXTS_ZCREATE_TEXT>
+    <item>
+     <DOKIL>
+      <ID>FU</ID>
+      <OBJECT>ZCREATE_TEXT</OBJECT>
+      <LANGU>D</LANGU>
+      <TYP>T</TYP>
+      <VERSION>0002</VERSION>
+      <MASTERLANG>X</MASTERLANG>
+      <TXTLINES>00008</TXTLINES>
+      <DOKSTATE>A</DOKSTATE>
+     </DOKIL>
+     <HEAD>
+      <TDOBJECT>DOKU</TDOBJECT>
+      <TDNAME>ZCREATE_TEXT</TDNAME>
+      <TDID>FU</TDID>
+      <TDSPRAS>D</TDSPRAS>
+      <TDFORM>S_DOCU_SHOW</TDFORM>
+      <TDSTYLE>S_DOCUS1</TDSTYLE>
+      <TDVERSION>00002</TDVERSION>
+      <TDLINESIZE>072</TDLINESIZE>
+     </HEAD>
+     <LINES>
+      <TLINE>
+       <TDFORMAT>*</TDFORMAT>
+       <TDLINE>Der Funktionsbaustein legt SAPscript- Textbausteine an.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>/</TDFORMAT>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>*</TDFORMAT>
+       <TDLINE>In der Schnittstelle des Funktionsbausteins müssen dazu 2 Arbeits-</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>bereiche bereitgestellt werden: Textheader und Zeilentabelle.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>/</TDFORMAT>
+       <TDLINE>Der Textheader wird durch Angaben in den Feldern FOBJECT, FNAME, FID</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>und FLANGUAGE vollständig spezifiziert. Generische Angaben sind nicht</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>zugelassen.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>/</TDFORMAT>
+       <TDLINE>Die Zeilentabelle FLINES ist mit den entsprechenden Textzeilen zu</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDLINE>füllen.</TDLINE>
+      </TLINE>
+      <TLINE>
+       <TDFORMAT>*</TDFORMAT>
+      </TLINE>
+     </LINES>
+    </item>
+   </LONGTEXTS_ZCREATE_TEXT>
+  </asx:values>
+ </asx:abap>
+</abapGit>

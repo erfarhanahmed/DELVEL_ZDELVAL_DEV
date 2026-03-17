@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_SSST" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <HEADER>
+    <STYLENAME>ZSAUDI_SOMAR</STYLENAME>
+    <MASTERLANG>E</MASTERLANG>
+    <LANGU>E</LANGU>
+    <CAPTION>Style ZSAUDI_SOMAR</CAPTION>
+    <V_CAPTION>Style ZSAUDI_SOMAR</V_CAPTION>
+    <TDFIRSTPAR>S1</TDFIRSTPAR>
+    <CPI>10.0</CPI>
+    <LPI>2.0</LPI>
+    <TDTABDIST>1.0</TDTABDIST>
+    <TDTABDISTU>CM</TDTABDISTU>
+    <ACTIVE>A</ACTIVE>
+    <TDFAMILY>ZSOMAR</TDFAMILY>
+    <TDHEIGHT>120</TDHEIGHT>
+    <TDBOLD>X</TDBOLD>
+   </HEADER>
+   <SSFPARAS>
+    <SSFPARAS>
+     <ACTIVE>A</ACTIVE>
+     <STYLENAME>ZSAUDI_SOMAR</STYLENAME>
+     <TDPARGRAPH>S1</TDPARGRAPH>
+     <TDPJUSTIFY>CENTER</TDPJUSTIFY>
+     <TDPLDIST>1.0</TDPLDIST>
+     <TDPLDISTU>LN</TDPLDISTU>
+     <TDPTOPU>CM</TDPTOPU>
+     <TDPBOTU>CM</TDPBOTU>
+     <TDPLEFTU>CM</TDPLEFTU>
+     <TDPRIGHTU>CM</TDPRIGHTU>
+     <TDPENTRYU>CM</TDPENTRYU>
+     <TDNUMLEFTU>CM</TDNUMLEFTU>
+     <TDFAMILY>ZSOMAR</TDFAMILY>
+     <TDHEIGHT>120</TDHEIGHT>
+     <TDBOLD>X</TDBOLD>
+     <TDITALIC>*</TDITALIC>
+     <TDUNDERLIN>*</TDUNDERLIN>
+     <LANGU>E</LANGU>
+     <CAPTION>somar</CAPTION>
+    </SSFPARAS>
+   </SSFPARAS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

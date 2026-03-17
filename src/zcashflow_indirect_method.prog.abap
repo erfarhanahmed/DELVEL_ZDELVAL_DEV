@@ -1,0 +1,8504 @@
+
+*&*========================================================================*
+REPORT ZCASHFLOW_INDIRECT_METHOD.
+*&*========================================================================*
+*&* TYPE GROUP
+*&*========================================================================*
+TYPE-POOLS:SLIS.
+*&*========================================================================*
+*&* TABLES
+*&*========================================================================*
+TABLES:T001,BSAS.
+TYPES: TY_MEM_TAB TYPE ABAPLIST.
+
+*&*========================================================================*
+*&* TYPES & INTERNAL TABLE DECLERATION
+*&*========================================================================*
+TYPES: BEGIN OF TS_ALV,
+         PARTICULARS TYPE CHAR120,
+         AMOUNT1     TYPE P DECIMALS 2,
+         AMOUNT2     TYPE P DECIMALS 2,
+         AMOUNT3     TYPE CHAR20,
+         CELLTAB     TYPE LVC_T_STYL,
+         CELLCOLOR   TYPE SLIS_T_SPECIALCOL_ALV, "lvc_t_scol,
+       END OF TS_ALV,
+       TT_ALV TYPE TABLE OF TS_ALV.
+DATA: GT_ALV TYPE TT_ALV,
+      GS_ALV TYPE TS_ALV.
+
+DATA:CELLCOLOR TYPE SLIS_SPECIALCOL_ALV.
+
+FIELD-SYMBOLS:<FS_ALV> TYPE TS_ALV.
+ASSIGN GS_ALV TO <FS_ALV>.
+
+TYPES : BEGIN OF TY_FINAL ,
+          YEAR     TYPE BKPF-GJAHR,
+          ITEM(10),
+          ZBIND    TYPE ZCASHFLOW-ZBIND,
+          AMT1     TYPE P DECIMALS 2,
+          AMT2     TYPE P DECIMALS 2,
+          AMT3     TYPE P DECIMALS 2,
+          AMT4     TYPE P DECIMALS 2,
+        END OF TY_FINAL .
+
+DATA : LT TYPE TABLE OF TY_FINAL,
+       LS TYPE TY_FINAL.
+DATA : LT1 TYPE TABLE OF TY_FINAL,
+       LS1 TYPE TY_FINAL.
+
+DATA : LT_CELLTAB TYPE LVC_T_STYL.
+DATA : LS_CELLTAB TYPE LVC_S_STYL.
+
+DATA: GT_FIELDCAT TYPE LVC_T_FCAT,
+      GS_FIELDCAT TYPE LVC_S_FCAT,
+      GS_VARIANT  TYPE DISVARIANT,
+      GS_LAYOUT   TYPE LVC_S_LAYO.
+DATA : YEAR1 TYPE BSAS-GJAHR .
+
+
+
+RANGES : L_GL1 FOR SKA1-SAKNR .
+RANGES : L_GL2 FOR SKA1-SAKNR .
+RANGES : L_GL3 FOR SKA1-SAKNR .
+RANGES : L_GL4 FOR SKA1-SAKNR .
+RANGES : L_GL5 FOR SKA1-SAKNR .
+RANGES : S_KTOPL FOR SKA1-KTOPL .
+
+TYPES: BEGIN OF TY_ASCI_TAB,
+         TEXT(500),
+       END OF TY_ASCI_TAB.
+DATA: ASCI_TAB TYPE STANDARD TABLE OF TY_ASCI_TAB INITIAL SIZE 0,
+      ASCI_WA  TYPE TY_ASCI_TAB.
+
+DATA : L_BUKRS    TYPE SKB1-BUKRS,
+       L_GL       TYPE SKA1-SAKNR,
+       L_TEXT     TYPE CHAR20,
+       L_BCAL(20),"    type RR_UMSAV,
+       L_BP(20),"      type FIGLQ_PREVM_BAL ,
+       L_DR(20),"     type FIGLQ_PREVM_BAL ,
+       L_CR(20),"   type FIGLQ_PREVM_BAL ,
+       L_AB(20).
+DATA :  L_LEN        TYPE I.
+
+
+
+
+DATA : MEM_TAB       TYPE STANDARD TABLE OF TY_MEM_TAB INITIAL SIZE 0.
+DATA : MEM_TAB_NEW   TYPE STANDARD TABLE OF TY_MEM_TAB INITIAL SIZE 0.
+
+
+DATA: GT_GL TYPE TABLE OF ZCASHFLOW.
+DATA: LS_GL TYPE  ZCASHFLOW.
+DATA  LV_PERIOD TYPE BSAS-MONAT. " ADDED BY SAURABH
+DATA :  LT_ITEM  TYPE TABLE OF ZCASHFLOW_ITEM.
+DATA :  LS_ITEM  TYPE ZCASHFLOW_ITEM.
+DATA :  LT_HEAD  TYPE TABLE OF ZCASHFLOW_HEAD.
+DATA :  LS_HEAD  TYPE ZCASHFLOW_HEAD.
+
+*&*========================================================================*
+*&* SELECTION SCREEN
+*&*========================================================================*
+SELECTION-SCREEN:BEGIN OF BLOCK B1 WITH FRAME TITLE TEXT-001.
+SELECT-OPTIONS:BUKRS  FOR T001-BUKRS NO INTERVALS NO-EXTENSION OBLIGATORY,
+               GJAHR  FOR BSAS-GJAHR NO INTERVALS NO-EXTENSION OBLIGATORY,
+               GJAHR1  FOR BSAS-GJAHR NO INTERVALS NO-EXTENSION ,
+               KTOPL  FOR T001-KTOPL NO INTERVALS NO-EXTENSION OBLIGATORY,
+               PERIOD FOR BSAS-MONAT.
+SELECTION-SCREEN:END OF BLOCK B1.
+*&*========================================================================*
+*&* INITIALIZATION
+*&*========================================================================*
+INITIALIZATION.
+*&*========================================================================*
+*&* AT SELECTION-SCREEN
+*&*========================================================================*
+AT SELECTION-SCREEN.
+  "  validation
+*&*========================================================================*
+*&* AT SELECTION-SCREEN OUTPUT
+*&*========================================================================*
+AT SELECTION-SCREEN OUTPUT.
+*  auth test division
+*  PERFORM auth_check_trans.
+*&*========================================================================*
+*&* START-OF-SELECTION
+*&*========================================================================*
+START-OF-SELECTION.
+
+  "  get data
+  PERFORM GET_DATA .
+  PERFORM GET_ALV_DATA TABLES BUKRS GJAHR GJAHR1.
+
+*&*========================================================================*
+*&* END-OF-SELECTION
+*&*========================================================================*
+END-OF-SELECTION.
+
+  PERFORM GERNERATE_OUPUT TABLES GT_ALV.
+*&---------------------------------------------------------------------*
+*& Form GET_ALV_DATA
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*&      --> BUKRS
+*&      --> GJAHR
+*&---------------------------------------------------------------------*
+FORM GET_ALV_DATA  TABLES    P_BUKRS
+                            P_GJAHR
+                            P_GJAHR1.
+
+
+*  <fs_alv>-particulars = 'CASH FLOWS FROM OPERATION'.
+  READ TABLE LT_HEAD INTO LS_HEAD WITH KEY HEAD = 'P01'.
+  <FS_ALV>-PARTICULARS = LS_HEAD-TEXT."'Net Profit /(Loss) Before Taxation With Other Income'.
+  CLEAR : LS_HEAD.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  <FS_ALV>-AMOUNT3 = 'P01'.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT3'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '4'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+*  <fs_alv>-cellcolor = 'C411'.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+  DATA : T_PL TYPE P DECIMALS 2.
+  DATA : TOT TYPE P DECIMALS 2.
+  DATA : TOT_N TYPE P DECIMALS 2.
+  DATA : TOT2 TYPE P DECIMALS 2.
+  DATA : TOT2_N TYPE P DECIMALS 2.
+  DATA : T_PL2 TYPE P DECIMALS 2.
+*  DATA : t_p02_a1 TYPE p DECIMALS 2.
+*  DATA : t_p02_a2 TYPE p DECIMALS 2.
+  DATA : T_P03_A1 TYPE P DECIMALS 2.
+  DATA : T_P03_A2 TYPE P DECIMALS 2.
+  DATA : T_P04_A1 TYPE P DECIMALS 2.
+  DATA : T_P04_A2 TYPE P DECIMALS 2.
+  DATA : T_P01_A2 TYPE P DECIMALS 2.
+  DATA : T_P02_A2 TYPE P DECIMALS 2.
+  DATA : T_P01_A1 TYPE P DECIMALS 2.
+  DATA : T_P02_A1 TYPE P DECIMALS 2.
+  DATA : T_P05_A1 TYPE P DECIMALS 2.
+  DATA : T_P05_A2 TYPE P DECIMALS 2.
+  DATA : T_P06_A1 TYPE P DECIMALS 2.
+  DATA : T_P06_A2 TYPE P DECIMALS 2.
+*BREAK-POINT .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '101' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '101' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+*  --------------------------------------------------------------------------------------------
+  T_PL = <FS_ALV>-AMOUNT1 .
+  T_PL2 = <FS_ALV>-AMOUNT2 .
+*-------------------------------------------------------------------------------------------
+*  <fs_alv>-particulars = 'Net Profit /(Loss) Before Taxation With Other Income'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '101'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I."'Net Profit /(Loss) Before Taxation With Other Income'.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 =  <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 =   <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '101'.
+
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  LOOP AT LT INTO LS WHERE ITEM =  '102' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '102' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+*--------------------------------------------------------------------* commited by upw on 23.03.2019 req. by sharad sir
+*  t_pl =  t_pl + <fs_alv>-amount1 .
+*  t_pl2 =   t_pl2 + <fs_alv>-amount2  .
+*--------------------------------------------------------------------* added by upw on 23.03.2019 req. by sharad sir
+  T_PL  =  T_PL  + <FS_ALV>-AMOUNT1 .
+  T_PL2 =  T_PL2 + <FS_ALV>-AMOUNT2 .
+*--------------------------------------------------------------------*
+
+*  <fs_alv>-particulars = 'Less: Other Income'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '102'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 =  <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 =   <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '102'.
+
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '106'  .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 .
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '106' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+*--------------------------------------------------------------------* commited by upw on 23.03.2019 req. by sharad sir
+*  t_pl =  t_pl + <fs_alv>-amount1 .
+*  t_pl2 =   t_pl2 + <fs_alv>-amount2  .
+*--------------------------------------------------------------------* added by upw on 23.03.2019 req. by sharad sir
+  T_PL  =  T_PL  + <FS_ALV>-AMOUNT1 .
+  T_PL2 =  T_PL2 + <FS_ALV>-AMOUNT2 .
+*--------------------------------------------------------------------*
+
+*  <fs_alv>-particulars = 'Less: Income From Invesements, Fds, Dividends & Other.'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '106'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 =  <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 =   <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '106'.
+
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  IF <FS_ALV>-AMOUNT1 LT 0 .
+    <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+  ELSE.
+    <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1  .
+  ENDIF.
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '107' .
+    IF LS-YEAR EQ GJAHR-LOW.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 .
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '107' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+
+*  ----------------------------------------------------------------------------------------------
+  T_PL =  T_PL + <FS_ALV>-AMOUNT1 .            "CHANGED ON 24/11/2020 - REPLACED WITH +
+  T_PL2 =   T_PL2 + <FS_ALV>-AMOUNT2  .        "CHANGED ON 24/11/2020 - REPLACED WITH +
+*  <fs_alv>-particulars = 'Add/Less: Gain/(Loss) From Asset Sale'.
+*  --------------------------------------------------------------------------------------------
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '107'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 =  <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 =   <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '107'.
+
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+*  <fs_alv>-particulars = 'Net Profit /(Loss) Before Taxation'.
+  LOOP AT LT INTO LS WHERE ITEM =  '103' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '103' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+*------------------------------------------------------------------------------------------------------*
+  T_PL =  T_PL + <FS_ALV>-AMOUNT1 .
+  T_PL2 =   T_PL2 + <FS_ALV>-AMOUNT2  .
+*------------------------------------------------------------------------------------------
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '103'.          "BY KAUMUDINI ON 07.12.2021
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 =  <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '103'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '104' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+*
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '104' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+*  -------------------------------------------------------------------------------------
+  T_PL =  T_PL + <FS_ALV>-AMOUNT1 .
+  T_PL2 =   T_PL2 + <FS_ALV>-AMOUNT2  .
+**----------------------------------------------------------------------------------------------
+
+*  <fs_alv>-particulars = 'Depreciation'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '104'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 =  <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 =   <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '104'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '105' .
+
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+  ENDLOOP.
+  LOOP AT LT INTO LS WHERE ITEM =  '105' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+*-------------------------------------------------------------------------------------------
+  T_PL = T_PL  + <FS_ALV>-AMOUNT1 .
+  T_PL2 =   T_PL2 + <FS_ALV>-AMOUNT2  .
+*----------------------------------------------------------------------------------------------
+*  <fs_alv>-particulars = 'Interest Expense'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '105'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 =  <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 =   <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '105'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 , <FS_ALV>-AMOUNT3 .
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+
+  T_P01_A1 = T_PL.
+  T_P01_A2 = T_PL2.
+  APPEND INITIAL LINE TO GT_ALV.
+  <FS_ALV>-PARTICULARS = 'TOTAL OF CASH FLOW FROM OPERATION'.
+  <FS_ALV>-AMOUNT1 = T_PL."<fs_alv>-amount1.
+  <FS_ALV>-AMOUNT2 = T_PL2 ."<fs_alv>-amount2.
+
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '6'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+*  <fs_alv>-cellcolor = 'C411'.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+*     CLEAR : t_pl , t_pl2 .
+  APPEND INITIAL LINE TO GT_ALV.
+  APPEND INITIAL LINE TO GT_ALV.
+
+
+
+*  <fs_alv>-particulars = 'Increase/decrease In Working Capital'.
+  READ TABLE LT_HEAD INTO LS_HEAD WITH KEY HEAD = 'P02'.
+  <FS_ALV>-PARTICULARS = LS_HEAD-TEXT.
+  CLEAR : LS_HEAD.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.                            "00000121
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  <FS_ALV>-AMOUNT1 = ''.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT1'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  <FS_ALV>-AMOUNT2 = ''.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT2'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  <FS_ALV>-AMOUNT3 = 'P02'.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT3'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '4'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+*  <fs_alv>-cellcolor = 'C411'.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  DELETE LT WHERE ITEM = '101' .
+  DELETE LT WHERE ITEM = '102' .
+  DELETE  LT WHERE ITEM = '104' .
+  DELETE  LT WHERE ITEM = '105' .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '201' .
+    IF LS-YEAR EQ GJAHR-LOW.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '201' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+
+*  <fs_alv>-particulars = '(Increase)/Decrease In Trade Receivables'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '201'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '201'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  LOOP AT LT INTO LS WHERE ITEM =  '202' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '202' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+*  <fs_alv>-particulars = '(Increase)/Decrease Inventories'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '202'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '202'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '203' .
+
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '203' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+*  <fs_alv>-particulars = '(Increase)/Decrease Advance Taxes & Duties'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '203'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '203'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '204' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '204' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+
+*  <fs_alv>-particulars = '(Increase)/Decrease Adv.(Revenue)'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '204'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '204'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  LOOP AT LT INTO LS WHERE ITEM =  '205' .
+
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+  LOOP AT LT INTO LS WHERE ITEM =  '205' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+
+*  <fs_alv>-particulars = '(Increase)/Decrease Loans & Adv.(Business)'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '205'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '205'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '206' .
+
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '206' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+
+*  <fs_alv>-particulars = 'Increase/(Decrease) In Cash Credit'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '206'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '206'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2,<FS_ALV>-AMOUNT3.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+*
+*  """"""""""""""""""""""""""""""""""'
+
+  T_P02_A1 = TOT.
+  T_P02_A2 = TOT2.
+
+  """""""""""""""'
+  <FS_ALV>-PARTICULARS = 'TOTAL INCREASE/DECREASE IN WORKING CAPITAL'.
+  <FS_ALV>-AMOUNT1 = TOT.
+  <FS_ALV>-AMOUNT2 = TOT2.
+
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '6'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+*  <fs_alv>-cellcolor = 'C411'.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2,<FS_ALV>-AMOUNT3.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+*  CLEAR : tot , tot2 .
+  APPEND INITIAL LINE TO GT_ALV.
+*  APPEND INITIAL LINE TO gt_alv.
+
+
+  """""""""""""""""'
+  T_PL = T_PL + TOT .
+  T_PL2 = T_PL2 + TOT2.
+
+  T_P02_A1  = T_PL. "Avi
+  T_P02_A2  = T_PL2." Avi
+
+  """""""""""""""'
+  <FS_ALV>-PARTICULARS = 'NET CASH FLOW FROM OPERATING ACTIVITIES'.
+  <FS_ALV>-AMOUNT1 = T_PL.
+  <FS_ALV>-AMOUNT2 = T_PL2.
+
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '6'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+*  <fs_alv>-cellcolor = 'C411'.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+  CLEAR : TOT , TOT2,T_PL,T_PL2 .
+  APPEND INITIAL LINE TO GT_ALV.
+  APPEND INITIAL LINE TO GT_ALV.
+
+**************End IOF Avinash Bhagat***********
+*  <fs_alv>-particulars = 'CASH FLOW FROM INVESTING ACTIVITIES'.
+  READ TABLE LT_HEAD INTO LS_HEAD WITH KEY HEAD = 'P03'.
+  <FS_ALV>-PARTICULARS = LS_HEAD-TEXT.
+  CLEAR : LS_HEAD.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.                            "00000121
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+*  <fs_alv>-amount1 = ''.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT1'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+*  <fs_alv>-amount2 = ''.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT2'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  <FS_ALV>-AMOUNT3 = 'P03'.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT3'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '4'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR,LS_CELLTAB.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  DELETE LT WHERE   ITEM = '201' .
+  DELETE LT WHERE ITEM = '202' .
+  DELETE  LT WHERE ITEM = '203' .
+  DELETE  LT WHERE ITEM = '204' .
+  DELETE  LT WHERE ITEM = '205' .
+  DELETE  LT WHERE ITEM = '206' .
+  DELETE  LT WHERE ITEM = '207' .
+  DELETE  LT WHERE ITEM = '208' .
+  DELETE  LT WHERE ITEM = '209' .
+  DELETE  LT WHERE ITEM = '210' .
+  DELETE  LT WHERE ITEM = '211' .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '301' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '301' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+
+  """"""""""""""""""""""""""""""""""'
+*  <fs_alv>-particulars = 'Increase/(Decrease) In Share Capital'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '301'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '301'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR,LS_CELLTAB.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '302' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '302' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+*  <fs_alv>-particulars = 'Increase/(Decrease) In General Reserve'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '302'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '302'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  LOOP AT LT INTO LS WHERE ITEM =  '303' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '303' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+*************End Avi Bhagat**
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+
+*  <fs_alv>-particulars = 'Receipt Of Incentive -Psgi 2007'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '303'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '303'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  LOOP AT LT INTO LS WHERE ITEM =  '304' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '304' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+*  <fs_alv>-particulars = 'Income From Invesements, Fds, Dividends & Other'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '304'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '304'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  LOOP AT LT INTO LS WHERE ITEM =  '305' .
+
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '305' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+*  <fs_alv>-particulars = '(Increase)/Decrease In F.D.With Karad Urban Banks & Sbi'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '305'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '305'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+
+  LOOP AT LT INTO LS WHERE ITEM =  '306' .
+
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+
+
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+*  <fs_alv>-particulars = '(Increase)/Decrease In Investments'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '306'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '306'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 , <FS_ALV>-AMOUNT3.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  T_PL = T_PL + TOT .
+  T_PL2 = T_PL2 + TOT2 .
+
+  T_P03_A1 = TOT.
+  T_P03_A2 = TOT2.
+  """""""""""""""'
+  <FS_ALV>-PARTICULARS = 'TOTAL CASH FLOW FROM INVESTING ACTIVITIES'.
+  <FS_ALV>-AMOUNT1 = TOT.
+  <FS_ALV>-AMOUNT2 = TOT2.
+
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '6'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+*  <fs_alv>-cellcolor = 'C411'.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+  CLEAR : TOT ,TOT2 .
+
+  APPEND INITIAL LINE TO GT_ALV.
+  APPEND INITIAL LINE TO GT_ALV.
+
+*  <fs_alv>-particulars = 'CASH FLOW FROM FINANCIAL ACTIVITIES'.
+  READ TABLE LT_HEAD INTO LS_HEAD WITH KEY HEAD = 'P04'.
+  <FS_ALV>-PARTICULARS = LS_HEAD-TEXT.
+  CLEAR : LS_HEAD.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.                            "00000121
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+*  <fs_alv>-amount1 = ''.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT1'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+*  <fs_alv>-amount2 = ''.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT2'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  <FS_ALV>-AMOUNT3 = 'P04'.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT3'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '4'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+*  <fs_alv>-cellcolor = 'C411'.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR,LS_CELLTAB.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+
+  DELETE  LT WHERE ITEM = '301' .
+  DELETE  LT WHERE ITEM = '302' .
+  DELETE  LT WHERE ITEM = '303' .
+  DELETE  LT WHERE ITEM = '304' .
+  DELETE  LT WHERE ITEM = '305' .
+  DELETE  LT WHERE ITEM = '306' .
+  DELETE  LT WHERE ITEM = '307' .
+  DELETE  LT WHERE ITEM = '308' .
+  DELETE  LT WHERE ITEM = '309' .
+  DELETE  LT WHERE ITEM = '310' .
+  DELETE  LT WHERE ITEM = '311' .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '401' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '401' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+
+*  <fs_alv>-particulars = '(Increase)/Decrease Repayment Of Sales Tax Deffered Liabilities'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '401'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '401'.
+
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '402' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '402' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+
+*  <fs_alv>-particulars = 'Increase/(Decrease) Of Loan From Directors'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '402'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '402'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '403' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '403' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+*  <fs_alv>-particulars = '(Loss) Interest Expense'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '403'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '403'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  LOOP AT LT INTO LS WHERE ITEM =  '404' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '404' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+*  <fs_alv>-particulars = 'Increase / (Decrease) In Term Loan'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '404'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '404'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3 ..
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  LOOP AT LT INTO LS WHERE ITEM =  '405' .
+
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '405' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+*  <fs_alv>-particulars = 'Increase / (Decrease) In Term Loan'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '405'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '405'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3 ..
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  LOOP AT LT INTO LS WHERE ITEM =  '406' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '406' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+
+  """""""""""""""""""""""""""""""
+  TOT =  TOT + <FS_ALV>-AMOUNT1 .
+  TOT2 =   TOT2 + <FS_ALV>-AMOUNT2  .
+
+  """"""""""""""""""""""""""""""""""'
+*  <fs_alv>-particulars = 'Increase / (Decrease) In Term Loan'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '406'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '406'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0' .  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3 ..
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+  APPEND INITIAL LINE TO GT_ALV.
+
+  """"""""""
+  """"""""""""""""'
+  T_PL = T_PL + TOT .
+  T_PL2 = T_PL2 + TOT2 .
+
+
+  T_P04_A1 = TOT.
+  T_P04_A2 = TOT2.
+  """""""""""""""'
+
+
+  <FS_ALV>-PARTICULARS = 'TOTAL CASH FLOW FROM FINANCING ACTIVITIES'.
+  <FS_ALV>-AMOUNT1 = TOT ."+ t_p02_a1 + t_p02_a2.
+  <FS_ALV>-AMOUNT2 = TOT2 ."+ t_p03_a1 + t_p03_a2.
+
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '6'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+*  <fs_alv>-cellcolor = 'C411'.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+  CLEAR : TOT , TOT2 ."t_p02_a1 , t_p02_a2 , t_p03_a1 , t_p03_a2.
+
+  APPEND INITIAL LINE TO GT_ALV.
+  APPEND INITIAL LINE TO GT_ALV.
+  BREAK PRIMUS.
+*  <fs_alv>-particulars = 'Net Increase/decrease In Cash & Cash Equivalents'.
+  READ TABLE LT_HEAD INTO LS_HEAD WITH KEY HEAD = 'P05'.
+  <FS_ALV>-PARTICULARS = LS_HEAD-TEXT.
+  CLEAR : LS_HEAD.
+
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+*  <FS_ALV>-AMOUNT2 = T_P02_A2 + T_P03_A2 + T_P04_A2.
+
+  <FS_ALV>-AMOUNT3 = 'P05'.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT3'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '4'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.
+
+  LS_CELLTAB-STYLE = '00000121'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+*CLEAR : T_PL , T_PL2 .
+*  _____________________--------------------Commented by Kaumudini
+*  APPEND INITIAL LINE TO gt_alv.
+*  APPEND INITIAL LINE TO gt_alv.
+  """""""""""""""""""""""""""""""""'
+  DELETE LT WHERE   ITEM = '401' .
+  DELETE LT WHERE ITEM = '402' .
+  DELETE  LT WHERE ITEM = '403' .
+  DELETE  LT WHERE ITEM = '404' .     "ny Kaumudini
+  DELETE  LT WHERE ITEM = '405' .     "ny Kaumudini
+  DELETE  LT WHERE ITEM = '406' .     "ny Kaumudini
+*  ------------------------------------------------
+  LOOP AT LT INTO LS WHERE ITEM =  '501' ..
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '501' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+  T_PL = T_PL + <FS_ALV>-AMOUNT1 .
+  T_PL2 = T_PL2 + <FS_ALV>-AMOUNT2.
+
+  """""""""""""""""""""""""""""""
+*  <fs_alv>-particulars = 'Opening Balance Of Cash & Cash Equivalents'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '501'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '501'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  """"""""""""""""""""""""""""""""""""""""'''
+  LOOP AT LT INTO LS WHERE ITEM =  '502' ." ' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '502' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+*  -----------------------------------------------
+  T_PL =  T_PL + <FS_ALV>-AMOUNT1.
+  T_PL2 =  T_PL2 + <FS_ALV>-AMOUNT2 .
+*  ------------------------------------------------
+*  <fs_alv>-particulars = 'Closing Balance Of Cash & Cash Equivalents'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '502'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '502'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+*  APPEND cellcolor TO <fs_alv>-cellcolor.
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.  "Kaumudii
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  APPEND INITIAL LINE TO GT_ALV.
+*  APPEND INITIAL LINE TO gt_alv.
+   """""""""""""""""""""""""""""""""""""""""""""""""""""
+    LOOP AT LT INTO LS WHERE ITEM =  '503' ." ' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+
+  LOOP AT LT INTO LS WHERE ITEM =  '503' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+*  -----------------------------------------------
+  T_PL =  T_PL + <FS_ALV>-AMOUNT1.
+  T_PL2 =  T_PL2 + <FS_ALV>-AMOUNT2 .
+
+
+
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '503'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '503'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+*  APPEND cellcolor TO <fs_alv>-cellcolor.
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.  "Kaumudii
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  APPEND INITIAL LINE TO GT_ALV.
+
+  <FS_ALV>-PARTICULARS = 'CROSS CHECK'.
+  <FS_ALV>-AMOUNT1 = T_PL.
+  <FS_ALV>-AMOUNT2 = T_PL2.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '4'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+*  <fs_alv>-cellcolor = 'C411'.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3 .
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+  CLEAR : T_PL , T_PL2 .
+
+*  APPEND INITIAL LINE TO gt_alv.
+  """""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  <FS_ALV>-PARTICULARS = ''.
+  <FS_ALV>-AMOUNT1 = T_PL.
+  <FS_ALV>-AMOUNT2 = T_PL2.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '4'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+*  <fs_alv>-cellcolor = 'C411'.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3 .
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+  CLEAR : T_PL , T_PL2 .
+
+  READ TABLE LT_HEAD INTO LS_HEAD WITH KEY HEAD = 'P06'.
+  <FS_ALV>-PARTICULARS = LS_HEAD-TEXT.
+  CLEAR : LS_HEAD.
+*  <fs_alv>-amount1 = t_pl.
+*  <fs_alv>-amount2 = t_pl2.
+
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+
+  <FS_ALV>-AMOUNT3 = 'P06'.
+  LS_CELLTAB-FIELDNAME = 'AMOUNT3'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '4'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+*CLEAR : T_PL , T_PL2 .
+*  _____________________--------------------Commented by Kaumudini
+*  APPEND INITIAL LINE TO gt_alv.
+*  APPEND INITIAL LINE TO gt_alv.
+  """""""""""""""""""""""""""""""""'
+  DELETE LT WHERE   ITEM = '501' .
+  DELETE LT WHERE ITEM = '502' .
+  DELETE LT WHERE ITEM = '503' .
+*  ------------------------------------------------
+  LOOP AT LT INTO LS WHERE ITEM =  '601' ..
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '601' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+*  ENDLOOP .
+  T_PL = T_PL + <FS_ALV>-AMOUNT1 .
+  T_PL2 = T_PL2 + <FS_ALV>-AMOUNT2.
+
+  """""""""""""""""""""""""""""""
+*  <fs_alv>-particulars = 'Opening Balance Of Cash & Cash Equivalents'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '601'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '601'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  """"""""""""""""""""""""""""""""""""""""'''
+  LOOP AT LT INTO LS WHERE ITEM =  '602' ." ' .
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '602' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+
+
+*  -----------------------------------------------
+  T_PL =  T_PL + <FS_ALV>-AMOUNT1.
+  T_PL2 =  T_PL2 + <FS_ALV>-AMOUNT2 .
+*  ------------------------------------------------
+*  <fs_alv>-particulars = 'Closing Balance Of Cash & Cash Equivalents'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '602'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '602'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+*  APPEND cellcolor TO <fs_alv>-cellcolor.
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.  "Kaumudii
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  APPEND INITIAL LINE TO GT_ALV.
+*  APPEND INITIAL LINE TO gt_alv.
+  """""""""""""""""""""""""""""""""""""""""""""""""""""
+
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I..
+  <FS_ALV>-AMOUNT1 = T_PL.
+  <FS_ALV>-AMOUNT2 = T_PL2.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '4'.
+  CELLCOLOR-COLOR-INT = '1'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '1'.  "1 = text colour, 0 = background colour
+*  <fs_alv>-cellcolor = 'C411'.
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = '00000121'.
+
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3 .
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+  CLEAR : T_PL , T_PL2 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '603' ..
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '603' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+*  ENDLOOP .
+  T_PL = T_PL + <FS_ALV>-AMOUNT1 .
+  T_PL2 = T_PL2 + <FS_ALV>-AMOUNT2.
+
+  """""""""""""""""""""""""""""""
+*  <fs_alv>-particulars = 'Opening Balance Of Cash & Cash Equivalents'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '603'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '603'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+  LOOP AT LT INTO LS WHERE ITEM =  '604'.
+    IF LS-YEAR EQ GJAHR-LOW .
+      <FS_ALV>-AMOUNT1 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT1 . .
+*      <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+    ELSE.
+      <FS_ALV>-AMOUNT1 = LS-AMT1 + <FS_ALV>-AMOUNT1.
+    ENDIF.
+
+  ENDLOOP .
+*  IF <FS_ALV>-AMOUNT1 LT 0 .
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1 * -1 .
+
+  LOOP AT LT INTO LS WHERE ITEM =  '604' AND YEAR = GJAHR1-LOW .
+    IF LS-YEAR IS NOT INITIAL .
+      <FS_ALV>-AMOUNT2 = LS-AMT1 * -1 + <FS_ALV>-AMOUNT2.
+    ELSE.
+      <FS_ALV>-AMOUNT2 = LS-AMT1 + <FS_ALV>-AMOUNT2.
+    ENDIF.
+
+  ENDLOOP .
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2 * -1 .
+
+*  ENDLOOP .
+  T_PL = T_PL + <FS_ALV>-AMOUNT1 .
+  T_PL2 = T_PL2 + <FS_ALV>-AMOUNT2.
+
+  """""""""""""""""""""""""""""""
+*  <fs_alv>-particulars = 'Opening Balance Of Cash & Cash Equivalents'.
+  READ TABLE LT_ITEM INTO LS_ITEM WITH KEY ITEM = '604'.
+  <FS_ALV>-PARTICULARS = LS_ITEM-TEXT_I.
+  CLEAR : LS_ITEM.
+  <FS_ALV>-AMOUNT1 = <FS_ALV>-AMOUNT1.
+  <FS_ALV>-AMOUNT2 = <FS_ALV>-AMOUNT2.
+  <FS_ALV>-AMOUNT3 = '604'.
+  CELLCOLOR-FIELDNAME = 'PARTICULARS'.
+  CELLCOLOR-COLOR-COL = '3'.
+  CELLCOLOR-COLOR-INT = '0'.  "1 = Intensified on, 0 = Intensified off
+  CELLCOLOR-COLOR-INV = '0'.  "1 = text colour, 0 = background colour
+
+  LS_CELLTAB-FIELDNAME = 'PARTICULARS'.
+  LS_CELLTAB-STYLE = ' '.
+  INSERT LS_CELLTAB INTO TABLE LT_CELLTAB.
+  MOVE LT_CELLTAB[] TO <FS_ALV>-CELLTAB[].
+
+  APPEND CELLCOLOR TO <FS_ALV>-CELLCOLOR.
+  APPEND <FS_ALV> TO GT_ALV.
+  CLEAR:<FS_ALV>-CELLCOLOR, CELLCOLOR.
+  CLEAR:<FS_ALV>-AMOUNT1 , <FS_ALV>-AMOUNT2 ,  <FS_ALV>-AMOUNT3.
+  REFRESH:LT_CELLTAB,<FS_ALV>-CELLTAB[].
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form GERNERATE_OUPUT
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*&      --> GT_ALV
+*&---------------------------------------------------------------------*
+FORM GERNERATE_OUPUT  TABLES   P_GT_ALV STRUCTURE GS_ALV.
+
+  PERFORM FIELDCAT_ALV CHANGING GT_FIELDCAT.
+
+  PERFORM ALV_LAYOUT CHANGING GS_LAYOUT.
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY_LVC'
+    EXPORTING
+*     I_INTERFACE_CHECK  = ' '
+*     I_BYPASSING_BUFFER =
+*     I_BUFFER_ACTIVE    =
+      I_CALLBACK_PROGRAM = SY-REPID
+*     I_CALLBACK_PF_STATUS_SET          = ' '
+*     I_CALLBACK_USER_COMMAND           = ' '
+*     I_CALLBACK_TOP_OF_PAGE            = ' '
+*     I_CALLBACK_HTML_TOP_OF_PAGE       = ' '
+*     I_CALLBACK_HTML_END_OF_LIST       = ' '
+*     I_STRUCTURE_NAME   =
+*     I_BACKGROUND_ID    = 'ALV_BACKGROUND'
+*     I_GRID_TITLE       =
+*     I_GRID_SETTINGS    =
+      IS_LAYOUT_LVC      = GS_LAYOUT
+      IT_FIELDCAT_LVC    = GT_FIELDCAT
+*     IT_EXCLUDING       =
+*     IT_SPECIAL_GROUPS_LVC             =
+*     IT_SORT_LVC        =
+*     IT_FILTER_LVC      =
+*     IT_HYPERLINK       =
+*     IS_SEL_HIDE        =
+      I_DEFAULT          = 'X'
+      I_SAVE             = 'A'
+*     IS_VARIANT         =
+*     IT_EVENTS          =
+*     IT_EVENT_EXIT      =
+*     IS_PRINT_LVC       =
+*     IS_REPREP_ID_LVC   =
+*     I_SCREEN_START_COLUMN             = 0
+*     I_SCREEN_START_LINE               = 0
+*     I_SCREEN_END_COLUMN               = 0
+*     I_SCREEN_END_LINE  = 0
+*     I_HTML_HEIGHT_TOP  =
+*     I_HTML_HEIGHT_END  =
+*     IT_ALV_GRAPHICS    =
+*     IT_EXCEPT_QINFO_LVC               =
+*     IR_SALV_FULLSCREEN_ADAPTER        =
+*   IMPORTING
+*     E_EXIT_CAUSED_BY_CALLER           =
+*     ES_EXIT_CAUSED_BY_USER            =
+    TABLES
+      T_OUTTAB           = GT_ALV
+    EXCEPTIONS
+      PROGRAM_ERROR      = 1
+      OTHERS             = 2.
+  IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form FIELDCAT_ALV
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*&      <-- GT_FIELDCAT
+*&---------------------------------------------------------------------*
+FORM FIELDCAT_ALV  CHANGING P_GT_FIELDCAT TYPE LVC_T_FCAT.
+
+  DATA COUNT TYPE I.
+
+  COUNT = COUNT + 1 .
+  GS_FIELDCAT-COL_POS   = '1'.
+  GS_FIELDCAT-FIELDNAME = 'PARTICULARS'.
+  GS_FIELDCAT-TABNAME   = 'GT_ALV'.
+  GS_FIELDCAT-SCRTEXT_L = 'Particulars'.
+  GS_FIELDCAT-NO_ZERO   = 'X'.
+*  gs_fieldcat-emphasize   = 'X'.
+  GS_FIELDCAT-OUTPUTLEN  = '55'.
+*  gs_fieldcat-style  = '000002AE'.
+  APPEND GS_FIELDCAT TO P_GT_FIELDCAT.
+  CLEAR GS_FIELDCAT .
+
+  COUNT = COUNT + 1 .
+  GS_FIELDCAT-COL_POS   = COUNT.
+  GS_FIELDCAT-FIELDNAME = 'AMOUNT1'.
+  GS_FIELDCAT-TABNAME   = 'GT_ALV'.
+  GS_FIELDCAT-SCRTEXT_L = 'Current Period'."gjahr-low.
+  GS_FIELDCAT-NO_ZERO   = 'X'.
+*  gs_fieldcat-emphasize   = 'X'.
+  GS_FIELDCAT-OUTPUTLEN  = 'X'.
+  APPEND GS_FIELDCAT TO P_GT_FIELDCAT.
+  CLEAR GS_FIELDCAT .
+
+*
+
+
+  COUNT = COUNT + 1 .
+  GS_FIELDCAT-COL_POS   = COUNT.
+  GS_FIELDCAT-FIELDNAME = 'AMOUNT2'.
+  GS_FIELDCAT-TABNAME   = 'GT_ALV'.
+  GS_FIELDCAT-SCRTEXT_L = 'Previous Period'."gjahr-low - 1.
+  GS_FIELDCAT-NO_ZERO   = 'X'.
+*    gs_fieldcat-emphasize   = 'X'.
+  GS_FIELDCAT-OUTPUTLEN  = 'X'.
+  APPEND GS_FIELDCAT TO P_GT_FIELDCAT.
+  CLEAR GS_FIELDCAT .
+
+  COUNT = COUNT + 1 .
+  GS_FIELDCAT-COL_POS   = COUNT.
+  GS_FIELDCAT-FIELDNAME = 'AMOUNT3'.
+  GS_FIELDCAT-TABNAME   = 'GT_ALV'.
+  GS_FIELDCAT-SCRTEXT_L = 'Item Code'.
+  GS_FIELDCAT-NO_ZERO   = 'X'.
+*    gs_fieldcat-emphasize   = 'X'.
+  GS_FIELDCAT-OUTPUTLEN  = 'X'.
+  APPEND GS_FIELDCAT TO P_GT_FIELDCAT.
+  CLEAR GS_FIELDCAT .
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form ALV_LAYOUT
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*&      <-- GS_LAYOUT
+*&---------------------------------------------------------------------*
+FORM ALV_LAYOUT  CHANGING P_GS_LAYOUT TYPE LVC_S_LAYO.
+
+
+  P_GS_LAYOUT-STYLEFNAME = 'CELLTAB'.
+  P_GS_LAYOUT-CTAB_FNAME = 'CELLCOLOR'.
+  P_GS_LAYOUT-CWIDTH_OPT = 'X'.
+*  p_gs_layout-zebra = 'X'.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form GET_DATA
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM GET_DATA .
+
+
+  SELECT * FROM ZCASHFLOW INTO TABLE GT_GL
+    WHERE BUKRS IN BUKRS.
+
+  "AND indirect EQ 'X'.
+*  BREAK abap .
+  LOOP AT GT_GL INTO LS_GL.
+    IF LS_GL-HEAD =  'P01'.
+      L_GL1-LOW = LS_GL-SAKNR.
+      L_GL1-SIGN = 'I'.
+      L_GL1-OPTION = 'EQ'.
+      APPEND L_GL1.
+
+      S_KTOPL-LOW = LS_GL-KTOPL.
+      S_KTOPL-SIGN = 'I'.
+      S_KTOPL-OPTION = 'EQ'.
+      APPEND S_KTOPL.
+
+
+    ENDIF.
+
+    IF LS_GL-HEAD =  'P02'.
+      L_GL2-LOW = LS_GL-SAKNR.
+      L_GL2-SIGN = 'I'.
+      L_GL2-OPTION = 'EQ'.
+      APPEND L_GL2.
+
+      S_KTOPL-LOW = LS_GL-KTOPL.
+      S_KTOPL-SIGN = 'I'.
+      S_KTOPL-OPTION = 'EQ'.
+      APPEND S_KTOPL.
+    ENDIF.
+
+    IF LS_GL-HEAD =  'P03'.
+      L_GL3-LOW = LS_GL-SAKNR.
+      L_GL3-SIGN = 'I'.
+      L_GL3-OPTION = 'EQ'.
+      APPEND L_GL3.
+
+      S_KTOPL-LOW = LS_GL-KTOPL.
+      S_KTOPL-SIGN = 'I'.
+      S_KTOPL-OPTION = 'EQ'.
+      APPEND S_KTOPL.
+    ENDIF.
+
+    IF LS_GL-HEAD =  'P04'.
+      L_GL4-LOW = LS_GL-SAKNR.
+      L_GL4-SIGN = 'I'.
+      L_GL4-OPTION = 'EQ'.
+      APPEND L_GL4.
+
+      S_KTOPL-LOW = LS_GL-KTOPL.
+      S_KTOPL-SIGN = 'I'.
+      S_KTOPL-OPTION = 'EQ'.
+      APPEND S_KTOPL.
+    ENDIF.
+
+    IF LS_GL-HEAD =  'P05'.
+      L_GL5-LOW = LS_GL-SAKNR.
+      L_GL5-SIGN = 'I'.
+      L_GL5-OPTION = 'EQ'.
+      APPEND L_GL5.
+
+      S_KTOPL-LOW = LS_GL-KTOPL.
+      S_KTOPL-SIGN = 'I'.
+      S_KTOPL-OPTION = 'EQ'.
+      APPEND S_KTOPL.
+    ENDIF.
+  ENDLOOP .
+
+  PERFORM PA01.
+  PERFORM PA02.
+  PERFORM PA03.
+  PERFORM PA04.
+  PERFORM PA05.
+  PERFORM PA06.
+  "EXCEPT HARDCODE HEADINGS TO CASHFLOW ITEM/HEAD THIS QUERY WILL FETCH DATA FROM TABLE
+  SELECT * FROM ZCASHFLOW_ITEM INTO TABLE LT_ITEM .
+  SELECT * FROM ZCASHFLOW_HEAD INTO TABLE LT_HEAD.
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form PA01
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM PA01 .
+  """""""""""""""""""""'for current year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+*                                      WITH par_var2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR
+                                    WITH PAR_VAR1 EQ 'ZCF'
+*                                    WITH par_var2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+*  DELETE asci_tab FROM 18.
+*  DELETE asci_tab FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+*************101**********************************
+      IF  LS_GL-ITEM = '101' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '101'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*        LS-AMT2 = L_DR + LS-AMT2.
+
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '101' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '101'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*        LS-AMT2 = L_CR + LS-AMT2.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '101' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '101'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '101' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '101'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '101' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '101'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+**************102*******************************
+      IF  LS_GL-ITEM = '102' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '102'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '102' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '102'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '102' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '102'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '102' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '102'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '102' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '102'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+*************103************************
+      IF  LS_GL-ITEM = '103' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '103'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '103' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '103'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '103' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '103'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '103' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '103'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '103' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '103'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***********104***************************
+      IF  LS_GL-ITEM = '104' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '104'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '104' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '104'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '104' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '104'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '104' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '104'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '104' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '104'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+**********105*********************
+      IF  LS_GL-ITEM = '105' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '105'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '105' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '105'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '105' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '105'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '105' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '105'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '105' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '105'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+******************106*******************************
+      IF LS_GL-ITEM = '106' AND LS_GL-ZBIND = 'D'.
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '106'.
+        LS-AMT1 = L_DR + LS-AMT1 .
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF LS_GL-ITEM = '106' AND LS_GL-ZBIND = 'C'.
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '106'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1 .
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+
+      IF  LS_GL-ITEM = '106' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '106'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '106' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '106'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF LS_GL-ITEM = '106' AND LS_GL-ZBIND = 'B'.
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '106'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = LS-AMT1.
+        ENDIF.
+        IF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00' ..
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+        APPEND LS TO LT .
+        CLEAR LS.
+*          ENDIF.
+      ENDIF.
+*******************107************************
+      IF  LS_GL-ITEM = '107' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '107'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '107' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '107'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '107' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '107'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '107' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '107'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '107' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '107'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+*      ENDIF.
+
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+*
+*  REFRESH: LT.
+
+
+  """""""""""""""""""'for Previous year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR1
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+                                      WITH PAR_VAR2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR1
+                                    WITH PAR_VAR1 EQ 'ZCF'
+                                    WITH PAR_VAR2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+  DELETE ASCI_TAB FROM 18.
+  DELETE ASCI_TAB FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+************101**********************************
+      IF  LS_GL-ITEM = '101' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '101'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '101' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '101'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '101' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '101'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '101' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '101'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '101' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '101'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***************102*******************************
+      IF  LS_GL-ITEM = '102' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '102'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '102' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '102'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '102' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '102'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '102' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '102'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '102' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '102'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***************103*******************************
+      IF  LS_GL-ITEM = '103' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '103'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '103' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '103'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '103' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '103'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '103' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '103'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '103' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '103'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************104*******************************
+      IF  LS_GL-ITEM = '104' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '104'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '104' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '104'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '104' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '104'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '104' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '104'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '104' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '104'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************105*******************************
+      IF  LS_GL-ITEM = '105' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '105'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '105' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '105'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '105' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '105'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '105' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '105'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '105' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '105'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************106*******************************
+      IF  LS_GL-ITEM = '106' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '106'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '106' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '106'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '106' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '106'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '106' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '106'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '106' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '106'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************107*******************************
+      IF  LS_GL-ITEM = '107' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '107'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '107' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '107'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '107' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '107'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '107' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '107'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '107' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '107'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*& Form PA02
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM PA02 .
+  """""""""""""""""""""'for current year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+*                                      WITH par_var2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR
+                                    WITH PAR_VAR1 EQ 'ZCF'
+*                                    WITH par_var2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+*  DELETE asci_tab FROM 18.
+*  DELETE asci_tab FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+*************201**********************************
+      IF  LS_GL-ITEM = '201' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '201'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*        LS-AMT2 = L_DR + LS-AMT2.
+
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '201' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '201'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*        LS-AMT2 = L_CR + LS-AMT2.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '201' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '201'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '201' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '201'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '201' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '201'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+**************202*******************************
+      IF  LS_GL-ITEM = '202' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '202'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '202' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '202'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '202' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '202'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '202' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '202'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '202' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '202'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+*************203************************
+      IF  LS_GL-ITEM = '203' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '203'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '203' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '203'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '203' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '203'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '203' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '203'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '203' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '203'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***********204***************************
+      IF  LS_GL-ITEM = '204' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '204'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '204' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '204'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '204' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '204'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '204' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '204'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '204' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '204'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+**********205*********************
+      IF  LS_GL-ITEM = '205' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '205'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '205' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '205'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '205' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '205'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '205' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '205'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '205' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '205'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+
+  """""""""""""""""""'for Previous year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR1
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+                                      WITH PAR_VAR2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR1
+                                    WITH PAR_VAR1 EQ 'ZCF'
+                                    WITH PAR_VAR2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+  DELETE ASCI_TAB FROM 18.
+  DELETE ASCI_TAB FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+************201**********************************
+      IF  LS_GL-ITEM = '201' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '201'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '201' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '201'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '201' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '201'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '201' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '201'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '201' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '201'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***************202*******************************
+      IF  LS_GL-ITEM = '202' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '202'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '202' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '202'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '202' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '202'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '202' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '202'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '202' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '202'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***************203*******************************
+      IF  LS_GL-ITEM = '203' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '203'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '203' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '203'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '203' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '203'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '203' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '203'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '203' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '203'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************204*******************************
+      IF  LS_GL-ITEM = '204' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '204'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '204' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '204'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '204' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '204'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '204' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '204'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '204' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '204'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************205*******************************
+      IF  LS_GL-ITEM = '205' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '205'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '205' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '205'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '205' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '205'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '205' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '205'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '205' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '205'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************206*******************************
+      IF  LS_GL-ITEM = '206' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '206'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '206' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '206'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '206' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '206'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '206' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '206'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '206' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '206'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  PA03
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM PA03 .
+  """""""""""""""""""""'for current year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+*                                      WITH par_var2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR
+                                    WITH PAR_VAR1 EQ 'ZCF'
+*                                    WITH par_var2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+*  DELETE asci_tab FROM 18.
+*  DELETE asci_tab FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+*************101**********************************
+      IF  LS_GL-ITEM = '301' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '301'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*        LS-AMT2 = L_DR + LS-AMT2.
+
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '301' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '301'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*        LS-AMT2 = L_CR + LS-AMT2.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '301' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '301'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '301' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '301'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '301' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '301'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+**************302*******************************
+      IF  LS_GL-ITEM = '302' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '302'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '302' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '302'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '302' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '302'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '302' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '302'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '302' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '302'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+*************303************************
+      IF  LS_GL-ITEM = '303' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '303'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '303' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '303'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '303' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '303'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '303' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '303'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '303' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '303'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***********304***************************
+      IF  LS_GL-ITEM = '304' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '304'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '304' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '304'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '304' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '304'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '304' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '304'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '304' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '304'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+**********305*********************
+      IF  LS_GL-ITEM = '305' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '305'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '305' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '305'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '305' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '305'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '305' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '305'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '305' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '305'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+
+
+  """""""""""""""""""'for Previous year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR1
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+                                      WITH PAR_VAR2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR1
+                                    WITH PAR_VAR1 EQ 'ZCF'
+                                    WITH PAR_VAR2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+  DELETE ASCI_TAB FROM 18.
+  DELETE ASCI_TAB FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+************301**********************************
+      IF  LS_GL-ITEM = '301' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '301'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '201' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '201'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '301' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '301'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '301' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '301'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '301' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '301'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***************202*******************************
+      IF  LS_GL-ITEM = '302' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '302'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '302' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '302'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '302' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '302'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '302' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '302'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '302' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '302'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***************303*******************************
+      IF  LS_GL-ITEM = '303' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '303'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '203' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '203'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '303' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '303'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '303' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '303'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '303' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '303'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************304*******************************
+      IF  LS_GL-ITEM = '304' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '304'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '304' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '304'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '304' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '304'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '304' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '304'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '304' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '304'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************305*******************************
+      IF  LS_GL-ITEM = '305' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '305'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '305' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '305'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '305' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '305'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '305' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '305'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '305' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '305'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************306*******************************
+      IF  LS_GL-ITEM = '306' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '306'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '306' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '306'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '306' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '306'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '306' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '306'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '306' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '306'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  PA04
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM PA04 .
+  """""""""""""""""""""'for current year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+*                                      WITH par_var2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR
+                                    WITH PAR_VAR1 EQ 'ZCF'
+*                                    WITH par_var2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+*  DELETE asci_tab FROM 18.
+*  DELETE asci_tab FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+*************401**********************************
+      IF  LS_GL-ITEM = '401' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '401'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*        LS-AMT2 = L_DR + LS-AMT2.
+
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '401' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '401'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*        LS-AMT2 = L_CR + LS-AMT2.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '401' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '401'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '401' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '401'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '401' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '401'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+**************402*******************************
+      IF  LS_GL-ITEM = '402' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '402'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '402' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '402'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '402' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '402'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '402' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '402'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '402' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '402'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+*************403************************
+      IF  LS_GL-ITEM = '403' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '403'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '403' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '403'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '403' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '403'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '403' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '403'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '403' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '403'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***********404***************************
+      IF  LS_GL-ITEM = '404' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '404'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '404' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '404'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '404' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '404'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '404' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '404'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '404' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '404'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+**********405*********************
+      IF  LS_GL-ITEM = '405' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '405'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '405' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '405'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '405' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '405'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '405' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '405'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '405' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '405'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+
+
+  """""""""""""""""""'for Previous year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR1
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+                                      WITH PAR_VAR2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR1
+                                    WITH PAR_VAR1 EQ 'ZCF'
+                                    WITH PAR_VAR2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+  DELETE ASCI_TAB FROM 18.
+  DELETE ASCI_TAB FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+************401**********************************
+      IF  LS_GL-ITEM = '401' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '401'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '401' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '401'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '401' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '401'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '401' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '401'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '401' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '401'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***************402*******************************
+      IF  LS_GL-ITEM = '402' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '402'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '402' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '402'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '402' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '402'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '402' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '402'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '402' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '402'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***************403*******************************
+      IF  LS_GL-ITEM = '403' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '403'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '403' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '403'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '403' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '403'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '403' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '403'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '403' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '403'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************404*******************************
+      IF  LS_GL-ITEM = '404' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '404'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '404' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '404'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '404' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '404'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '404' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '404'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '404' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '404'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************405*******************************
+      IF  LS_GL-ITEM = '405' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '405'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '405' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '405'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '405' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '405'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '405' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '405'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '405' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '405'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************306*******************************
+      IF  LS_GL-ITEM = '406' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '406'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '406' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '406'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '406' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '406'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '406' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '406'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '406' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '406'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  PA05
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM PA05 .
+  """""""""""""""""""""'for current year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+*                                      WITH par_var2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR
+                                    WITH PAR_VAR1 EQ 'ZCF'
+*                                    WITH par_var2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+*  DELETE asci_tab FROM 18.
+*  DELETE asci_tab FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+*************501**********************************
+      IF  LS_GL-ITEM = '501' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '501'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*        LS-AMT2 = L_DR + LS-AMT2.
+
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '501' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '501'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*        LS-AMT2 = L_CR + LS-AMT2.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '501' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '501'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '501' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '501'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '501' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '501'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+**************502*******************************
+      IF  LS_GL-ITEM = '502' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '502'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '502' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '502'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '502' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '502'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '502' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '502'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '502' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '502'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+**************503*******************************
+      IF  LS_GL-ITEM = '503' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '503'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '503' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '503'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '503' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '503'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '503' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '503'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '503' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '503'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+
+
+  """""""""""""""""""'for Previous year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR1
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+                                      WITH PAR_VAR2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR1
+                                    WITH PAR_VAR1 EQ 'ZCF'
+                                    WITH PAR_VAR2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+  DELETE ASCI_TAB FROM 18.
+  DELETE ASCI_TAB FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+************501**********************************
+      IF  LS_GL-ITEM = '501' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '501'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '501' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '501'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '501' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '501'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '501' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '501'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '501' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '501'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***************502*******************************
+      IF  LS_GL-ITEM = '502' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '502'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '502' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '502'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '502' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '502'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '502' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '502'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '502' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '502'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************503*******************************
+      IF  LS_GL-ITEM = '503' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '503'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '503' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '503'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '503' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '503'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '503' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '503'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '503' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '503'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  PA06
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM PA06 .
+  """""""""""""""""""""'for current year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+*                                      WITH par_var2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR
+                                    WITH PAR_VAR1 EQ 'ZCF'
+*                                    WITH par_var2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+*  DELETE asci_tab FROM 18.
+*  DELETE asci_tab FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+*************601**********************************
+      IF  LS_GL-ITEM = '601' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '601'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*        LS-AMT2 = L_DR + LS-AMT2.
+
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '601' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '601'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*        LS-AMT2 = L_CR + LS-AMT2.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '601' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '601'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '601' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '601'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '601' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '601'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+**************602*******************************
+      IF  LS_GL-ITEM = '602' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '602'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '602' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '602'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '602' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '602'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '602' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '602'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '602' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '602'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***************603*******************************
+      IF  LS_GL-ITEM = '603' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '603'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '603' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '603'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '603' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '603'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '603' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '603'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '603' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '603'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************604*******************************
+      IF  LS_GL-ITEM = '604' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '604'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '604' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '604'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '604' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '604'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '604' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '604'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '604' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR-LOW.
+        LS-ITEM = '604'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+
+  """""""""""""""""""'for Previous year """"""""""""""""""
+  IF PERIOD[] IS NOT INITIAL.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                      WITH SD_SAKNR IN L_GL1
+                     WITH SD_BUKRS IN BUKRS
+                                      WITH SD_GJAHR IN GJAHR1
+                                      WITH B_MONATE IN PERIOD
+                                      WITH PAR_VAR1 EQ 'ZCF'
+                                      WITH PAR_VAR2 EQ ' '
+                                       EXPORTING LIST TO MEMORY
+                     AND RETURN.
+  ELSE.
+    SUBMIT RFSSLD00   WITH SD_KTOPL IN  S_KTOPL
+                    WITH SD_SAKNR IN L_GL1
+                   WITH SD_BUKRS IN BUKRS
+                                    WITH SD_GJAHR IN GJAHR1
+                                    WITH PAR_VAR1 EQ 'ZCF'
+                                    WITH PAR_VAR2 EQ ' '
+                                     EXPORTING LIST TO MEMORY
+                   AND RETURN.
+  ENDIF.
+  REFRESH :MEM_TAB  .
+  CALL FUNCTION 'LIST_FROM_MEMORY'
+    TABLES
+      LISTOBJECT = MEM_TAB
+    EXCEPTIONS
+      NOT_FOUND  = 1
+      OTHERS     = 2.
+
+  REFRESH ASCI_TAB.
+  CALL FUNCTION 'LIST_TO_ASCI'
+    EXPORTING
+      LIST_INDEX         = -1
+      WITH_LINE_BREAK    = ' '
+    TABLES
+      LISTASCI           = ASCI_TAB
+      LISTOBJECT         = MEM_TAB
+    EXCEPTIONS
+      EMPTY_LIST         = 1
+      LIST_INDEX_INVALID = 2
+      OTHERS             = 3.
+  CHECK ASCI_TAB[] IS NOT INITIAL.
+
+  DELETE ASCI_TAB FROM 1 TO 5.
+  DELETE ASCI_TAB FROM 18.
+  DELETE ASCI_TAB FROM 14.
+*  BREAK-POINT .
+  LOOP AT ASCI_TAB INTO ASCI_WA .
+
+    L_LEN = STRLEN( ASCI_WA ) - 1.
+    ASCI_WA+0(1) = SPACE.
+    ASCI_WA+L_LEN = SPACE.
+    CONDENSE ASCI_WA.
+
+    SPLIT ASCI_WA AT ' ' INTO: L_BUKRS
+                               L_GL
+                               L_BCAL
+                               L_BP
+                               L_DR
+                               L_CR
+                               L_AB.
+
+    REPLACE ALL OCCURRENCES OF ',' IN L_BCAL WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_AB WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_CR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_DR WITH SPACE.
+    REPLACE ALL OCCURRENCES OF ',' IN  L_BP WITH SPACE.
+
+    CONDENSE :  L_AB , L_BCAL,L_CR,L_BP,L_DR.
+
+    CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+      EXPORTING
+        INPUT  = L_GL
+      IMPORTING
+        OUTPUT = L_GL.
+
+
+
+
+    LOOP AT GT_GL INTO LS_GL WHERE SAKNR = L_GL.
+************601**********************************
+      IF  LS_GL-ITEM = '601' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '601'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '601' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '601'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '601' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '601'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '601' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '601'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '601' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '601'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+***************602*******************************
+      IF  LS_GL-ITEM = '602' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '602'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '602' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '602'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '602' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '602'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '602' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '602'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '602' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '602'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+***************603*******************************
+      IF  LS_GL-ITEM = '603' AND LS_GL-ZBIND = 'D' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '603'.
+
+        LS-AMT1 = L_DR + LS-AMT1.
+
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+      IF  LS_GL-ITEM = '603' AND LS_GL-ZBIND = 'C' .
+        LS-YEAR =  GJAHR1-LOW .
+        LS-ITEM = '603'.
+        L_CR =  L_CR * -1.
+        LS-AMT1 = L_CR + LS-AMT1.
+        .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '603' AND LS_GL-ZBIND = 'F' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '603'.
+        LS-AMT1 = L_BCAL + LS-AMT1.
+*        LS-AMT2 = L_BCAL + LS-AMT2.
+        IF LS-AMT2 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT2 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+      ENDIF.
+
+
+      IF  LS_GL-ITEM = '603' AND LS_GL-ZBIND = 'A' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '603'.
+        LS-AMT1 = L_BP + LS-AMT1.
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+      ENDIF.
+
+      IF  LS_GL-ITEM = '603' AND LS_GL-ZBIND = 'B' .
+        LS-YEAR =  GJAHR1-LOW.
+        LS-ITEM = '603'.
+        LS-AMT1 = L_DR + L_CR * -1 + LS-AMT1.
+
+        IF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Y'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Y'..
+          LS-AMT1 = LS-AMT1.
+*        ENDIF.
+        ELSEIF LS-AMT1 GT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = '0.00'.
+        ELSEIF LS-AMT1 LT 0 AND LS_GL-ZCND = 'Z'.
+          LS-AMT1 = LS-AMT1  .
+        ENDIF.
+*      LS-AMT2 = L_BCAL + LS-AMT2 .
+        APPEND LS TO LT .
+        CLEAR LS.
+
+      ENDIF.
+
+
+
+    ENDLOOP.
+    CLEAR:LS_GL,L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA..
+
+  ENDLOOP.
+  CLEAR :  L_AB , L_BCAL,L_BP,L_CR,L_DR,ASCI_WA.
+
+
+
+
+
+ENDFORM.

@@ -1,0 +1,10 @@
+"Name: \PR:SAPMV13A\FO:KONP_MWSK1\SE:END\EI
+ENHANCEMENT 0 ZSD_VK11_TAX_CODE.
+DATA : it_konp TYPE TABLE OF konp.
+
+IF sy-tcode = 'VK11' OR sy-tcode = 'VK12' .
+IF konp-mwsk1 IS INITIAL AND konp-LOEVM_KO IS INITIAL AND ( konp-kschl = 'ZLST' OR konp-kschl = 'ZCST' ).
+  MESSAGE 'Maintain Tax Code' TYPE 'E' DISPLAY LIKE 'I'.
+ENDIF.
+ENDIF.
+ENDENHANCEMENT.

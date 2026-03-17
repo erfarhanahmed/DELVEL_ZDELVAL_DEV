@@ -1,0 +1,1663 @@
+*&---------------------------------------------------------------------*
+*& Report ZCOMPLETED_SALES_ORDER
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZCOMPLETED_SALES_ORDER.
+
+TABLES : AFKO , CAUFV , MSEG ,VBAP ,QALS , QAVE.
+**&---------------------------------------------------------------------*
+**& Types / structure
+**&---------------------------------------------------------------------*
+
+DATA : BHARAT_ORDER   TYPE STRING,
+       BHARAT_ITEM_NO TYPE STRING,
+       ERDAT          TYPE VBAP-ERDAT.
+
+TYPES : BEGIN OF STR_CAUFV,
+          AUFNR TYPE CAUFV-AUFNR,
+          ERDAT TYPE CAUFV-ERDAT,
+        END OF STR_CAUFV.
+
+TYPES : BEGIN OF TY_CUST,
+          VBELN TYPE VBAK-VBELN,
+          KUNNR TYPE VBAK-KUNNR,
+          NAME1 TYPE KNA1-NAME1,
+        END OF TY_CUST.
+
+TYPES : BEGIN OF STR_GT1,
+          VBELN  TYPE  VBELN,
+          POSNR  TYPE  POSNR,
+          ERDAT  TYPE  ERDAT,
+          MATNR  TYPE  MATNR,
+          WERKS  TYPE  WERKS,
+          ERZET  TYPE  ERZET,
+          KWMENG TYPE  KWMENG,
+          EDATU  TYPE  EDATU,
+          WMENG  TYPE  WMENG,
+          ETENR  TYPE  ETENR,
+          LFSTA  TYPE  LFSTA,
+          AUFNR  TYPE  AUFNR,
+        END OF STR_GT1.
+
+DATA : GT_MAIN1 TYPE TABLE OF STR_GT1,
+       WA_MAIN1 TYPE STR_GT1.
+
+TYPES : BEGIN OF STR_GT,
+          VBELN  TYPE  VBELN,
+          POSNR  TYPE  POSNR,
+          ERDAT  TYPE  ERDAT,
+*         matnr  TYPE  matnr,
+          WERKS  TYPE  WERKS,
+          ERZET  TYPE  ERZET,
+          KWMENG TYPE  KWMENG,
+          EDATU  TYPE  EDATU,
+          WMENG  TYPE  WMENG,
+          ETENR  TYPE  ETENR,
+          LFSTA  TYPE  LFSTA,
+          AUFNR  TYPE  AUFNR,
+          MATNR  TYPE  MATNR,
+        END OF STR_GT.
+
+DATA : GT_MAIN TYPE TABLE OF STR_GT,
+       WA_MAIN TYPE STR_GT.
+
+TYPES : BEGIN OF STR_EKKN,
+          EBELN TYPE EKKN-EBELN,
+          EBELP TYPE EKKN-EBELP,
+          ZEKKN TYPE EKKN-ZEKKN,
+          VBELN TYPE EKKN-VBELN,
+          VBELP TYPE EKKN-VBELP,
+          AEDAT TYPE EKKO-AEDAT,
+          MATNR TYPE EKPO-MATNR,
+        END OF STR_EKKN.
+
+DATA : IT_EKKN TYPE TABLE OF STR_EKKN,
+       WA_EKKN TYPE STR_EKKN.
+
+TYPES : BEGIN OF STR_EKKN1,
+          EBELN TYPE EKKN-EBELN,
+          EBELP TYPE EKKN-EBELP,
+          ZEKKN TYPE EKKN-VBELN,
+          VBELN TYPE EKKN-VBELP,
+        END OF STR_EKKN1.
+
+DATA : LT_EKKN1 TYPE TABLE OF STR_EKKN1,
+       WA_EKKN1 TYPE STR_EKKN1.
+
+TYPES : BEGIN OF TY_MG,
+          EBELN      TYPE MSEG-EBELN,
+          EBELP      TYPE MSEG-EBELP,
+          BWART      TYPE MSEG-BWART,
+          CPUDT_MKPF TYPE MSEG-CPUDT_MKPF,
+          CPUTM_MKPF TYPE MSEG-CPUTM_MKPF,
+        END OF TY_MG.
+
+DATA : IT_MG TYPE TABLE OF TY_MG,
+       WA_MG TYPE TY_MG.
+
+TYPES : BEGIN OF STR_AFKO,
+          AUFNR  TYPE AFKO-AUFNR,
+          FTRMI  TYPE AFKO-FTRMI,
+          GAMNG  TYPE AFKO-GAMNG,
+          STLBEZ TYPE AFKO-STLBEZ,
+        END OF STR_AFKO.
+
+TYPES : BEGIN OF STR_MSEG,
+          AUFNR      TYPE MSEG-AUFNR,
+          BUDAT_MKPF TYPE MSEG-BUDAT_MKPF,
+          BWART      TYPE MSEG-BWART,
+        END OF STR_MSEG.
+
+TYPES : BEGIN OF STR_RESB,
+          AUFNR TYPE RESB-AUFNR,
+          RSNUM TYPE RESB-RSNUM,
+          RSPOS TYPE RESB-RSPOS,
+          BDMNG TYPE RESB-BDMNG,
+          ENMNG TYPE RESB-ENMNG,
+        END OF STR_RESB.
+
+TYPES : BEGIN OF STR_RESB1,
+          AUFNR TYPE RESB-AUFNR,
+          BDMNG TYPE RESB-BDMNG,
+          ENMNG TYPE RESB-ENMNG,
+        END OF STR_RESB1.
+
+DATA : IT_CAUFV1 TYPE TABLE OF STR_RESB1,
+       WA_CAUFV1 TYPE STR_RESB1.
+
+TYPES : BEGIN OF STR_AUFK,
+          AUFNR TYPE AUFK-AUFNR,
+          KDAUF TYPE AUFK-KDAUF,
+          KDPOS TYPE AUFK-KDPOS,
+        END OF STR_AUFK.
+
+TYPES : BEGIN OF STR_DATA1,
+          VBELN TYPE  VBELN,
+          POSNR TYPE  POSNR,
+*        matnr  TYPE  matnr,
+          ERDAT TYPE  ERDAT,
+          LFSTA TYPE  LFSTA,
+          LFGSA TYPE  LFGSA,
+          FKSTA TYPE  FKSTA,
+          ABSTA TYPE  ABSTA,
+          GBSTA TYPE  GBSTA,
+          AUFNR TYPE  AUFNR,
+          KDAUF TYPE  CHAR15,
+          KDPOS TYPE  KDPOS,
+        END OF STR_DATA1.
+**********************************************
+TYPES : BEGIN OF TY_AFRU,
+          AUFNR TYPE AFRU-AUFNR,
+          BUDAT TYPE AFRU-BUDAT,
+          IEDZ  TYPE AFRU-IEDZ,
+        END OF TY_AFRU.
+
+DATA : IT_AFRU TYPE TABLE OF TY_AFRU,
+       WA_AFRU TYPE TY_AFRU.
+
+TYPES : BEGIN OF TY_QAVE1,
+          AUFNR     TYPE QALS-AUFNR,
+          PRUEFLOS  TYPE QALS-PRUEFLOS,
+          VDATUM    TYPE QAVE-VDATUM,
+          VEZEITERF TYPE QAVE-VEZEITERF,
+        END OF TY_QAVE1.
+
+
+DATA : IT_QAVE1 TYPE TABLE OF TY_QAVE1,
+       WA_QAVE1 TYPE  TY_QAVE1.
+
+TYPES : BEGIN OF TY_QAVE2,
+          AUFNR     TYPE QALS-AUFNR,
+          EBELN     TYPE QALS-EBELN,
+          EBELP     TYPE QALS-EBELP,
+          PRUEFLOS  TYPE QALS-PRUEFLOS,
+          VDATUM    TYPE QAVE-VDATUM,
+          VEZEITERF TYPE QAVE-VEZEITERF,
+        END OF TY_QAVE2.
+
+DATA : IT_QAVE2 TYPE TABLE OF TY_QAVE2,
+       WA_QAVE2 TYPE  TY_QAVE2.
+
+TYPES : BEGIN OF TY_QALS,
+          AUFNR    TYPE QALS-AUFNR,
+          PRUEFLOS TYPE QALS-PRUEFLOS,
+          BWART    TYPE QALS-BWART,
+        END OF TY_QALS.
+
+DATA : IT_QALS TYPE TABLE OF TY_QALS,
+       WA_QALS TYPE TABLE OF TY_QALS.
+
+TYPES : BEGIN OF TY_XAUTO,
+          BWART      TYPE MSEG-BWART,
+          XAUTO      TYPE MSEG-XAUTO,
+          KDAUF      TYPE MSEG-KDAUF,
+          KDPOS      TYPE MSEG-KDPOS,
+          CPUDT_MKPF TYPE MSEG-CPUDT_MKPF,
+          CPUTM_MKPF TYPE MSEG-CPUTM_MKPF,
+          AUFNR      TYPE MSEG-AUFNR,
+          UMMAT      TYPE MSEG-UMMAT,
+        END OF TY_XAUTO.
+
+DATA : IT_XAUTO TYPE TABLE OF TY_XAUTO,
+       WA_XAUTO TYPE TY_XAUTO.
+
+DATA : IT_XAUTO1 TYPE TABLE OF TY_XAUTO,
+       WA_XAUTO1 TYPE TY_XAUTO.
+
+TYPES : BEGIN OF TY_QAVE,
+          PRUEFLOS  TYPE QAVE-PRUEFLOS,
+          VDATUM    TYPE QAVE-VDATUM,
+          VEZEITERF TYPE QAVE-VEZEITERF,
+*          bwart TYPE qave-bwart,
+        END OF TY_QAVE.
+
+DATA : IT_QAVE TYPE TABLE OF TY_QAVE,
+       WA_QAVE TYPE TABLE OF TY_QAVE.
+
+*TYPES : BEGIN OF ty_final,
+*          aufnr  TYPE char15,
+*           BHARAT_ORDER TYPE STRING,
+*           BHARAT_ITEM_NO TYPE STRING,
+*          erdat  TYPE caufv-erdat,
+*          ftrmi  TYPE afko-ftrmi,
+*          first_issue_date TYPE mseg-budat_mkpf,
+*          last_issue_date  TYPE mseg-budat_mkpf,
+*          txt04  TYPE string,
+*          kdauf  TYPE aufk-kdauf,
+*          kdpos  TYPE aufk-kdpos,
+*          MATNR TYPE MATNR,
+*          NAME1 TYPE KNA1-name1,
+*          budat type afru-budat,
+*          isdz type afru-isdz,
+
+
+*   END OF ty_final.
+
+********************************************
+TYPES : BEGIN OF STR_DATA,
+          AUFNR            TYPE CHAR15,
+          ERDAT            TYPE CAUFV-ERDAT,
+          FTRMI            TYPE AFKO-FTRMI,
+          FIRST_ISSUE_DATE TYPE MSEG-BUDAT_MKPF,
+          ERZET            TYPE ERZET,
+          LAST_ISSUE_DATE  TYPE MSEG-BUDAT_MKPF,
+          TXT04            TYPE STRING,
+          KDAUF            TYPE AUFK-KDAUF,
+          KDPOS            TYPE AUFK-KDPOS,
+          NAME1            TYPE KNA1-NAME1,
+          MATNR            TYPE MATNR,
+          BUDAT            TYPE BUDAT,
+          IEDZ             TYPE IEDZ,
+          EBELN            TYPE EBELN,
+          MATNR1           TYPE MATNR,
+          AEDAT            TYPE AEDAT,
+          KDPOS1           TYPE STRING,
+          VDATUM           TYPE QAVE-VDATUM,
+          VDATUM1          TYPE QAVE-VDATUM,
+          VEZEITERF        TYPE QAVE-VEZEITERF,
+          VEZEITERF1       TYPE QAVE-VEZEITERF,
+          LV_LAG           TYPE STRING,
+          LV_QA_LAG        TYPE STRING,
+          LOG_DATE         TYPE MSEG-CPUDT_MKPF,
+          LOG_TIME         TYPE MSEG-CPUTM_MKPF,
+          LOG_LAG          TYPE STRING,
+          ERFZEIT          TYPE CAUFV-ERFZEIT,
+          CPUDT_MKPF       TYPE MSEG-CPUDT_MKPF,
+          CPUTM_MKPF       TYPE STRING,
+          AFPO_MATNR       TYPE AFPO-MATNR,
+        END OF STR_DATA.
+
+TYPES : BEGIN OF STR_DOWN,
+          KDAUF            TYPE STRING,
+          KDPOS            TYPE STRING,
+          MATNR            TYPE STRING,
+          NAME1            TYPE STRING,
+          AUFNR            TYPE STRING,
+          AFPO_MATNR       TYPE STRING,
+          ERDAT            TYPE STRING,
+          FTRMI            TYPE STRING,
+          FIRST_ISSUE_DATE TYPE STRING,
+          LAST_ISSUE_DATE  TYPE STRING,
+          TXT04            TYPE STRING,
+          EBELN            TYPE STRING,
+          MATNR1           TYPE STRING,
+          AEDAT            TYPE STRING,
+          KDPOS1           TYPE STRING,
+          CPUDT_MKPF       TYPE STRING,
+          CPUTM_MKPF       TYPE STRING,
+          BUDAT            TYPE STRING,
+          IEDZ             TYPE STRING,
+          LV_LAG           TYPE STRING,
+          VDATUM           TYPE STRING,
+          VEZEITERF        TYPE STRING,
+          LV_QA_LAG        TYPE STRING,
+          LOG_DATE         TYPE STRING,
+          LOG_TIME         TYPE STRING,
+          LOG_LAG          TYPE STRING,
+          REF_DATE         TYPE STRING,
+          REF_TIME         TYPE STRING,
+        END OF STR_DOWN.
+
+TYPES : BEGIN OF STR_AUFK_N,
+          AUFNR TYPE CAUFV-AUFNR,
+          ERDAT TYPE CAUFV-ERDAT,
+        END OF STR_AUFK_N.
+
+**&---------------------------------------------------------------------*
+**& Data declaration / variable /Internal Table and Work Area Declaration
+**&---------------------------------------------------------------------*
+DATA : IT_CAUFV TYPE TABLE OF STR_CAUFV,
+       WA_CAUFV TYPE STR_CAUFV.
+
+DATA : IT_CUST TYPE TABLE OF TY_CUST,
+       WA_CUST TYPE TY_CUST.
+
+DATA : IT_AFKO TYPE TABLE OF STR_AFKO,
+       WA_AFKO TYPE STR_AFKO.
+
+DATA : IT_AUFK_N TYPE TABLE OF STR_AUFK_N,
+       WA_AUFK_N TYPE STR_AUFK_N.
+
+DATA : IT_MSEG TYPE TABLE OF STR_MSEG,
+       WA_MSEG TYPE STR_MSEG.
+
+DATA : IT_RESB TYPE TABLE OF STR_RESB,
+       WA_RESB TYPE STR_RESB.
+
+DATA : IT_DATA TYPE TABLE OF STR_DATA,
+       WA_DATA TYPE STR_DATA.
+
+DATA: IT_FIELDCAT TYPE SLIS_T_FIELDCAT_ALV,
+      WA_FIELDCAT TYPE SLIS_FIELDCAT_ALV.
+
+DATA : LV_SUM_BDMNG TYPE BDMNG.                     " Variable to store sum of BDMNG
+DATA : LV_SUM_ENMNG TYPE ENMNG.
+
+DATA : IT_DOWN TYPE TABLE OF STR_DOWN,
+       WA_DOWN TYPE STR_DOWN.
+
+DATA : IT_AUFK TYPE TABLE OF STR_AUFK,
+       WA_AUFK TYPE STR_AUFK.
+
+DATA : IT_DATA1 TYPE TABLE OF STR_DATA1,
+       WA_DATA1 TYPE STR_DATA1.
+
+DATA: LV_ERDAT            TYPE STRING,
+      LV_FTRMI            TYPE STRING,
+      LV_FIRST_ISSUE_DATE TYPE STRING,
+      LV_LAST_ISSUE_DATE  TYPE STRING.
+
+DATA:
+  LV_OBJNR        TYPE CAUFV-OBJNR,
+  OBJECT_TAB      TYPE BSVX,
+  LV_TOTAL_ISSUED TYPE MSEG-MENGE.
+
+DATA: LV_NAME   TYPE THEAD-TDNAME,
+      LV_LINES  TYPE STANDARD TABLE OF TLINE,
+      WA_LINES  LIKE TLINE,
+      LS_ITMTXT TYPE TLINE,
+      LS_MATTXT TYPE TLINE.
+
+*----------------------------------------------------------------------*
+* Selection screen
+*----------------------------------------------------------------------*
+SELECTION-SCREEN : BEGIN OF BLOCK B1 WITH FRAME TITLE TEXT-001.
+  SELECT-OPTIONS : S_VBELN FOR VBAP-VBELN,
+                   S_POSNR FOR VBAP-POSNR,
+                   S_ERDAT FOR VBAP-ERDAT.
+  PARAMETERS :    P_WERKS TYPE CAUFV-WERKS OBLIGATORY DEFAULT 'PL01' MODIF ID BU.
+SELECTION-SCREEN END OF BLOCK B1.
+
+*SELECTION-SCREEN BEGIN OF BLOCK b4 WITH FRAME TITLE TEXT-002.
+*PARAMETERS open_so  RADIOBUTTON GROUP code DEFAULT 'X' USER-COMMAND codegen.
+*PARAMETERS comp_so  RADIOBUTTON GROUP code.
+*SELECTION-SCREEN END OF BLOCK b4.
+
+SELECTION-SCREEN BEGIN OF BLOCK B2 WITH FRAME TITLE TEXT-005.
+  PARAMETERS P_DOWN AS CHECKBOX.
+  PARAMETERS P_FOLDER TYPE RLGRAP-FILENAME DEFAULT '/Delval/India'.
+SELECTION-SCREEN END OF BLOCK B2.
+
+SELECTION-SCREEN :BEGIN OF BLOCK B3 WITH FRAME TITLE TEXT-006.
+  SELECTION-SCREEN COMMENT /1(70) TEXT-004.
+SELECTION-SCREEN: END OF BLOCK B3.
+
+AT SELECTION-SCREEN OUTPUT.
+  LOOP AT SCREEN.
+    IF SCREEN-GROUP1 = 'BU'.
+      SCREEN-INPUT = '0'.
+      MODIFY SCREEN.
+    ENDIF.
+  ENDLOOP.
+
+*&---------------------------------------------------------------------*
+*& Start of Selection
+*&---------------------------------------------------------------------*
+
+START-OF-SELECTION.
+
+  PERFORM GET_DATA.
+  PERFORM FILL_FIELDCAT.
+  PERFORM DISPLAY_DATA.
+
+*&---------------------------------------------------------------------*
+*&      Form  GET_DATA
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM GET_DATA .
+
+  SELECT A~VBELN
+         A~POSNR
+         A~ERDAT
+         A~MATNR
+         A~WERKS
+         A~ERZET
+         A~KWMENG
+         D~EDATU
+         D~WMENG
+         D~ETENR
+         C~LFSTA
+      INTO TABLE GT_MAIN1
+      FROM VBAP AS A
+      JOIN VBAP AS C ON C~VBELN = A~VBELN
+                    AND C~POSNR = A~POSNR
+      JOIN VBEP AS D ON A~VBELN = D~VBELN
+                    AND A~POSNR = D~POSNR
+      WHERE A~VBELN IN S_VBELN
+      AND   A~WERKS EQ P_WERKS
+      AND   A~ERDAT IN S_ERDAT
+      AND   A~POSNR IN S_POSNR
+      AND   C~LFSTA = 'C'
+      AND   C~GBSTA = 'C'
+      AND   C~LFGSA = 'C'
+      AND   D~ETTYP = 'CP'.
+
+  IF GT_MAIN1 IS INITIAL.
+    MESSAGE |DATA NOT FOUND| TYPE 'E'.
+  ENDIF.
+
+  SELECT A~VBELN
+         A~KUNNR
+         C~NAME1
+       FROM VBAK AS A
+       INNER JOIN KNA1 AS C ON C~KUNNR = A~KUNNR
+       INTO TABLE IT_CUST
+       FOR ALL ENTRIES IN GT_MAIN1
+       WHERE A~VBELN = GT_MAIN1-VBELN.
+
+  SELECT A~VBELN
+         A~POSNR
+         A~ERDAT
+*         a~matnr
+         A~WERKS
+         A~ERZET
+         A~KWMENG
+         D~EDATU
+         D~WMENG
+         D~ETENR
+         C~LFSTA
+         F~AUFNR
+         F~MATNR
+    INTO TABLE GT_MAIN
+    FROM VBAP AS A
+    JOIN VBEP AS D ON A~VBELN = D~VBELN
+                  AND A~POSNR = D~POSNR
+    JOIN VBAP AS C ON A~VBELN = C~VBELN
+                  AND A~POSNR = C~POSNR
+    JOIN AFPO AS F ON A~VBELN = F~KDAUF
+                  AND A~POSNR = F~KDPOS
+    WHERE A~VBELN IN S_VBELN
+    AND   A~WERKS = P_WERKS
+    AND   A~ERDAT IN S_ERDAT
+    AND   A~POSNR IN S_POSNR
+    AND   C~LFSTA = 'C'
+    AND   C~LFGSA = 'C'
+    AND   C~GBSTA = 'C'
+    AND   D~ETTYP = 'CP'.
+
+
+*  IF open_so EQ 'X'.
+*  SELECT ebeln
+*         ebelp
+*         vbeln
+*         vbelp
+*   FROM ekkn
+*   INTO TABLE lt_ekkn1
+*   WHERE vbeln IN s_vbeln.
+*  ENDIF.
+*  SELECT ebeln
+*         ebelp
+*         loekz
+*         txz01
+*         matnr
+*         werks
+*         menge
+*         knttp
+*         FROM ekpo
+*         INTO TABLE it_ekkn
+*         FOR ALL ENTRIES IN lt_ekkn1
+*         WHERE ebeln = lt_ekkn1-ebeln
+*         AND ebelp = lt_ekkn1-ebelp
+*         AND loekz = ' '
+*         AND werks = 'PL01'
+*         AND knttp = 'E'
+*         AND elikz = ' '.
+*  IF lt_ekkn1 IS NOT INITIAL.
+
+  SELECT A~EBELN
+         A~EBELP
+         A~ZEKKN
+         A~VBELN
+         A~VBELP
+         B~AEDAT
+         C~MATNR
+    INTO TABLE IT_EKKN
+    FROM EKKN AS A INNER JOIN EKKO AS B ON
+    A~EBELN = B~EBELN
+    JOIN EKPO AS C ON
+    A~EBELN EQ C~EBELN
+    FOR ALL ENTRIES IN GT_MAIN1
+    WHERE VBELN = GT_MAIN1-VBELN
+    AND   VBELP = GT_MAIN1-POSNR.
+*          AND   matnr = gt_main1-matnr.
+
+  SORT IT_EKKN BY VBELN VBELP EBELN EBELP.
+  DELETE ADJACENT DUPLICATES FROM IT_EKKN COMPARING VBELN VBELP EBELN EBELP.
+*  ENDIF.
+
+  IF IT_EKKN IS NOT INITIAL.
+
+    SELECT EBELN
+           EBELP
+           BWART
+           CPUDT_MKPF
+           CPUTM_MKPF
+           FROM MSEG
+           INTO TABLE IT_MG
+           FOR ALL ENTRIES IN IT_EKKN
+           WHERE EBELN = IT_EKKN-EBELN
+           AND   EBELP = IT_EKKN-EBELP
+           AND   BWART = '101'.
+
+    SORT IT_MG BY EBELN EBELP CPUDT_MKPF CPUTM_MKPF DESCENDING.
+
+  ENDIF.
+
+  IF GT_MAIN IS NOT INITIAL .
+    SELECT AUFNR
+           ERDAT
+      FROM AUFK
+      INTO TABLE IT_AUFK_N
+      FOR ALL ENTRIES IN GT_MAIN
+       WHERE AUFNR = GT_MAIN-AUFNR.
+
+
+    SELECT AUFNR
+           FTRMI
+           GAMNG
+           STLBEZ
+      FROM AFKO
+           INTO TABLE IT_AFKO
+           FOR ALL ENTRIES IN GT_MAIN
+           WHERE AUFNR = GT_MAIN-AUFNR.
+
+    SELECT AUFNR
+           BUDAT_MKPF
+           BWART      FROM MSEG
+           INTO TABLE IT_MSEG
+           FOR ALL ENTRIES IN GT_MAIN
+           WHERE AUFNR = GT_MAIN-AUFNR.
+
+    DATA(IT_MSEG_TEMP) = IT_MSEG[].
+
+    DATA(IT_MSEG_TEMP1) = IT_MSEG[].
+
+    SORT IT_MSEG_TEMP BY BUDAT_MKPF  ASCENDING.
+
+    SORT IT_MSEG_TEMP1 BY BUDAT_MKPF DESCENDING.
+
+    SELECT OBJNR, ERDAT, AUFNR , ERFZEIT
+           FROM CAUFV
+           INTO TABLE @DATA(IT_CAUFV_NEW)
+           FOR ALL ENTRIES IN @IT_CAUFV
+           WHERE AUFNR = @IT_CAUFV-AUFNR.
+
+    SELECT AUFNR
+           PRUEFLOS
+           BWART FROM QALS
+           INTO CORRESPONDING FIELDS OF TABLE IT_QALS
+           FOR ALL ENTRIES IN GT_MAIN
+           WHERE AUFNR = GT_MAIN-AUFNR
+           AND BWART IN ('321','311').
+
+    SELECT AUFNR
+           BUDAT
+           IEDZ
+           FROM AFRU
+           INTO TABLE IT_AFRU
+           FOR ALL ENTRIES IN GT_MAIN
+           WHERE AUFNR = GT_MAIN-AUFNR.
+
+    SORT IT_AFRU BY AUFNR BUDAT IEDZ DESCENDING.
+
+    SELECT A~AUFNR
+           A~PRUEFLOS
+           B~VDATUM
+           B~VEZEITERF
+      INTO TABLE IT_QAVE1
+      FROM QALS AS A JOIN QAVE AS B
+      ON A~PRUEFLOS EQ B~PRUEFLOS
+      FOR ALL ENTRIES IN GT_MAIN
+      WHERE AUFNR = GT_MAIN-AUFNR.
+
+    SELECT  BWART
+            XAUTO
+            KDAUF
+            KDPOS
+            CPUDT_MKPF
+            CPUTM_MKPF
+            AUFNR
+            UMMAT
+      INTO TABLE IT_XAUTO
+      FROM MSEG
+      FOR ALL ENTRIES IN GT_MAIN
+      WHERE KDAUF = GT_MAIN-VBELN
+*      AND   kdpos = gt_main-posnr
+      AND   BWART = '311'
+      AND   XAUTO = 'X'.
+
+    SORT IT_XAUTO BY KDAUF KDPOS CPUDT_MKPF CPUTM_MKPF DESCENDING.
+  ENDIF.
+
+  IF IT_EKKN IS NOT INITIAL.
+
+    SELECT A~AUFNR
+           A~EBELN
+           A~EBELP
+           A~PRUEFLOS
+           B~VDATUM
+           B~VEZEITERF
+    INTO TABLE IT_QAVE2
+    FROM QALS AS A JOIN QAVE AS B
+    ON A~PRUEFLOS EQ B~PRUEFLOS
+    FOR ALL ENTRIES IN IT_EKKN
+    WHERE EBELN = IT_EKKN-EBELN
+    AND   EBELP = IT_EKKN-EBELP.
+
+    SELECT  BWART
+            XAUTO
+            KDAUF
+            KDPOS
+            CPUDT_MKPF
+            CPUTM_MKPF
+            AUFNR
+            UMMAT
+    INTO TABLE IT_XAUTO1
+    FROM MSEG
+    FOR ALL ENTRIES IN IT_EKKN
+    WHERE KDAUF = IT_EKKN-VBELN
+    AND   KDPOS = IT_EKKN-VBELP
+    AND   MATNR = IT_EKKN-MATNR
+    AND   BWART = '311'
+    AND   XAUTO = 'X'.
+
+  ENDIF.
+
+  SORT GT_MAIN BY AUFNR.
+  LOOP AT GT_MAIN1 INTO WA_MAIN1 .
+    WA_DATA-KDAUF  = WA_MAIN1-VBELN.
+    WA_DATA-KDPOS  = WA_MAIN1-POSNR.
+    WA_DATA-MATNR  = WA_MAIN1-MATNR.
+
+    READ TABLE GT_MAIN INTO WA_MAIN WITH KEY VBELN = WA_DATA-KDAUF POSNR = WA_DATA-KDPOS.
+    IF SY-SUBRC = 0.
+      WA_DATA-AUFNR       = WA_MAIN-AUFNR.
+      WA_DATA-ERZET       = WA_MAIN-ERZET.
+      WA_DATA-AFPO_MATNR  = WA_MAIN-MATNR.
+    ENDIF.
+
+    READ TABLE IT_AFRU INTO WA_AFRU WITH KEY AUFNR = WA_DATA-AUFNR.
+    IF SY-SUBRC = 0.
+      WA_DATA-BUDAT = WA_AFRU-BUDAT.
+      WA_DATA-IEDZ = WA_AFRU-IEDZ.
+    ENDIF.
+    READ TABLE IT_AUFK_N INTO WA_AUFK_N WITH KEY AUFNR = WA_DATA-AUFNR .
+    IF SY-SUBRC = 0.
+      WA_DATA-ERDAT = WA_AUFK_N-ERDAT.
+    ENDIF.
+
+    READ TABLE IT_XAUTO INTO WA_XAUTO WITH KEY KDAUF = WA_DATA-KDAUF KDPOS = WA_DATA-KDPOS UMMAT = WA_DATA-AFPO_MATNR.
+    IF SY-SUBRC = 0.
+      WA_DATA-LOG_DATE = WA_XAUTO-CPUDT_MKPF.
+      WA_DATA-LOG_TIME = WA_XAUTO-CPUTM_MKPF.
+    ENDIF.
+
+    READ TABLE IT_AFKO INTO WA_AFKO WITH KEY AUFNR = WA_DATA-AUFNR .
+    IF SY-SUBRC = 0.
+      WA_DATA-FTRMI  = WA_AFKO-FTRMI.
+    ENDIF.
+
+    READ TABLE  IT_MSEG_TEMP INTO DATA(LS_MSEG_TEMP) WITH KEY AUFNR = WA_DATA-AUFNR .
+    IF SY-SUBRC = 0.
+      WA_DATA-FIRST_ISSUE_DATE = LS_MSEG_TEMP-BUDAT_MKPF.
+    ENDIF.
+*
+    READ TABLE  IT_MSEG_TEMP1 INTO DATA(LS_MSEG_TEMP1) WITH KEY AUFNR = WA_DATA-AUFNR .
+    IF SY-SUBRC = 0.
+      WA_DATA-LAST_ISSUE_DATE = LS_MSEG_TEMP1-BUDAT_MKPF.
+    ENDIF.
+    READ TABLE IT_CAUFV_NEW INTO DATA(WA_CAUFV_NEW) WITH KEY AUFNR = WA_DATA-AUFNR .
+    IF  SY-SUBRC = 0.
+      LV_OBJNR = WA_CAUFV_NEW-OBJNR.
+      WA_DATA-ERFZEIT = WA_CAUFV_NEW-ERFZEIT.
+
+      CALL FUNCTION 'STATUS_TEXT_EDIT'
+        EXPORTING
+          CLIENT           = SY-MANDT
+          FLG_USER_STAT    = 'X'
+          OBJNR            = LV_OBJNR
+          ONLY_ACTIVE      = 'X'
+          SPRAS            = SY-LANGU
+        IMPORTING
+          LINE             = OBJECT_TAB-STTXT
+        EXCEPTIONS
+          OBJECT_NOT_FOUND = 1
+          OTHERS           = 2.
+      IF SY-SUBRC <> 0.
+* IMPLEMENT SUITABLE ERROR HANDLING HERE
+      ENDIF.
+
+      WA_DATA-TXT04 = OBJECT_TAB-STTXT.
+    ENDIF.
+
+    READ TABLE IT_CUST INTO WA_CUST WITH KEY VBELN = WA_DATA-KDAUF.
+    IF SY-SUBRC = 0.
+      WA_DATA-NAME1 = WA_CUST-NAME1.
+    ENDIF.
+
+    READ TABLE IT_QAVE1 INTO WA_QAVE1 WITH KEY AUFNR = WA_DATA-AUFNR.
+    IF SY-SUBRC = 0.
+      WA_DATA-VDATUM    = WA_QAVE1-VDATUM.
+      WA_DATA-VEZEITERF = WA_QAVE1-VEZEITERF.
+    ENDIF.
+
+    DATA(LV_VDATUM)    = WA_DATA-VDATUM.
+    DATA(LV_VEZEITERF) = WA_DATA-VEZEITERF.
+    DATA(LV_LOG_DATE)  = WA_DATA-LOG_DATE.
+    DATA(LV_LOG_TIME)  = WA_DATA-LOG_TIME.
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+    DATA : LV_DATE  TYPE P,
+           LV_DATE1 TYPE STRING,
+           LV_TIME  TYPE P,
+           LV_TIME1 TYPE STRING.
+    DATA LV_DAYS TYPE CHAR4.
+    DATA LV_HOURS TYPE CHAR5.
+    LV_DAYS  = 'Days'.
+    LV_HOURS = 'Hours'.
+
+    CALL FUNCTION 'SD_DATETIME_DIFFERENCE'
+      EXPORTING
+        DATE1            = WA_DATA-BUDAT
+        TIME1            = WA_DATA-IEDZ
+        DATE2            = WA_DATA-ERDAT
+        TIME2            = WA_DATA-ERFZEIT
+      IMPORTING
+        DATEDIFF         = LV_DATE
+        TIMEDIFF         = LV_TIME
+*       EARLIEST         =
+      EXCEPTIONS
+        INVALID_DATETIME = 1
+        OTHERS           = 2.
+    IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+    ENDIF.
+
+    IF  SY-SUBRC = 0.
+      LV_DATE1 = LV_DATE .
+      CONCATENATE  LV_DATE1 LV_DAYS INTO LV_DATE1.
+      LV_TIME1 = LV_TIME.
+      CONCATENATE  LV_TIME1 LV_HOURS INTO LV_TIME1.
+
+      CONCATENATE LV_DATE1 LV_TIME1 INTO WA_DATA-LV_LAG SEPARATED BY '&'.
+    ENDIF.
+
+    IF  WA_DATA-VDATUM IS INITIAL AND  WA_DATA-VEZEITERF IS INITIAL.
+      LV_VDATUM    = SY-DATUM.
+      LV_VEZEITERF = SY-UZEIT.
+    ENDIF.
+    CLEAR : LV_DATE,LV_TIME,LV_TIME1,LV_DATE1.
+    CALL FUNCTION 'SD_DATETIME_DIFFERENCE'   """"""""""""ass completation date - Qa compl date
+      EXPORTING
+        DATE1            = WA_DATA-BUDAT
+        TIME1            = WA_DATA-IEDZ
+        DATE2            = LV_VDATUM
+        TIME2            = LV_VEZEITERF
+      IMPORTING
+        DATEDIFF         = LV_DATE
+        TIMEDIFF         = LV_TIME
+*       EARLIEST         =
+      EXCEPTIONS
+        INVALID_DATETIME = 1
+        OTHERS           = 2.
+    IF SY-SUBRC = 0.
+      LV_DATE1 = LV_DATE .
+      CONCATENATE  LV_DATE1 LV_DAYS INTO LV_DATE1.
+      LV_TIME1 = LV_TIME.
+      CONCATENATE  LV_TIME1 LV_HOURS INTO LV_TIME1.
+
+      CONCATENATE LV_DATE1 LV_TIME1 INTO WA_DATA-LV_QA_LAG SEPARATED BY '&'.
+      CLEAR :LV_VDATUM,LV_VEZEITERF.
+    ENDIF.
+
+    IF WA_DATA-VDATUM IS INITIAL AND  WA_DATA-LOG_DATE IS INITIAL.
+      LV_LOG_DATE    = ''.
+      LV_LOG_TIME    = ''.
+    ELSEIF WA_DATA-VDATUM IS NOT INITIAL AND  WA_DATA-LOG_DATE IS  INITIAL.
+      LV_LOG_DATE    = SY-DATUM.
+      LV_LOG_TIME    = SY-UZEIT.
+    ENDIF.
+    CLEAR : LV_DATE,LV_TIME,LV_TIME1,LV_DATE1.
+    CALL FUNCTION 'SD_DATETIME_DIFFERENCE'   """""""""""" Logistic lag = Logistic Receipt  Date  - Qa compl date
+      EXPORTING
+        DATE1            = LV_LOG_DATE
+        TIME1            = LV_LOG_TIME
+        DATE2            = WA_DATA-VDATUM
+        TIME2            = WA_DATA-VEZEITERF
+      IMPORTING
+        DATEDIFF         = LV_DATE
+        TIMEDIFF         = LV_TIME
+*       EARLIEST         =
+      EXCEPTIONS
+        INVALID_DATETIME = 1
+        OTHERS           = 2.
+    IF SY-SUBRC = 0.
+      LV_DATE1 = LV_DATE .
+      CONCATENATE  LV_DATE1 LV_DAYS INTO LV_DATE1.
+      LV_TIME1 = LV_TIME.
+      CONCATENATE  LV_TIME1 LV_HOURS INTO LV_TIME1.
+
+      CONCATENATE LV_DATE1 LV_TIME1 INTO WA_DATA-LOG_LAG SEPARATED BY '&'.
+    ENDIF.
+
+    """"  """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+    READ TABLE IT_EKKN INTO WA_EKKN WITH KEY VBELN = WA_DATA-KDAUF VBELP = WA_MAIN1-POSNR MATNR = WA_MAIN1-MATNR.
+    IF SY-SUBRC = 0.
+      WA_DATA-EBELN  = WA_EKKN-EBELN.
+      WA_DATA-MATNR1 = WA_EKKN-MATNR.
+      WA_DATA-AEDAT  = WA_EKKN-AEDAT.
+      WA_DATA-KDPOS1 = WA_EKKN-EBELP.
+      WA_EKKN-VBELN  = WA_EKKN-VBELN.
+      WA_EKKN-VBELP  = WA_EKKN-VBELP.
+    ENDIF.
+
+    READ TABLE IT_XAUTO INTO WA_XAUTO WITH KEY KDAUF = WA_EKKN-VBELN KDPOS = WA_MAIN1-POSNR.
+    IF SY-SUBRC = 0.
+      WA_DATA-LOG_DATE = WA_XAUTO-CPUDT_MKPF.
+      WA_DATA-LOG_TIME = WA_XAUTO-CPUTM_MKPF.
+    ENDIF.
+
+    READ TABLE IT_MG INTO WA_MG WITH KEY EBELN = WA_DATA-EBELN  EBELP = WA_DATA-KDPOS1.
+    IF SY-SUBRC = 0.
+      WA_DATA-CPUDT_MKPF  = WA_MG-CPUDT_MKPF.
+      WA_DATA-CPUTM_MKPF  = WA_MG-CPUTM_MKPF.
+    ENDIF.
+
+    READ TABLE IT_QAVE2 INTO WA_QAVE2 WITH KEY EBELN = WA_DATA-EBELN  EBELP = WA_DATA-KDPOS1.
+    IF SY-SUBRC = 0.
+      WA_DATA-VDATUM    = WA_QAVE2-VDATUM.
+      WA_DATA-VEZEITERF = WA_QAVE2-VEZEITERF.
+    ENDIF.
+
+    IF WA_DATA-EBELN IS NOT INITIAL.
+
+      LV_DAYS  = 'Days'.
+      DATA LV_DAYS21 TYPE I.
+      CALL FUNCTION 'HR_99S_INTERVAL_BETWEEN_DATES'
+        EXPORTING
+          BEGDA = WA_DATA-CPUDT_MKPF
+          ENDDA = WA_DATA-AEDAT
+*         TAB_MODE        = ' '
+        IMPORTING
+          DAYS  = LV_DAYS21.
+
+      LV_DATE1 = LV_DAYS21 .
+      CONCATENATE  LV_DATE1 LV_DAYS INTO WA_DATA-LV_LAG.
+
+      """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""final  QA LAG = Final QA Completatio - GRN Date
+      LV_VDATUM    = WA_DATA-VDATUM.
+      LV_VEZEITERF = WA_DATA-VEZEITERF.
+      LV_LOG_DATE  = WA_DATA-CPUDT_MKPF.
+      LV_LOG_TIME  = WA_DATA-CPUTM_MKPF.
+      DATA(LOG_DATE) = WA_DATA-LOG_DATE.
+      DATA(LOG_TIME) = WA_DATA-LOG_TIME.
+      IF WA_DATA-VDATUM IS INITIAL AND  WA_DATA-CPUDT_MKPF IS INITIAL.
+        LV_LOG_DATE    = ''.
+        LV_LOG_TIME    = ''.
+      ELSEIF WA_DATA-VDATUM IS NOT INITIAL AND  WA_DATA-CPUDT_MKPF IS  INITIAL.
+        LV_LOG_DATE    = SY-DATUM.
+        LV_LOG_TIME    = SY-UZEIT.
+      ENDIF.
+      CLEAR : LV_DATE,LV_TIME,LV_TIME1,LV_DATE1.
+      CALL FUNCTION 'SD_DATETIME_DIFFERENCE'
+        EXPORTING
+          DATE1            = LV_VDATUM
+          TIME1            = LV_VEZEITERF
+          DATE2            = LV_LOG_DATE
+          TIME2            = LV_LOG_TIME
+        IMPORTING
+          DATEDIFF         = LV_DATE
+          TIMEDIFF         = LV_TIME
+*         EARLIEST         =
+        EXCEPTIONS
+          INVALID_DATETIME = 1
+          OTHERS           = 2.
+      IF SY-SUBRC = 0.
+        LV_DATE1 = LV_DATE .
+        CONCATENATE  LV_DATE1 LV_DAYS INTO LV_DATE1.
+        LV_TIME1 = LV_TIME.
+        CONCATENATE  LV_TIME1 LV_HOURS INTO LV_TIME1.
+
+        CONCATENATE LV_DATE1 LV_TIME1 INTO WA_DATA-LV_QA_LAG SEPARATED BY '&'.
+      ENDIF.
+
+      """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""Logistic lag = Logistic Receipt  Date  - Qa compl date
+      IF WA_DATA-VDATUM IS INITIAL AND  WA_DATA-LOG_DATE IS INITIAL.
+        LV_LOG_DATE    = ''.
+        LV_LOG_TIME    = ''.
+      ELSEIF WA_DATA-VDATUM IS NOT INITIAL AND  WA_DATA-LOG_DATE IS  INITIAL.
+        LV_LOG_DATE    = SY-DATUM.
+        LV_LOG_TIME    = SY-UZEIT.
+      ENDIF.
+      CLEAR : LV_DATE,LV_TIME,LV_TIME1,LV_DATE1.
+      CALL FUNCTION 'SD_DATETIME_DIFFERENCE'
+        EXPORTING
+          DATE1            = LOG_DATE
+          TIME1            = LOG_TIME
+          DATE2            = LV_VDATUM
+          TIME2            = LV_VEZEITERF
+        IMPORTING
+          DATEDIFF         = LV_DATE
+          TIMEDIFF         = LV_TIME
+*         EARLIEST         =
+        EXCEPTIONS
+          INVALID_DATETIME = 1
+          OTHERS           = 2.
+      IF SY-SUBRC = 0.
+        LV_DATE1 = LV_DATE .
+        CONCATENATE  LV_DATE1 LV_DAYS INTO LV_DATE1.
+        LV_TIME1 = LV_TIME.
+        CONCATENATE  LV_TIME1 LV_HOURS INTO LV_TIME1.
+
+        CONCATENATE LV_DATE1 LV_TIME1 INTO WA_DATA-LOG_LAG SEPARATED BY '&'.
+      ENDIF.
+    ENDIF.
+
+    IF WA_DATA-EBELN IS INITIAL AND  WA_DATA-AUFNR IS INITIAL.
+      CLEAR :  WA_DATA-LOG_DATE , WA_DATA-LOG_TIME .
+    ENDIF.
+
+    IF WA_DATA-IEDZ EQ '000000'.
+      WA_DATA-IEDZ = '' .
+    ENDIF.
+    IF WA_DATA-CPUTM_MKPF EQ '000000'.
+      WA_DATA-CPUTM_MKPF = '' .
+    ENDIF.
+    IF  WA_DATA-VEZEITERF EQ '000000'.
+      WA_DATA-VEZEITERF  = ''.
+    ENDIF.
+    IF  WA_DATA-LOG_TIME EQ '000000'.
+      WA_DATA-LOG_TIME = ''.
+    ENDIF.
+
+    IF WA_DATA-CPUTM_MKPF IS NOT INITIAL.
+      CONCATENATE WA_DATA-CPUTM_MKPF+0(2) ':' WA_DATA-CPUTM_MKPF+2(2) ':' WA_DATA-CPUTM_MKPF+4(2) INTO WA_DATA-CPUTM_MKPF.
+    ENDIF.
+
+    WA_DATA-AUFNR = WA_DATA-AUFNR+4(8).
+    WA_DATA-KDAUF = WA_DATA-KDAUF+2(8).
+
+    APPEND WA_DATA TO IT_DATA.
+    CLEAR :WA_DATA,WA_CAUFV1,LV_VDATUM,LV_VEZEITERF,LV_LOG_DATE,LV_LOG_TIME,LV_OBJNR.
+  ENDLOOP.
+  SORT IT_DATA.
+  DELETE ADJACENT DUPLICATES FROM IT_DATA COMPARING AUFNR KDAUF KDPOS.
+  DELETE ADJACENT DUPLICATES FROM IT_DATA COMPARING ALL FIELDS.
+
+  LOOP AT IT_EKKN INTO WA_EKKN.
+    WA_DATA-EBELN   = WA_EKKN-EBELN.
+    WA_DATA-KDPOS1  = WA_EKKN-EBELP.
+    WA_DATA-KDAUF   = WA_EKKN-VBELN.
+    WA_DATA-KDPOS   = WA_EKKN-VBELP.
+    WA_DATA-MATNR1  = WA_EKKN-MATNR.
+    WA_DATA-AEDAT   = WA_EKKN-AEDAT.
+
+    READ TABLE GT_MAIN1 INTO WA_MAIN1 WITH KEY VBELN = WA_DATA-KDAUF POSNR = WA_DATA-KDPOS.
+    IF SY-SUBRC = 0.
+      WA_DATA-MATNR  = WA_MAIN1-MATNR.
+    ENDIF.
+
+    READ TABLE IT_CUST INTO WA_CUST WITH KEY VBELN = WA_DATA-KDAUF.
+    IF SY-SUBRC = 0.
+      WA_DATA-NAME1 = WA_CUST-NAME1.
+    ENDIF.
+
+    READ TABLE IT_MG INTO WA_MG WITH KEY EBELN = WA_DATA-EBELN  EBELP = WA_DATA-KDPOS1.                """GRN DATE AND TIME
+    IF SY-SUBRC = 0.
+      WA_DATA-CPUDT_MKPF  = WA_MG-CPUDT_MKPF.
+      WA_DATA-CPUTM_MKPF  = WA_MG-CPUTM_MKPF.
+    ENDIF.
+
+    READ TABLE IT_QAVE2 INTO WA_QAVE2 WITH KEY EBELN = WA_DATA-EBELN  EBELP = WA_DATA-KDPOS1.          """FINAL QA COMPLETATION TIME AND DATE
+    IF SY-SUBRC = 0.
+      WA_DATA-VDATUM    = WA_QAVE2-VDATUM.
+      WA_DATA-VEZEITERF = WA_QAVE2-VEZEITERF.
+    ENDIF.
+
+    READ TABLE IT_XAUTO1 INTO WA_XAUTO1 WITH KEY KDAUF = WA_DATA-KDAUF KDPOS = WA_DATA-KDPOS UMMAT = WA_DATA-MATNR1.  """LOGISTIC TIME AND DATE
+    IF SY-SUBRC = 0.
+      WA_DATA-LOG_DATE = WA_XAUTO1-CPUDT_MKPF.
+      WA_DATA-LOG_TIME = WA_XAUTO1-CPUTM_MKPF.
+    ENDIF.
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""  Assembly lag = GRN DATE - PO CREATION DATE
+    IF WA_DATA-CPUDT_MKPF IS NOT INITIAL.
+
+      LV_DAYS  = 'Days'.
+      DATA LV_DAYS21_NEW TYPE I.
+      CALL FUNCTION 'HR_99S_INTERVAL_BETWEEN_DATES'
+        EXPORTING
+          BEGDA = WA_DATA-CPUDT_MKPF
+          ENDDA = WA_DATA-AEDAT
+*         TAB_MODE        = ' '
+        IMPORTING
+          DAYS  = LV_DAYS21_NEW.
+
+      LV_DATE1 = LV_DAYS21_NEW .
+      CONCATENATE  LV_DATE1 LV_DAYS INTO WA_DATA-LV_LAG.
+    ENDIF.
+
+    """"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""final  QA LAG = Final QA Completatio - GRN Date
+    LV_VDATUM    = WA_DATA-VDATUM.
+    LV_VEZEITERF = WA_DATA-VEZEITERF.
+    LV_LOG_DATE  = WA_DATA-CPUDT_MKPF.
+    LV_LOG_TIME  = WA_DATA-CPUTM_MKPF.
+    LOG_DATE     = WA_DATA-LOG_DATE.
+    LOG_TIME     = WA_DATA-LOG_TIME.
+    IF WA_DATA-VDATUM IS INITIAL AND  WA_DATA-CPUDT_MKPF IS INITIAL.
+      LV_LOG_DATE    = ''.
+      LV_LOG_TIME    = ''.
+    ELSEIF WA_DATA-VDATUM IS NOT INITIAL AND  WA_DATA-CPUDT_MKPF IS  INITIAL.
+      LV_LOG_DATE    = SY-DATUM.
+      LV_LOG_TIME    = SY-UZEIT.
+    ENDIF.
+    CLEAR : LV_DATE,LV_TIME,LV_TIME1,LV_DATE1.
+    CALL FUNCTION 'SD_DATETIME_DIFFERENCE'
+      EXPORTING
+        DATE1            = LV_VDATUM
+        TIME1            = LV_VEZEITERF
+        DATE2            = LV_LOG_DATE
+        TIME2            = LV_LOG_TIME
+      IMPORTING
+        DATEDIFF         = LV_DATE
+        TIMEDIFF         = LV_TIME
+*       EARLIEST         =
+      EXCEPTIONS
+        INVALID_DATETIME = 1
+        OTHERS           = 2.
+    IF SY-SUBRC = 0.
+      LV_DATE1 = LV_DATE .
+      CONCATENATE  LV_DATE1 LV_DAYS INTO LV_DATE1.
+      LV_TIME1 = LV_TIME.
+      CONCATENATE  LV_TIME1 LV_HOURS INTO LV_TIME1.
+
+      CONCATENATE LV_DATE1 LV_TIME1 INTO WA_DATA-LV_QA_LAG SEPARATED BY '&'.
+    ENDIF.
+    """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""Logistic lag = Logistic Receipt  Date  - Qa compl date
+    IF WA_DATA-VDATUM IS INITIAL AND  WA_DATA-LOG_DATE IS INITIAL.
+      LV_LOG_DATE    = ''.
+      LV_LOG_TIME    = ''.
+    ELSEIF WA_DATA-VDATUM IS NOT INITIAL AND  WA_DATA-LOG_DATE IS  INITIAL.
+      LV_LOG_DATE    = SY-DATUM.
+      LV_LOG_TIME    = SY-UZEIT.
+    ENDIF.
+    CLEAR : LV_DATE,LV_TIME,LV_TIME1,LV_DATE1.
+    CALL FUNCTION 'SD_DATETIME_DIFFERENCE'
+      EXPORTING
+        DATE1            = LOG_DATE
+        TIME1            = LOG_TIME
+        DATE2            = LV_VDATUM
+        TIME2            = LV_VEZEITERF
+      IMPORTING
+        DATEDIFF         = LV_DATE
+        TIMEDIFF         = LV_TIME
+*       EARLIEST         =
+      EXCEPTIONS
+        INVALID_DATETIME = 1
+        OTHERS           = 2.
+    IF SY-SUBRC = 0.
+      LV_DATE1 = LV_DATE .
+      CONCATENATE  LV_DATE1 LV_DAYS INTO LV_DATE1.
+      LV_TIME1 = LV_TIME.
+      CONCATENATE  LV_TIME1 LV_HOURS INTO LV_TIME1.
+
+      CONCATENATE LV_DATE1 LV_TIME1 INTO WA_DATA-LOG_LAG SEPARATED BY '&'.
+    ENDIF.
+
+    IF WA_DATA-EBELN IS INITIAL AND  WA_DATA-AUFNR IS INITIAL.
+      CLEAR :  WA_DATA-LOG_DATE , WA_DATA-LOG_TIME .
+    ENDIF.
+
+    WA_DATA-AUFNR = WA_DATA-AUFNR+4(8).
+    WA_DATA-KDAUF = WA_DATA-KDAUF+2(8).
+*
+    IF WA_DATA-CPUTM_MKPF IS NOT INITIAL.
+      CONCATENATE WA_DATA-CPUTM_MKPF+0(2) ':'  WA_DATA-CPUTM_MKPF+2(2) ':' WA_DATA-CPUTM_MKPF+4(2) INTO WA_DATA-CPUTM_MKPF.
+    ENDIF.
+
+    IF WA_DATA-IEDZ EQ '000000'.
+      WA_DATA-IEDZ = ''.
+    ENDIF.
+
+    IF WA_DATA-VEZEITERF EQ '000000'.
+      WA_DATA-VEZEITERF = ''.
+    ENDIF.
+
+    IF WA_DATA-LOG_TIME EQ '000000'.
+      WA_DATA-LOG_TIME = ''.
+    ENDIF.
+
+    APPEND WA_DATA TO IT_DATA.
+    CLEAR WA_DATA.
+  ENDLOOP.
+
+  SORT IT_DATA BY KDAUF KDPOS EBELN KDPOS1.
+  DELETE ADJACENT DUPLICATES FROM IT_DATA COMPARING  KDAUF KDPOS EBELN KDPOS1.
+
+
+  IF P_DOWN = 'X'.
+
+    LOOP AT IT_DATA INTO WA_DATA.
+      WA_DOWN-AUFNR               =    WA_DATA-AUFNR             .
+      WA_DOWN-ERDAT               =    WA_DATA-ERDAT                 .
+      WA_DOWN-TXT04               =    WA_DATA-TXT04                 .
+      WA_DOWN-KDAUF               =    WA_DATA-KDAUF                 .
+      WA_DOWN-KDPOS               =    WA_DATA-KDPOS                 .
+      WA_DOWN-NAME1               =    WA_DATA-NAME1                 .
+      WA_DOWN-MATNR               =    WA_DATA-MATNR                 .
+      WA_DOWN-FTRMI               =    WA_DATA-FTRMI             .
+      WA_DOWN-TXT04               =    WA_DATA-TXT04             .
+      WA_DOWN-EBELN               =    WA_DATA-EBELN             .
+      WA_DOWN-MATNR1              =    WA_DATA-MATNR1            .
+      WA_DOWN-AEDAT               =    WA_DATA-AEDAT             .
+
+      CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+        EXPORTING
+          INPUT  = WA_DATA-AEDAT
+        IMPORTING
+          OUTPUT = WA_DOWN-AEDAT.
+
+      IF WA_DOWN-AEDAT IS NOT INITIAL.
+        CONCATENATE WA_DOWN-AEDAT+0(2) WA_DOWN-AEDAT+2(3) WA_DOWN-AEDAT+5(4)
+                        INTO WA_DOWN-AEDAT SEPARATED BY '-'.
+      ENDIF.
+
+      WA_DOWN-KDPOS1              =    WA_DATA-KDPOS1            .
+      WA_DOWN-CPUDT_MKPF          =    WA_DATA-CPUDT_MKPF        .
+
+      CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+        EXPORTING
+          INPUT  = WA_DATA-CPUDT_MKPF
+        IMPORTING
+          OUTPUT = WA_DOWN-CPUDT_MKPF.
+
+      IF WA_DOWN-CPUDT_MKPF IS NOT INITIAL.
+        CONCATENATE WA_DOWN-CPUDT_MKPF+0(2) WA_DOWN-CPUDT_MKPF+2(3) WA_DOWN-CPUDT_MKPF+5(4)
+                        INTO WA_DOWN-CPUDT_MKPF SEPARATED BY '-'.
+      ENDIF.
+*      BREAK primusabap.
+      WA_DOWN-CPUTM_MKPF          =    WA_DATA-CPUTM_MKPF        .
+      WA_DOWN-BUDAT               =    WA_DATA-BUDAT             .
+      WA_DOWN-AFPO_MATNR          =    WA_DATA-AFPO_MATNR        .
+
+      CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+        EXPORTING
+          INPUT  = WA_DATA-BUDAT
+        IMPORTING
+          OUTPUT = WA_DOWN-BUDAT.
+
+      IF WA_DOWN-BUDAT IS NOT INITIAL.
+        CONCATENATE WA_DOWN-BUDAT+0(2) WA_DOWN-BUDAT+2(3) WA_DOWN-BUDAT+5(4)
+                        INTO WA_DOWN-BUDAT SEPARATED BY '-'.
+      ENDIF.
+      WA_DOWN-IEDZ                =    WA_DATA-IEDZ              .
+
+      IF WA_DOWN-IEDZ IS NOT INITIAL.
+        CONCATENATE WA_DOWN-IEDZ+0(2) ':' WA_DOWN-IEDZ+2(2)':' WA_DOWN-IEDZ+4(2) INTO WA_DOWN-IEDZ.
+      ENDIF.
+      WA_DOWN-LV_LAG              =    WA_DATA-LV_LAG            .
+
+      WA_DOWN-VDATUM              =    WA_DATA-VDATUM            .
+      CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+        EXPORTING
+          INPUT  = WA_DATA-VDATUM
+        IMPORTING
+          OUTPUT = WA_DOWN-VDATUM.
+
+      IF WA_DOWN-VDATUM IS NOT INITIAL.
+        CONCATENATE WA_DOWN-VDATUM+0(2) WA_DOWN-VDATUM+2(3) WA_DOWN-VDATUM+5(4)
+                        INTO WA_DOWN-VDATUM SEPARATED BY '-'.
+      ENDIF.
+
+      WA_DOWN-VEZEITERF           =    WA_DATA-VEZEITERF         .
+
+      IF WA_DOWN-VEZEITERF IS NOT INITIAL.
+        CONCATENATE WA_DOWN-VEZEITERF+0(2) ':' WA_DOWN-VEZEITERF+2(2) ':' WA_DOWN-VEZEITERF+4(2) INTO WA_DOWN-VEZEITERF.
+      ENDIF.
+
+      WA_DOWN-LV_QA_LAG           =    WA_DATA-LV_QA_LAG         .
+      WA_DOWN-LOG_DATE            =    WA_DATA-LOG_DATE          .
+
+      IF WA_DATA-LOG_DATE IS NOT INITIAL.
+        CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+          EXPORTING
+            INPUT  = WA_DATA-LOG_DATE
+          IMPORTING
+            OUTPUT = WA_DOWN-LOG_DATE.
+
+        CONCATENATE WA_DOWN-LOG_DATE+0(2) WA_DOWN-LOG_DATE+2(3) WA_DOWN-LOG_DATE+5(4)
+                        INTO WA_DOWN-LOG_DATE SEPARATED BY '-'.
+      ENDIF.
+      WA_DOWN-LOG_TIME            =    WA_DATA-LOG_TIME          .
+      IF WA_DOWN-LOG_TIME IS NOT INITIAL.
+        CONCATENATE WA_DOWN-LOG_TIME+0(2) WA_DOWN-LOG_TIME+2(2) WA_DOWN-LOG_TIME+4(2)
+                INTO WA_DOWN-LOG_TIME SEPARATED BY ':'.
+      ENDIF.
+
+      WA_DOWN-LOG_LAG             =    WA_DATA-LOG_LAG           .
+
+      LV_ERDAT = WA_DATA-ERDAT.
+      CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+        EXPORTING
+          INPUT  = LV_ERDAT
+        IMPORTING
+          OUTPUT = WA_DOWN-ERDAT.
+
+      IF WA_DOWN-ERDAT IS NOT INITIAL.
+        CONCATENATE WA_DOWN-ERDAT+0(2) WA_DOWN-ERDAT+2(3) WA_DOWN-ERDAT+5(4)
+                        INTO WA_DOWN-ERDAT SEPARATED BY '-'.
+      ENDIF.
+
+      LV_FTRMI = WA_DATA-FTRMI.
+      CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+        EXPORTING
+          INPUT  = LV_FTRMI
+        IMPORTING
+          OUTPUT = WA_DOWN-FTRMI.
+
+      IF WA_DOWN-FTRMI   IS NOT INITIAL.
+        CONCATENATE WA_DOWN-FTRMI+0(2) WA_DOWN-FTRMI+2(3) WA_DOWN-FTRMI+5(4)
+                        INTO WA_DOWN-FTRMI   SEPARATED BY '-'.
+      ENDIF.
+
+      IF WA_DATA-FIRST_ISSUE_DATE  IS NOT  INITIAL.
+        CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+          EXPORTING
+            INPUT  = WA_DATA-FIRST_ISSUE_DATE
+          IMPORTING
+            OUTPUT = WA_DOWN-FIRST_ISSUE_DATE.
+
+        CONCATENATE WA_DOWN-FIRST_ISSUE_DATE+0(2) WA_DOWN-FIRST_ISSUE_DATE+2(3) WA_DOWN-FIRST_ISSUE_DATE+5(4)
+                        INTO WA_DOWN-FIRST_ISSUE_DATE SEPARATED BY '-'.
+      ENDIF.
+      IF WA_DATA-LAST_ISSUE_DATE  IS NOT INITIAL.
+        CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+          EXPORTING
+            INPUT  = WA_DATA-LAST_ISSUE_DATE
+          IMPORTING
+            OUTPUT = WA_DOWN-LAST_ISSUE_DATE.
+
+        CONCATENATE WA_DOWN-LAST_ISSUE_DATE+0(2) WA_DOWN-LAST_ISSUE_DATE+2(3) WA_DOWN-LAST_ISSUE_DATE+5(4)
+                        INTO WA_DOWN-LAST_ISSUE_DATE SEPARATED BY '-'.
+      ENDIF.
+
+      CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+        EXPORTING
+          INPUT  = SY-DATUM
+        IMPORTING
+          OUTPUT = WA_DOWN-REF_DATE.
+
+      CONCATENATE WA_DOWN-REF_DATE+0(2) WA_DOWN-REF_DATE+2(3) WA_DOWN-REF_DATE+5(4)
+                      INTO WA_DOWN-REF_DATE SEPARATED BY '-'.
+      WA_DOWN-REF_TIME = SY-UZEIT.
+*      BREAK primusabap.
+      CONCATENATE  WA_DOWN-REF_TIME+0(2) WA_DOWN-REF_TIME+2(2) WA_DOWN-REF_TIME+4(2) INTO WA_DOWN-REF_TIME SEPARATED BY ':'.
+
+      IF WA_DOWN-CPUTM_MKPF EQ ' 0:00:00'.
+        WA_DOWN-CPUTM_MKPF = ' '.
+      ENDIF.
+      IF WA_DOWN-IEDZ EQ ' 0:00:00'.
+        WA_DOWN-IEDZ = ' '.
+      ENDIF.
+
+      IF WA_DOWN-VEZEITERF EQ ' 0:00:00'.
+        WA_DOWN-VEZEITERF = ' '.
+      ENDIF.
+
+      IF WA_DOWN-LOG_TIME EQ ' 0:00:00'.
+        WA_DOWN-LOG_TIME = ' '.
+      ENDIF.
+
+      IF WA_DOWN-LOG_DATE EQ '00000000'.
+        WA_DOWN-LOG_DATE = ' '.
+      ENDIF.
+
+      APPEND WA_DOWN TO IT_DOWN.
+      CLEAR WA_DOWN.
+    ENDLOOP.
+  ENDIF.
+
+ENDFORM.
+
+
+*&---------------------------------------------------------------------*
+*&      Form  FILL_FIELDCAT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM FILL_FIELDCAT .
+
+  WA_FIELDCAT-FIELDNAME = 'KDAUF' .
+  WA_FIELDCAT-SELTEXT_M = 'SO No' .
+  WA_FIELDCAT-COL_POS = '1'.
+  WA_FIELDCAT-OUTPUTLEN = 8.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'KDPOS' .
+  WA_FIELDCAT-SELTEXT_M = 'SO Item' .
+  WA_FIELDCAT-COL_POS = '2'.
+  WA_FIELDCAT-OUTPUTLEN = 5.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'MATNR' .
+  WA_FIELDCAT-SELTEXT_M = 'SO Material' .
+  WA_FIELDCAT-COL_POS = '3'.
+  WA_FIELDCAT-OUTPUTLEN = 18.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'NAME1' .
+  WA_FIELDCAT-SELTEXT_M = 'Customer' .
+  WA_FIELDCAT-COL_POS = '4'.
+  WA_FIELDCAT-OUTPUTLEN = 25.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'AUFNR' .
+  WA_FIELDCAT-SELTEXT_M = 'Prod Order' .
+  WA_FIELDCAT-COL_POS = '5'.
+  WA_FIELDCAT-OUTPUTLEN = 10.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'AFPO_MATNR' .
+  WA_FIELDCAT-SELTEXT_M = 'Prod Order Material' .
+  WA_FIELDCAT-COL_POS = '6'.
+  WA_FIELDCAT-OUTPUTLEN = 10.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'ERDAT' .
+  WA_FIELDCAT-SELTEXT_M = 'Prod Order Created Date' .
+  WA_FIELDCAT-COL_POS = '7'.
+  WA_FIELDCAT-OUTPUTLEN = 15.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'FTRMI' .
+  WA_FIELDCAT-SELTEXT_M = 'Release Date' .
+  WA_FIELDCAT-COL_POS = '8'.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'FIRST_ISSUE_DATE' .
+  WA_FIELDCAT-SELTEXT_M = '1st Issue Date' .
+  WA_FIELDCAT-COL_POS = '9'.
+  WA_FIELDCAT-OUTPUTLEN = 10.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'LAST_ISSUE_DATE' .
+  WA_FIELDCAT-SELTEXT_M = 'Last Issue Date' .
+  WA_FIELDCAT-COL_POS = '10'.
+  WA_FIELDCAT-OUTPUTLEN = 12.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'TXT04' .
+  WA_FIELDCAT-SELTEXT_M = 'System Status' .
+  WA_FIELDCAT-COL_POS = '11'.
+  WA_FIELDCAT-OUTPUTLEN = 25.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'EBELN' .
+  WA_FIELDCAT-SELTEXT_M = 'Purchase Order' .
+  WA_FIELDCAT-COL_POS = '12'.
+  WA_FIELDCAT-OUTPUTLEN = 12.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'MATNR1' .
+  WA_FIELDCAT-SELTEXT_M = 'PO Material' .
+  WA_FIELDCAT-COL_POS = '13'.
+  WA_FIELDCAT-OUTPUTLEN = 15.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'AEDAT' .
+  WA_FIELDCAT-SELTEXT_M = 'PO Creation Date' .
+  WA_FIELDCAT-COL_POS = '14'.
+  WA_FIELDCAT-OUTPUTLEN = 13.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'KDPOS1' .
+  WA_FIELDCAT-SELTEXT_M = 'PO Item No' .
+  WA_FIELDCAT-COL_POS = '15'.
+  WA_FIELDCAT-OUTPUTLEN = 13.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'CPUDT_MKPF' .
+  WA_FIELDCAT-SELTEXT_M = 'GRN Date' .
+  WA_FIELDCAT-COL_POS = '16'.
+  WA_FIELDCAT-OUTPUTLEN = 13.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'CPUTM_MKPF' .
+  WA_FIELDCAT-SELTEXT_M = 'GRN Time' .
+  WA_FIELDCAT-COL_POS = '17'.
+  WA_FIELDCAT-OUTPUTLEN = 13.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'BUDAT' .
+  WA_FIELDCAT-SELTEXT_M = 'Assembly Completion Date' .
+  WA_FIELDCAT-COL_POS = '18'.
+  WA_FIELDCAT-OUTPUTLEN = 15.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'IEDZ' .
+  WA_FIELDCAT-SELTEXT_M = 'Assembly Time Entered' .
+  WA_FIELDCAT-COL_POS = '19'.
+  WA_FIELDCAT-OUTPUTLEN = 15.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'LV_LAG' .
+  WA_FIELDCAT-SELTEXT_M = 'Assembly Lag' .
+  WA_FIELDCAT-COL_POS = '20'.
+  WA_FIELDCAT-OUTPUTLEN = 13.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'VDATUM' .
+  WA_FIELDCAT-SELTEXT_M = 'Final QA Completation Date' .
+  WA_FIELDCAT-COL_POS = '21'.
+  WA_FIELDCAT-OUTPUTLEN = 13.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'VEZEITERF' .
+  WA_FIELDCAT-SELTEXT_M = 'Final QA Time Completation Time' .
+  WA_FIELDCAT-COL_POS = '22'.
+  WA_FIELDCAT-OUTPUTLEN = 13.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'LV_QA_LAG' .
+  WA_FIELDCAT-SELTEXT_M = 'Final QA Lag' .
+  WA_FIELDCAT-COL_POS = '23'.
+  WA_FIELDCAT-OUTPUTLEN = 13.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = ' LOG_DATE' .
+  WA_FIELDCAT-SELTEXT_M = 'Logistic Receipt  Date' .
+  WA_FIELDCAT-COL_POS = '24'.
+  WA_FIELDCAT-OUTPUTLEN = 13.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'LOG_TIME' .
+  WA_FIELDCAT-SELTEXT_M = 'Logistic Time Entered' .
+  WA_FIELDCAT-COL_POS = '25'.
+  WA_FIELDCAT-OUTPUTLEN = 13.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+  WA_FIELDCAT-FIELDNAME = 'LOG_LAG' .
+  WA_FIELDCAT-SELTEXT_M = 'Logistic lag' .
+  WA_FIELDCAT-COL_POS = '25'.
+  WA_FIELDCAT-OUTPUTLEN = 13.
+  APPEND WA_FIELDCAT TO IT_FIELDCAT .
+  CLEAR WA_FIELDCAT.
+
+ENDFORM.
+
+*&---------------------------------------------------------------------*
+*&      Form  DISPLAY_DATA
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM DISPLAY_DATA .
+  DATA : FS_LAYOUT TYPE SLIS_LAYOUT_ALV.
+
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+    EXPORTING
+      I_CALLBACK_PROGRAM = 'sy-repid'
+      IS_LAYOUT          = FS_LAYOUT
+      IT_FIELDCAT        = IT_FIELDCAT
+      I_DEFAULT          = 'X'
+      I_SAVE             = 'A'
+    TABLES
+      T_OUTTAB           = IT_DATA.
+  IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+  DATA: GRID1       TYPE REF TO CL_GUI_ALV_GRID,
+        GT_SFLIGHT  TYPE TABLE OF SFLIGHT,
+        GT_FIELDCAT TYPE LVC_T_FCAT.
+
+*  call METHOD GRID1->set_table_for_first_display.
+
+
+
+  IF P_DOWN = 'X'.
+    PERFORM DOWNLOAD.
+  ENDIF.
+
+ENDFORM.
+
+
+*&---------------------------------------------------------------------*
+*&      Form  DOWNLOAD
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM DOWNLOAD .
+
+  TYPE-POOLS TRUXS.
+  DATA: IT_CSV TYPE TRUXS_T_TEXT_DATA,
+        WA_CSV TYPE LINE OF TRUXS_T_TEXT_DATA,
+        HD_CSV TYPE LINE OF TRUXS_T_TEXT_DATA.
+
+  DATA: LV_FILE(30).
+  DATA: LV_FULLFILE TYPE STRING,
+        LV_DAT(10),
+        LV_TIM(4).
+  DATA: LV_MSG(80).
+
+  CALL FUNCTION 'SAP_CONVERT_TO_TXT_FORMAT'
+    TABLES
+      I_TAB_SAP_DATA       = IT_DOWN
+    CHANGING
+      I_TAB_CONVERTED_DATA = IT_CSV
+    EXCEPTIONS
+      CONVERSION_FAILED    = 1
+      OTHERS               = 2.
+  IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+  PERFORM CVS_HEADER USING HD_CSV.
+  LV_FILE = 'ZSD_LAG_COMPLETE_SO.TXT'.
+
+  CONCATENATE P_FOLDER '/' LV_FILE
+     INTO LV_FULLFILE.
+
+  WRITE: / 'ZSD_LAG.TXT Download started on', SY-DATUM, 'at', SY-UZEIT.
+  OPEN DATASET LV_FULLFILE
+    FOR OUTPUT IN TEXT MODE ENCODING DEFAULT.  "NON-UNICODE.
+  IF SY-SUBRC = 0.
+
+    DATA LV_STRING_2490 TYPE STRING.
+    DATA LV_CRLF_2490 TYPE STRING.
+    LV_CRLF_2490 = CL_ABAP_CHAR_UTILITIES=>CR_LF.
+    LV_STRING_2490 = HD_CSV.
+*    TRANSFER HD_CSV TO LV_FULLFILE.
+
+    LOOP AT IT_CSV INTO WA_CSV.
+      CONCATENATE LV_STRING_2490 LV_CRLF_2490 WA_CSV INTO LV_STRING_2490.
+    ENDLOOP.
+    TRANSFER LV_STRING_2490 TO LV_FULLFILE.
+    CLOSE DATASET LV_FULLFILE.
+    CONCATENATE 'File' LV_FULLFILE 'downloaded' INTO LV_MSG SEPARATED BY SPACE.
+    MESSAGE LV_MSG TYPE 'S'.
+  ENDIF.
+
+ENDFORM.
+
+
+*&---------------------------------------------------------------------*
+*&      Form  CVS_HEADER
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_HD_CSV  text
+*----------------------------------------------------------------------*
+FORM CVS_HEADER  USING    P_HD_CSV.
+  DATA: L_FIELD_SEPERATOR.
+  L_FIELD_SEPERATOR = CL_ABAP_CHAR_UTILITIES=>HORIZONTAL_TAB.
+  CONCATENATE   'SO No'
+                'SO Item'
+                'SO Material'
+                'Customer'
+                'Prod Order'
+                'Prod Order Material'
+                'Prod Order Created Date'
+                'Release Date'
+                '1st Issue Date'
+                'Last Issue Date'
+                'System Status'
+                'Purchase Order'
+                'PO Material'
+                'PO Creation Date'
+                'PO Item No'
+                'GRN Date'
+                'GRN Time'
+                'Assembly Completion Date'
+                'Assembly Time Entered'
+                'Assembly Lag'
+                'Final QA Completation Date'
+                'Final QA Time Completation Time'
+                'Final QA Lag'
+                'Logistic Receipt  Date'
+                'Logistic Time Entered'
+                'Logistic lag'
+                'Refreshable Date'
+                'Refreshable Time'
+
+               INTO P_HD_CSV
+              SEPARATED BY L_FIELD_SEPERATOR.
+
+ENDFORM.

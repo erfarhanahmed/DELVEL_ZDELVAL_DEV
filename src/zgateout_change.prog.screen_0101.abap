@@ -1,0 +1,22 @@
+PROCESS BEFORE OUTPUT.
+  MODULE status_0101.
+
+*  LOOP AT IT_DATA INTO WA_DATA WITH CONTROL TAB CURSOR
+* TAB-CURRENT_LINE.
+*  ENDLOOP.
+
+PROCESS AFTER INPUT.
+
+
+  CHAIN.
+    FIELD zgate_out-ztrans_name MODULE ztrans_name.
+  ENDCHAIN.
+
+  CHAIN.
+    FIELD zgate_out-zveh_num   MODULE zveh_num.
+  ENDCHAIN.
+
+*    LOOP AT IT_DATA .
+*
+*    ENDLOOP.
+  MODULE user_command_0101.

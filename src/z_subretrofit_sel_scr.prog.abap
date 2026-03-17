@@ -1,0 +1,23 @@
+*&---------------------------------------------------------------------*
+*&  Include           Z_SUBRETROFIT_SEL_SCR
+*&---------------------------------------------------------------------*
+
+SELECTION-SCREEN BEGIN OF BLOCK b1 WITH FRAME TITLE text-001.
+  PARAMETERS:       p_bukrs TYPE bukrs OBLIGATORY MODIF ID gr1.
+  SELECT-OPTIONS:   s_chln  FOR J_1IG_SUBCON-chln_inv NO INTERVALS MODIF ID gr1.
+SELECTION-SCREEN END OF BLOCK b1.
+
+SELECTION-SCREEN BEGIN OF BLOCK b2 WITH FRAME TITLE text-002.
+ SELECTION-SCREEN BEGIN OF LINE.
+  PARAMETERS simulate RADIOBUTTON GROUP ROS DEFAULT 'X'.
+  SELECTION-SCREEN COMMENT 3(20) text-s01 FOR FIELD simulate.
+
+  SELECTION-SCREEN POSITION 45.
+  PARAMETERS update RADIOBUTTON GROUP ROS.
+  SELECTION-SCREEN COMMENT 48(20) text-s02 FOR FIELD update.
+ SELECTION-SCREEN END OF LINE.
+SELECTION-SCREEN END OF BLOCK b2.
+
+** Country check
+AT SELECTION-SCREEN ON p_bukrs.
+  PERFORM country_check.

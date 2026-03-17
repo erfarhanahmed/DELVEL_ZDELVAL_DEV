@@ -1,0 +1,25 @@
+
+DISCOUNTED_VALUE = GV_TOTAL_VALUE - TOT_DISC .
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

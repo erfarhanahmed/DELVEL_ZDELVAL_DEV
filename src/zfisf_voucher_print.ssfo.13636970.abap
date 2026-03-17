@@ -1,0 +1,30 @@
+*** MAIN WINDOW.
+
+SELECT single belnr BLDAT XBLNR
+FROM BKPF
+INTO CORRESPONDING FIELDS OF  wa_BSEG1
+   WHERE BELNR  = wa_bseg1-BELNR
+  AND BUKRS = BKPFTAB-BUKRS
+  AND GJAHR = BKPFTAB-GJAHR.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,1894 @@
+**&---------------------------------------------------------------------*
+*& Report ZUS_MATERIAL_MASTER_REPORT
+*&---------------------------------------------------------------------*
+*&
+*&---------------------------------------------------------------------*
+REPORT ZUS_MATERIAL_MASTER_REPORT_NEW.
+
+TABLES: MARA,MARD.
+
+
+TYPES: BEGIN OF TY_MARA,
+       MATNR      TYPE MARA-MATNR,
+       MTART      TYPE MARA-MTART,
+       ERSDA      TYPE MARA-ERSDA,
+       ERNAM      TYPE MARA-ERNAM,
+       BISMT      TYPE MARA-BISMT,
+       EXTWG      TYPE MARA-EXTWG,
+       MATKL      TYPE MARA-MATKL,
+       SPART      TYPE MARA-SPART,
+       BRGEW      TYPE MARA-BRGEW,
+       MEINS      TYPE MARA-MEINS,
+       WRKST      TYPE MARA-WRKST,
+       NTGEW      TYPE MARA-NTGEW,
+       MTPOS_MARA TYPE MARA-MTPOS_MARA,
+       TRAGR      TYPE MARA-TRAGR,
+       MAGRV      TYPE MARA-MAGRV,
+       BSTME      TYPE MARA-BSTME,
+       ZSERIES    TYPE MARA-ZSERIES,
+       ZSIZE      TYPE MARA-ZSIZE,
+       BRAND      TYPE MARA-BRAND,
+       MOC        TYPE MARA-MOC,
+       TYPE       TYPE MARA-TYPE,
+       QMPUR      TYPE MARA-QMPUR,
+       PSTAT      TYPE MARA-PSTAT,
+       RAUBE      TYPE MARA-RAUBE,
+       ZEINR      TYPE MARA-ZEINR,
+       ZEIVR      TYPE MARA-ZEIVR,
+*       OBJ        TYPE OBJNUM,
+       LVORM TYPE MARA-LVORM,
+       END OF TY_MARA,
+
+       BEGIN OF TY_MARA_MARD,
+*       MATNR(90)," TYPE MARA-MATNR,
+       MATNR TYPE MARA-MATNR,
+       ERSDA TYPE MARA-ERSDA,
+       ERNAM TYPE MARA-ERNAM,
+       WERKS TYPE MARD-WERKS,
+       END OF TY_MARA_MARD,
+
+       BEGIN OF TY_MAKT,
+       MATNR TYPE MAKT-MATNR,
+       MAKTX TYPE MAKT-MAKTX,
+       END OF TY_MAKT,
+
+       BEGIN OF TY_MARC,
+       MATNR(90)," TYPE MARC-MATNR,
+       WERKS TYPE MARC-WERKS,
+       MTVFP TYPE MARC-MTVFP,
+       LADGR TYPE MARC-LADGR,
+       PRCTR TYPE MARC-PRCTR,
+       SERNP TYPE MARC-SERNP,
+       EKGRP TYPE MARC-EKGRP,
+       DISMM TYPE MARC-DISMM,
+       DISPO TYPE MARC-DISPO,
+       BSTMI TYPE MARC-BSTMI,
+       DISLS TYPE MARC-DISLS,
+       BESKZ TYPE MARC-BESKZ,
+       SOBSL TYPE MARC-SOBSL,
+       WZEIT TYPE MARC-WZEIT,
+       PLIFZ TYPE MARC-PLIFZ,
+       FHORI TYPE MARC-FHORI,
+       STRGR TYPE MARC-STRGR,
+       VRMOD TYPE MARC-VRMOD,
+       VINT1 TYPE MARC-VINT1,
+       VINT2 TYPE MARC-VINT2,
+       SBDKZ TYPE MARC-SBDKZ,
+       FEVOR TYPE MARC-FEVOR,
+       SFCPF TYPE MARC-SFCPF,
+       DZEIT TYPE MARC-DZEIT,
+       AUSME TYPE MARC-AUSME,
+       LOSGR TYPE MARC-LOSGR,
+       STEUC TYPE MARC-STEUC,
+       SSQSS TYPE MARC-SSQSS,
+       MISKZ TYPE MARC-MISKZ,
+       LVORM TYPE MARA-LVORM,
+       END OF TY_MARC,
+
+
+
+       BEGIN OF TY_MARD,
+       MATNR TYPE MARD-MATNR,
+       WERKS TYPE MARD-WERKS,
+       LGORT TYPE MARD-LGORT,
+       LGPBE TYPE MARD-LGPBE,
+       END OF TY_MARD,
+
+       BEGIN OF TY_MVKE,
+       MATNR TYPE MVKE-MATNR,
+       VKORG TYPE MVKE-VKORG,
+       VTWEG TYPE MVKE-VTWEG,
+       DWERK TYPE MVKE-DWERK,
+       VERSG TYPE MVKE-VERSG,
+       KTGRM TYPE MVKE-KTGRM,
+       MTPOS TYPE MVKE-MTPOS,
+       END OF TY_MVKE,
+
+       BEGIN OF TY_MARM,
+       MATNR TYPE MARM-MATNR,
+       MEINH TYPE MARM-MEINH,
+       UMREZ TYPE MARM-UMREZ,
+       UMREN TYPE MARM-UMREN,
+       END OF TY_MARM,
+
+       BEGIN OF TY_MBEW,
+       MATNR TYPE MBEW-MATNR,
+       BWKEY TYPE MBEW-BWKEY,
+       BKLAS TYPE MBEW-BKLAS,
+       VPRSV TYPE MBEW-VPRSV,
+       VERPR TYPE MBEW-VERPR,
+       STPRS TYPE MBEW-STPRS,
+       EKALR TYPE MBEW-EKALR,
+       END OF TY_MBEW,
+
+       BEGIN OF TY_MLAN,
+       MATNR  TYPE MLAN-MATNR,
+       ALAND  TYPE MLAN-ALAND,
+       TAXM1  TYPE MLAN-TAXM1,
+       TAXM2  TYPE MLAN-TAXM2,
+       TAXM3  TYPE MLAN-TAXM3,
+       TAXM4  TYPE MLAN-TAXM4,
+       END OF TY_MLAN,
+
+       BEGIN OF TY_J_1IMTCHID,
+       MATNR      TYPE J_1IMTCHID-MATNR,
+       WERKS      TYPE J_1IMTCHID-WERKS,
+       J_1ICAPIND TYPE J_1IMTCHID-J_1ICAPIND,
+       J_1ISUBIND  TYPE J_1IMTCHID-J_1ISUBIND,
+       J_1IGRXREF TYPE J_1IMTCHID-J_1IGRXREF,
+       END OF TY_J_1IMTCHID,
+
+       BEGIN OF TY_QMAT,
+       MATNR TYPE QMAT-MATNR,
+       ART   TYPE QMAT-ART,
+       WERKS TYPE QMAT-WERKS,
+       AKTIV TYPE QMAT-AKTIV,
+       END OF TY_QMAT,
+
+       BEGIN OF TY_J_1IASSVAL,
+       J_1IWERKS TYPE J_1IASSVAL-J_1IWERKS,
+       J_1IMATNR TYPE J_1IASSVAL-J_1IMATNR,
+       J_1IVALASS TYPE J_1IASSVAL-J_1IVALASS,
+       END OF TY_J_1IASSVAL,
+
+       BEGIN OF TY_J_1IMODDET,
+       WERKS    TYPE J_1IMODDET-WERKS,
+       J_1IMOIM TYPE J_1IMODDET-J_1IMOIM,
+       J_1IMOOM TYPE J_1IMODDET-J_1IMOOM,
+       END OF TY_J_1IMODDET,
+
+       BEGIN OF TY_AUSP,
+       OBJEK TYPE AUSP-OBJEK,
+       ATINN TYPE AUSP-ATINN,
+       ATWRT TYPE AUSP-ATWRT,
+       END OF TY_AUSP,
+
+       BEGIN OF TY_KSSK,
+       OBJEK  TYPE  KSSK-OBJEK,
+       CLINT  TYPE  KSSK-CLINT,
+       END OF TY_KSSK,
+
+       BEGIN OF TY_KLAH,
+       CLINT  TYPE  KLAH-CLINT,
+       CLASS  TYPE  KLAH-CLASS,
+       END OF TY_KLAH,
+
+       BEGIN OF TY_MATERIAL,
+*       MATNR  TYPE OBJNUM,
+       MATNR  TYPE char90,
+       END OF TY_MATERIAL,
+"--------- Added by Pratyancha on 28.06.2024 logic by Keshav Deshmukh--------------"
+
+      BEGIN OF ty_cdhdr,
+         objectclas TYPE cdhdr-objectclas,
+         objectid   TYPE cdhdr-objectid,
+         changenr   TYPE cdhdr-changenr,
+         username   TYPE cdhdr-username,
+         udate      TYPE cdhdr-udate,
+         tcode      TYPE cdhdr-tcode,
+     END OF ty_cdhdr,
+
+     BEGIN OF ty_cdpos,
+         objectclas TYPE cdhdr-objectclas,
+         objectid   TYPE cdhdr-objectid,
+         changenr   TYPE cdhdr-changenr,
+         tabname    TYPE cdpos-tabname,
+         tabkey     TYPE cdpos-tabkey,
+         fname      TYPE cdpos-fname,
+         value_new  TYPE cdpos-value_new,
+      END OF ty_cdpos,
+"--------- Added by Pratyancha on 28.06.2024 logic by Keshav Deshmukh--------------"
+
+
+       BEGIN OF TY_FINAL,
+       MATNR    TYPE MARA-MATNR,
+       MTART    TYPE MARA-MTART,
+       ERSDA    TYPE ERSDA,"char15,
+       ERNAM    TYPE MARA-ERNAM,
+       BISMT    TYPE MARA-BISMT,
+       EXTWG    TYPE MARA-EXTWG,
+       WRKST    TYPE MARA-WRKST,
+       MATKL    TYPE MARA-MATKL,
+       SPART    TYPE MARA-SPART,
+       BRGEW    TYPE MARA-BRGEW,
+       MEINS    TYPE MARA-MEINS,
+       NTGEW    TYPE MARA-NTGEW,
+       MTPOS_MARA TYPE MARA-MTPOS_MARA,
+       TRAGR    TYPE MARA-TRAGR,
+       MAGRV    TYPE MARA-MAGRV,
+       BSTME    TYPE MARA-BSTME,
+       ZSERIES  TYPE MARA-ZSERIES,
+       ZSIZE    TYPE MARA-ZSIZE,
+       BRAND    TYPE MARA-BRAND,
+       MOC      TYPE MARA-MOC,
+       TYPE     TYPE MARA-TYPE,
+       QMPUR    TYPE MARA-QMPUR,
+       PSTAT    TYPE MARA-PSTAT,
+       RAUBE    TYPE MARA-RAUBE,
+       ZEINR    TYPE MARA-ZEINR,
+       ZEIVR    TYPE MARA-ZEIVR,
+       MAKTX    TYPE MAKT-MAKTX,
+       WERKS   TYPE MARC-WERKS,
+       MTVFP   TYPE MARC-MTVFP,
+       LADGR   TYPE MARC-LADGR,
+       PRCTR   TYPE MARC-PRCTR,
+       SERNP   TYPE MARC-SERNP,
+       EKGRP   TYPE MARC-EKGRP,
+       DISMM   TYPE MARC-DISMM,
+       DISPO   TYPE MARC-DISPO,
+       BSTMI   TYPE MARC-BSTMI,
+       DISLS   TYPE MARC-DISLS,
+       BESKZ   TYPE MARC-BESKZ,
+       SOBSL   TYPE MARC-SOBSL,
+       WZEIT   TYPE MARC-WZEIT,
+       PLIFZ   TYPE MARC-PLIFZ,
+       FHORI   TYPE MARC-FHORI,
+       STRGR   TYPE MARC-STRGR,
+       VRMOD   TYPE MARC-VRMOD,
+       VINT1   TYPE MARC-VINT1,
+       VINT2   TYPE MARC-VINT2,
+       SBDKZ   TYPE MARC-SBDKZ,
+       FEVOR   TYPE MARC-FEVOR,
+       SFCPF   TYPE MARC-SFCPF,
+       DZEIT  TYPE MARC-DZEIT,
+       AUSME  TYPE MARC-AUSME,
+       LOSGR  TYPE CHAR15,
+       STEUC  TYPE MARC-STEUC,
+       SSQSS  TYPE MARC-SSQSS,
+       MISKZ  TYPE MARC-MISKZ,
+       LGORT  TYPE MARD-LGORT,
+       LGPBE  TYPE MARD-LGPBE,
+       VKORG  TYPE MVKE-VKORG,
+       VTWEG  TYPE MVKE-VTWEG,
+       DWERK  TYPE MVKE-DWERK,
+       VERSG  TYPE MVKE-VERSG,
+       KTGRM  TYPE MVKE-KTGRM,
+       MTPOS  TYPE MVKE-MTPOS,
+       MEINH  TYPE MARM-MEINH,
+       UMREZ  TYPE MARM-UMREZ,
+       UMREN  TYPE MARM-UMREN,
+       BKLAS  TYPE MBEW-BKLAS,
+       VPRSV  TYPE MBEW-VPRSV,
+       VERPR  TYPE CHAR15,
+       STPRS  TYPE CHAR15,
+       EKALR  TYPE MBEW-EKALR,
+       TAXM1  TYPE MLAN-TAXM1,
+       TAXM2  TYPE MLAN-TAXM2,
+       TAXM3  TYPE MLAN-TAXM3,
+*       TAXM4  TYPE MLAN-TAXM4,
+       J_1ICAPIND TYPE J_1IMTCHID-J_1ICAPIND,
+       J_1ISUBIND  TYPE J_1IMTCHID-J_1ISUBIND,
+       J_1IGRXREF TYPE J_1IMTCHID-J_1IGRXREF,
+       ART   TYPE QMAT-ART,
+       AKTIV TYPE QMAT-AKTIV,
+       J_1IVALASS TYPE CHAR15,
+       J_1IMOOM TYPE J_1IMODDET-J_1IMOOM,
+       MATTXT   TYPE CHAR250,
+*       SPAN     TYPE TEXT300,  " comented by supriya on 16.07.2024
+       CLASS    TYPE KLAH-CLASS,
+       STEM     TYPE AUSP-ATWRT,
+       SEAT     TYPE AUSP-ATWRT,
+       BODY     TYPE AUSP-ATWRT,
+       DISC     TYPE AUSP-ATWRT,
+       BALL     TYPE AUSP-ATWRT,
+       RATING   TYPE AUSP-ATWRT,
+       CLAS     TYPE AUSP-ATWRT,
+       AIR_F    TYPE AUSP-ATWRT,
+       MAIN_AIR TYPE AUSP-ATWRT,
+       LVORM    TYPE MARA-LVORM,
+       REF      TYPE ERSDA," char15,
+       CS     TYPE CHAR10, "Added BY Nilay B. on 30.03.2023
+       FG     TYPE CHAR10,
+       ODP     TYPE CHAR10,
+       RJ     TYPE CHAR10,
+       RM     TYPE CHAR10,
+       SCR     TYPE CHAR10,
+       SFG     TYPE CHAR10,
+       SLR     TYPE CHAR10,
+       SP     TYPE CHAR10,
+       USt1     TYPE CHAR10,
+       UST2    TYPE CHAR10,
+       DIS10    TYPE CHAR10,
+       DIS20    TYPE CHAR10,
+       DIS30    TYPE CHAR10, "ended BY Nilay B. on 30.03.2023
+       USERNAME  TYPE CHAR50,         " ADEED BY PRATYANCHA ON 28.06.2024
+       udate  TYPE udate,            " ADEED BY PRATYANCHA ON 28.06.2024
+         tcode TYPE char20,
+         SPAN     TYPE TEXT300,  " Added by supriya on 16.07.2024
+       END OF TY_FINAL,
+
+**************************************Download Structure *****************************
+       BEGIN OF FINAL,
+       MATNR    TYPE CHAR18,
+       MTART    TYPE CHAR4,
+       ERSDA    TYPE CHAR15,
+       ERNAM    TYPE MARA-ERNAM,
+       BISMT    TYPE CHAR18,
+       EXTWG    TYPE CHAR18,
+       WRKST    TYPE CHAR50,
+       MATKL    TYPE CHAR9,
+       SPART    TYPE MARA-SPART,
+       BRGEW    TYPE CHAR15,  "MARA-BRGEW,
+       MEINS    TYPE MARA-MEINS,
+       NTGEW    TYPE CHAR15,  "MARA-NTGEW,
+       MTPOS_MARA TYPE MARA-MTPOS_MARA,
+       TRAGR    TYPE MARA-TRAGR,
+       MAGRV    TYPE MARA-MAGRV,
+       BSTME    TYPE MARA-BSTME,
+       ZSERIES  TYPE MARA-ZSERIES,
+       ZSIZE    TYPE MARA-ZSIZE,
+       BRAND    TYPE MARA-BRAND,
+       MOC      TYPE MARA-MOC,
+       TYPE     TYPE MARA-TYPE,
+       QMPUR    TYPE MARA-QMPUR,
+       PSTAT    TYPE MARA-PSTAT,
+       RAUBE    TYPE MARA-RAUBE,
+       ZEINR    TYPE MARA-ZEINR,
+       ZEIVR    TYPE MARA-ZEIVR,
+       MAKTX    TYPE MAKT-MAKTX,
+       WERKS   TYPE MARC-WERKS,
+       MTVFP   TYPE MARC-MTVFP,
+       LADGR   TYPE MARC-LADGR,
+       PRCTR   TYPE MARC-PRCTR,
+       SERNP   TYPE MARC-SERNP,
+       EKGRP   TYPE MARC-EKGRP,
+       DISMM   TYPE MARC-DISMM,
+       DISPO   TYPE MARC-DISPO,
+       BSTMI   TYPE MARC-BSTMI,
+       DISLS   TYPE MARC-DISLS,
+       BESKZ   TYPE MARC-BESKZ,
+       SOBSL   TYPE MARC-SOBSL,
+       WZEIT   TYPE MARC-WZEIT,
+       PLIFZ   TYPE MARC-PLIFZ,
+       FHORI   TYPE MARC-FHORI,
+       STRGR   TYPE MARC-STRGR,
+       VRMOD   TYPE MARC-VRMOD,
+       VINT1   TYPE MARC-VINT1,
+       VINT2   TYPE MARC-VINT2,
+       SBDKZ   TYPE MARC-SBDKZ,
+       FEVOR   TYPE MARC-FEVOR,
+       SFCPF   TYPE MARC-SFCPF,
+       DZEIT  TYPE MARC-DZEIT,
+       AUSME  TYPE MARC-AUSME,
+       LOSGR  TYPE CHAR15,
+       STEUC  TYPE MARC-STEUC,
+       SSQSS  TYPE MARC-SSQSS,
+       MISKZ  TYPE MARC-MISKZ,
+       LGORT  TYPE MARD-LGORT,
+       LGPBE  TYPE MARD-LGPBE,
+       VKORG  TYPE MVKE-VKORG,
+       VTWEG  TYPE MVKE-VTWEG,
+       DWERK  TYPE MVKE-DWERK,
+       VERSG  TYPE MVKE-VERSG,
+       KTGRM  TYPE MVKE-KTGRM,
+       MTPOS  TYPE MVKE-MTPOS,
+       MEINH  TYPE MARM-MEINH,
+       UMREZ  TYPE MARM-UMREZ,
+       UMREN  TYPE MARM-UMREN,
+       BKLAS  TYPE MBEW-BKLAS,
+       VPRSV  TYPE MBEW-VPRSV,
+       VERPR  TYPE CHAR15,
+       STPRS  TYPE CHAR15,
+       EKALR  TYPE MBEW-EKALR,
+       TAXM1  TYPE MLAN-TAXM1,
+       TAXM2  TYPE MLAN-TAXM2,
+       TAXM3  TYPE MLAN-TAXM3,
+*       TAXM4  TYPE MLAN-TAXM4,
+       J_1ICAPIND TYPE J_1IMTCHID-J_1ICAPIND,
+       J_1ISUBIND  TYPE J_1IMTCHID-J_1ISUBIND,
+       J_1IGRXREF TYPE J_1IMTCHID-J_1IGRXREF,
+       ART   TYPE QMAT-ART,
+       AKTIV TYPE QMAT-AKTIV,
+       J_1IVALASS TYPE CHAR15,
+       J_1IMOOM TYPE J_1IMODDET-J_1IMOOM,
+       MATTXT   TYPE CHAR250,
+*       SPAN     TYPE TEXT300,          "commented by supriya 16.07.2024
+       CLASS    TYPE KLAH-CLASS,
+       STEM     TYPE AUSP-ATWRT,
+       SEAT     TYPE AUSP-ATWRT,
+       BODY     TYPE AUSP-ATWRT,
+       DISC     TYPE AUSP-ATWRT,
+       BALL     TYPE AUSP-ATWRT,
+       RATING   TYPE AUSP-ATWRT,
+       CLAS     TYPE AUSP-ATWRT,
+       AIR_F    TYPE AUSP-ATWRT,
+       MAIN_AIR TYPE AUSP-ATWRT,
+       LVORM    TYPE MARA-LVORM,
+       REF      TYPE CHAR15,
+       CS     TYPE CHAR10,
+       FG     TYPE CHAR10,
+       ODP     TYPE CHAR10,
+       RJ     TYPE CHAR10,
+       RM     TYPE CHAR10,
+       SCR     TYPE CHAR10,
+       SFG     TYPE CHAR10,
+       SLR     TYPE CHAR10,
+       SP     TYPE CHAR10,
+       UST1     TYPE CHAR10,
+       UST2    TYPE CHAR10,
+       DIS10    TYPE CHAR10,
+       DIS20    TYPE CHAR10,
+       DIS30    TYPE CHAR10,                  " added by Pratyancha on 28.06.2024
+**       TCODE    TYPE CHAR20,                  " added by Pratyancha on 28.06.2024
+        USERNAME  TYPE CHAR50,         " ADEED BY PRATYANCHA ON 28.06.2024
+         udate    type CHAR15,
+          SPAN     TYPE TEXT300,          "Add by supriya by supriya 16.07.2024
+ END OF FINAL.
+
+DATA: LT_FINAL TYPE TABLE OF FINAL,
+      LS_FINAL TYPE          FINAL.
+
+**************************************Download Structure *****************************
+
+
+DATA: IT_MARA TYPE TABLE OF TY_MARA,
+      WA_MARA TYPE          TY_MARA,
+
+      IT_MARA_MARD TYPE TABLE OF TY_MARA_MARD,
+      WA_MARA_MARD TYPE          TY_MARA_MARD,
+
+      IT_MAKT TYPE TABLE OF TY_MAKT,
+      WA_MAKT TYPE          TY_MAKT,
+
+      IT_MARD TYPE TABLE OF TY_MARD,
+      WA_MARD TYPE          TY_MARD,
+
+      IT_MARC TYPE TABLE OF TY_MARC,
+      WA_MARC TYPE          TY_MARC,
+
+      IT_MBEW TYPE TABLE OF TY_MBEW,
+      WA_MBEW TYPE          TY_MBEW,
+
+      IT_MLAN TYPE TABLE OF TY_MLAN,
+      WA_MLAN TYPE          TY_MLAN,
+
+      IT_MARM TYPE TABLE OF TY_MARM,
+      WA_MARM TYPE          TY_MARM,
+
+      IT_MVKE TYPE TABLE OF TY_MVKE,
+      WA_MVKE TYPE          TY_MVKE,
+
+      IT_J_1IMTCHID TYPE TABLE OF TY_J_1IMTCHID,
+      WA_J_1IMTCHID TYPE          TY_J_1IMTCHID,
+
+      IT_QMAT TYPE TABLE OF TY_QMAT,
+      WA_QMAT TYPE          TY_QMAT,
+"--------------- Added by Pratyancha on 28.06.2024 logic by Keshav Deshmukh--------------"
+      IT_CDPOS      TYPE TABLE OF TY_CDPOS,
+      WA_CDPOS      TYPE          TY_CDPOS,
+
+      IT_CDHDR_NEW  TYPE TABLE OF TY_CDHDR,
+      WA_CDHDR_NEW  TYPE          TY_CDHDR,
+
+      IT_CDHDR      TYPE TABLE OF TY_CDHDR,
+      WA_CDHDR      TYPE          TY_CDHDR,
+"--------------- Added by Pratyancha on 28.06.2024 logic by Keshav Deshmukh--------------"
+
+      IT_J_1IASSVAL TYPE TABLE OF TY_J_1IASSVAL,
+      WA_J_1IASSVAL TYPE          TY_J_1IASSVAL,
+
+      IT_J_1IMODDET TYPE TABLE OF TY_J_1IMODDET,
+      WA_J_1IMODDET TYPE          TY_J_1IMODDET,
+
+      IT_AUSP TYPE TABLE OF TY_AUSP,
+      WA_AUSP TYPE          TY_AUSP,
+
+      IT_MATERIAL TYPE TABLE OF TY_MATERIAL,
+      WA_MATERIAL TYPE          TY_MATERIAL,
+
+      IT_KSSK TYPE TABLE OF TY_KSSK,
+      WA_KSSK TYPE          TY_KSSK,
+
+      IT_KLAH TYPE TABLE OF TY_KLAH,
+      WA_KLAH TYPE          TY_KLAH,
+
+      IT_FINAL TYPE TABLE OF TY_FINAL,
+      WA_FINAL TYPE          TY_FINAL.
+
+DATA: IT_FCAT TYPE SLIS_T_FIELDCAT_ALV,
+      WA_FCAT LIKE LINE OF IT_FCAT.
+
+DATA   FS_LAYOUT TYPE SLIS_LAYOUT_ALV.
+
+DATA: LV_NAME   TYPE THEAD-TDNAME,
+      LV_LINES  TYPE STANDARD TABLE OF TLINE,
+      WA_LINES  LIKE TLINE,
+      LS_ITMTXT  TYPE TLINE,
+      LS_MATTXT  TYPE TLINE.
+
+
+SELECTION-SCREEN: BEGIN OF BLOCK B1 WITH FRAME TITLE TEXT-001.
+  SELECT-OPTIONS: S_MAT FOR MARA-MATNR,
+                  S_DATE FOR MARA-ERSDA,
+                  S_ERNAM FOR MARA-ERNAM NO INTERVALS,
+                  S_WERKS FOR MARD-WERKS OBLIGATORY DEFAULT 'US01'.
+
+SELECTION-SCREEN: END OF BLOCK B1.
+
+SELECTION-SCREEN BEGIN OF BLOCK B2 WITH FRAME TITLE TEXT-002 .
+PARAMETERS P_DOWN AS CHECKBOX.
+PARAMETERS P_FOLDER LIKE RLGRAP-FILENAME DEFAULT '/Delval/USA'."USA'."USA'."USA'."usa'.       "'/Delval/USA'."usa'.
+SELECTION-SCREEN END OF BLOCK B2.
+
+SELECTION-SCREEN :BEGIN OF BLOCK B3 WITH FRAME TITLE TEXT-003.
+  SELECTION-SCREEN  COMMENT /1(60) TEXT-004.
+
+SELECTION-SCREEN: END OF BLOCK B3.
+
+
+
+
+
+START-OF-SELECTION.
+
+
+
+PERFORM GET_DATA.
+PERFORM GET_FCAT.
+PERFORM FILL_LAYOUT.
+PERFORM GET_DISPLAY.
+*&---------------------------------------------------------------------*
+*&      Form  GET_DATA
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM GET_DATA .
+
+
+
+
+
+  SELECT A~MATNR
+         A~ERSDA
+         A~ERNAM
+         B~WERKS
+         INTO TABLE IT_MARA_MARD FROM MARA AS A
+         INNER JOIN MARD AS B ON B~MATNR = A~MATNR
+         WHERE A~MATNR IN S_MAT
+          AND  B~WERKS IN S_WERKS
+          AND   A~ERSDA IN S_DATE
+          AND   A~ERNAM IN S_ERNAM.
+
+SORT IT_MARA_MARD BY MATNR WERKS.
+DELETE ADJACENT DUPLICATES FROM IT_MARA_MARD COMPARING MATNR WERKS.
+DELETE IT_MARA_MARD WHERE WERKS = 'PL01' OR
+                          WERKS = 'SU01'.                 "ADDED BY AAKASHK 12.09.2024
+
+
+IF IT_MARA_MARD IS NOT INITIAL.
+
+  SELECT MATNR
+         MTART
+         ERSDA
+         ERNAM
+         BISMT
+         EXTWG
+         MATKL
+         SPART
+         BRGEW
+         MEINS
+         WRKST
+         NTGEW
+         MTPOS_MARA
+         TRAGR
+         MAGRV
+         BSTME
+         ZSERIES
+         ZSIZE
+         BRAND
+         MOC
+         TYPE
+         QMPUR
+         PSTAT
+         RAUBE
+         ZEINR
+         ZEIVR
+         LVORM FROM MARA INTO TABLE IT_MARA
+         FOR ALL ENTRIES IN IT_MARA_MARD
+*         WHERE  MATNR = IT_MARA_MARD-MATNR+(18)
+         WHERE  MATNR = IT_MARA_MARD-MATNR
+         AND ERSDA IN S_DATE.
+
+
+  SELECT MATNR
+         WERKS
+         MTVFP
+         LADGR
+         PRCTR
+         SERNP
+         EKGRP
+         DISMM
+         DISPO
+         BSTMI
+         DISLS
+         BESKZ
+         SOBSL
+         WZEIT
+         PLIFZ
+         FHORI
+         STRGR
+         VRMOD
+         VINT1
+         VINT2
+         SBDKZ
+         FEVOR
+         SFCPF
+         DZEIT
+         AUSME
+         LOSGR
+         STEUC
+         SSQSS
+         MISKZ
+         LVORM FROM MARC INTO TABLE IT_MARC
+         FOR ALL ENTRIES IN IT_MARA_MARD
+*         WHERE MATNR = IT_MARA_MARD-MATNR+(18)
+         WHERE MATNR = IT_MARA_MARD-MATNR
+           AND WERKS = IT_MARA_MARD-WERKS.
+
+ SELECT MATNR
+        WERKS
+        LGORT
+        LGPBE FROM MARD INTO TABLE IT_MARD
+        FOR ALL ENTRIES IN IT_MARA_MARD
+*        WHERE MATNR = IT_MARA_MARD-MATNR+(18)
+        WHERE MATNR = IT_MARA_MARD-MATNR
+          AND WERKS = IT_MARA_MARD-WERKS.
+
+
+*ENDIF.
+*
+*LOOP AT IT_MARA INTO WA_MARA.
+*
+*  WA_MARA-OBJ = WA_MARA-MATNR.
+*APPEND WA_MARA TO IT_MARA.
+*ENDLOOP.
+
+
+  SELECT MATNR
+         MAKTX FROM MAKT INTO TABLE IT_MAKT
+         FOR ALL ENTRIES IN IT_MARA_MARD
+         WHERE MATNR = IT_MARA_MARD-MATNR.
+*         WHERE MATNR = IT_MARA_MARD-MATNR+(18).
+
+  SELECT MATNR
+          FROM MARA INTO TABLE IT_MATERIAL
+         FOR ALL ENTRIES IN IT_MARA_MARD
+*         WHERE MATNR = IT_MARA_MARD-MATNR+(18).
+         WHERE MATNR = IT_MARA_MARD-MATNR.
+
+ SELECT MATNR
+        VKORG
+        VTWEG
+        DWERK
+        VERSG
+        KTGRM
+        MTPOS FROM MVKE INTO TABLE IT_MVKE
+        FOR ALL ENTRIES IN IT_MARA_MARD
+*        WHERE MATNR = IT_MARA_MARD-MATNR+(18)
+        WHERE MATNR = IT_MARA_MARD-MATNR
+          AND VKORG = 'US00'.
+
+ SELECT MATNR
+        MEINH
+        UMREZ
+        UMREN FROM MARM INTO TABLE IT_MARM
+        FOR ALL ENTRIES IN IT_MARA_MARD
+*        WHERE MATNR = IT_MARA_MARD-MATNR+(18).
+        WHERE MATNR = IT_MARA_MARD-MATNR.
+
+ SELECT MATNR
+        BWKEY
+        BKLAS
+        VPRSV
+        VERPR
+        STPRS
+        EKALR FROM MBEW INTO TABLE IT_MBEW
+        FOR ALL ENTRIES IN IT_MARA_MARD
+*        WHERE MATNR = IT_MARA_MARD-MATNR+(18)
+        WHERE MATNR = IT_MARA_MARD-MATNR
+          AND BWKEY = IT_MARA_MARD-WERKS.
+
+ SELECT MATNR
+        ALAND
+        TAXM1
+        TAXM2
+        TAXM3
+        TAXM4 FROM MLAN INTO TABLE IT_MLAN
+        FOR ALL ENTRIES IN IT_MARA_MARD
+*        WHERE MATNR = IT_MARA_MARD-MATNR+(18)
+        WHERE MATNR = IT_MARA_MARD-MATNR
+          AND ALAND = 'US'.
+
+ SELECT MATNR
+        WERKS
+        J_1ICAPIND
+        J_1ISUBIND
+        J_1IGRXREF FROM J_1IMTCHID INTO TABLE IT_J_1IMTCHID
+        FOR ALL ENTRIES IN IT_MARA_MARD
+*        WHERE MATNR = IT_MARA_MARD-MATNR+(18)
+        WHERE MATNR = IT_MARA_MARD-MATNR
+          AND WERKS = IT_MARA_MARD-WERKS.
+
+ SELECT MATNR
+        ART
+        WERKS
+        AKTIV FROM QMAT INTO TABLE IT_QMAT
+        FOR ALL ENTRIES IN IT_MARA_MARD
+*        WHERE MATNR = IT_MARA_MARD-MATNR+(18)
+        WHERE MATNR = IT_MARA_MARD-MATNR
+          AND WERKS = IT_MARA_MARD-WERKS.
+
+ SELECT J_1IWERKS
+        J_1IMATNR
+        J_1IVALASS FROM J_1IASSVAL INTO TABLE IT_J_1IASSVAL
+        FOR ALL ENTRIES IN IT_MARA_MARD
+*        WHERE J_1IMATNR = IT_MARA_MARD-MATNR+(18)
+        WHERE J_1IMATNR = IT_MARA_MARD-MATNR
+          AND J_1IWERKS = IT_MARA_MARD-WERKS.
+
+ SELECT WERKS
+        J_1IMOIM
+        J_1IMOOM FROM J_1IMODDET INTO TABLE IT_J_1IMODDET
+        FOR ALL ENTRIES IN IT_MARA_MARD
+*        WHERE J_1IMOIM = IT_MARA_MARD-MATNR+(18)
+        WHERE J_1IMOIM = IT_MARA_MARD-MATNR
+          AND WERKS  =   IT_MARA_MARD-WERKS.
+
+* SELECT OBJEK
+*        ATINN
+*        ATWRT FROM AUSP INTO TABLE IT_AUSP
+*        FOR ALL ENTRIES IN IT_MARA
+*        WHERE OBJEK = IT_MARA-OBJ.
+
+
+ENDIF.
+
+
+
+""""""""""""""""""""""""""""""""""""""""
+IF IT_MARC IS NOT INITIAL.
+      SELECT objectclas
+             objectid
+             changenr
+             tabname
+             tabkey
+             fname
+             value_new  FROM cdpos
+             INTO TABLE it_cdpos
+             FOR ALL ENTRIES IN IT_MARC
+             WHERE objectid = IT_MARC-matnr
+               AND tabname IN ('MARA','MARC')
+*            AND TABKEY = TABKEY
+               AND fname    = 'LVORM'
+               AND value_new = 'X'.
+*       ENDIF.                                                              " ADDED BY PM ON 28.06.2024
+      SELECT objectclas
+             objectid
+             changenr
+             username
+             udate
+             tcode
+             FROM cdhdr
+             INTO TABLE it_cdhdr
+             FOR ALL ENTRIES IN it_cdpos
+             WHERE changenr = it_cdpos-changenr.
+ENDIF.
+"""""""""""""""""""""""""""""""""""""""""""""""""
+
+
+
+
+
+
+
+IF IT_MATERIAL IS NOT INITIAL .
+ SELECT OBJEK
+        ATINN
+        ATWRT FROM AUSP INTO TABLE IT_AUSP
+        FOR ALL ENTRIES IN IT_MATERIAL
+        WHERE OBJEK = IT_MATERIAL-MATNR.
+
+ SELECT OBJEK
+          CLINT FROM KSSK INTO TABLE IT_KSSK
+          FOR ALL ENTRIES IN IT_MATERIAL
+          WHERE OBJEK = IT_MATERIAL-MATNR.
+
+ENDIF.
+
+IF IT_KSSK IS NOT INITIAL.
+   SELECT CLINT
+          CLASS FROM KLAH INTO TABLE IT_KLAH
+          FOR ALL ENTRIES IN IT_KSSK
+          WHERE CLINT = IT_KSSK-CLINT.
+ ENDIF.
+
+LOOP AT IT_MARA_MARD INTO WA_MARA_MARD.
+
+READ TABLE IT_MARA INTO WA_MARA WITH KEY MATNR = WA_MARA_MARD-MATNR.
+*LOOP AT IT_MARA INTO WA_MARA.
+IF SY-SUBRC = 0.
+  WA_FINAL-MATNR      = WA_MARA-MATNR.
+  WA_FINAL-MTART      = WA_MARA-MTART.
+  WA_FINAL-ERSDA      = WA_MARA-ERSDA.
+  WA_FINAL-ERNAM      = WA_MARA-ERNAM.
+  WA_FINAL-BISMT      = WA_MARA-BISMT.
+  WA_FINAL-EXTWG      = WA_MARA-EXTWG.
+  WA_FINAL-WRKST      = WA_MARA-WRKST.
+  WA_FINAL-MATKL      = WA_MARA-MATKL.
+  WA_FINAL-SPART      = WA_MARA-SPART.
+  WA_FINAL-BRGEW      = WA_MARA-BRGEW.
+  WA_FINAL-MEINS      = WA_MARA-MEINS.
+  WA_FINAL-NTGEW      = WA_MARA-NTGEW.
+  WA_FINAL-MTPOS_MARA = WA_MARA-MTPOS_MARA.
+  WA_FINAL-TRAGR      = WA_MARA-TRAGR  .
+  WA_FINAL-MAGRV      = WA_MARA-MAGRV  .
+  WA_FINAL-BSTME      = WA_MARA-BSTME  .
+  WA_FINAL-ZSERIES    = WA_MARA-ZSERIES.
+  WA_FINAL-ZSIZE      = WA_MARA-ZSIZE  .
+  WA_FINAL-BRAND      = WA_MARA-BRAND  .
+  WA_FINAL-MOC        = WA_MARA-MOC    .
+  WA_FINAL-TYPE       = WA_MARA-TYPE   .
+  WA_FINAL-QMPUR      = WA_MARA-QMPUR   .
+  WA_FINAL-PSTAT      = WA_MARA-PSTAT   .
+  WA_FINAL-RAUBE      = WA_MARA-RAUBE   .
+  WA_FINAL-ZEINR      = WA_MARA-ZEINR   .
+  WA_FINAL-ZEIVR      = WA_MARA-ZEIVR   .
+  WA_FINAL-LVORM      = WA_MARA-LVORM   .
+*BREAK PRIMUS.
+*WA_MARA-OBJ = WA_MARA-MATNR.
+ENDIF.
+READ TABLE IT_MATERIAL INTO WA_MATERIAL WITH KEY MATNR = WA_FINAL-MATNR.
+IF SY-SUBRC = 0.
+
+LOOP AT IT_AUSP INTO WA_AUSP WHERE OBJEK = WA_MATERIAL-MATNR.
+  CASE WA_AUSP-ATINN.
+    WHEN '0000000811'.
+      WA_FINAL-STEM = WA_AUSP-ATWRT.
+    WHEN '0000000812' .
+      WA_FINAL-RATING = WA_AUSP-ATWRT.
+    WHEN '0000000813'.
+      WA_FINAL-DISC = WA_AUSP-ATWRT.
+    WHEN '0000000815'.
+      WA_FINAL-BODY = WA_AUSP-ATWRT.
+    WHEN '0000000816'.
+      WA_FINAL-SEAT = WA_AUSP-ATWRT.
+    WHEN '0000000828'.
+      WA_FINAL-BALL = WA_AUSP-ATWRT.
+    WHEN '0000000829'.
+      WA_FINAL-CLAS = WA_AUSP-ATWRT.
+    WHEN '0000000831'.
+      WA_FINAL-MAIN_AIR = WA_AUSP-ATWRT.
+    WHEN '0000000832'.
+      WA_FINAL-AIR_F = WA_AUSP-ATWRT.
+  ENDCASE.
+
+
+
+ENDLOOP.
+
+ENDIF.
+READ TABLE IT_KSSK INTO WA_KSSK WITH KEY OBJEK = WA_MATERIAL-MATNR.
+IF SY-SUBRC = 0.
+
+READ TABLE IT_KLAH INTO WA_KLAH WITH KEY CLINT = WA_KSSK-CLINT.
+  IF SY-SUBRC = 0.
+    WA_FINAL-CLASS = WA_KLAH-CLASS.
+  ENDIF.
+ENDIF.
+*CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+*    EXPORTING
+*      input         = wa_mara-ersda
+*   IMPORTING
+*     OUTPUT        = wa_final-ersda
+*            .
+*
+*CONCATENATE wa_final-ersda+0(2) wa_final-ersda+2(3) wa_final-ersda+5(4)
+*                INTO wa_final-ersda SEPARATED BY '-'.
+
+READ TABLE IT_MAKT INTO WA_MAKT WITH KEY MATNR = WA_MARA-MATNR.
+IF SY-SUBRC = 0.
+  WA_FINAL-MAKTX = WA_MAKT-MAKTX.
+
+ENDIF.
+
+
+READ TABLE IT_MARC INTO WA_MARC WITH KEY MATNR = WA_MARA-MATNR WERKS = WA_MARA_MARD-WERKS.
+ IF SY-SUBRC = 0.
+  WA_FINAL-WERKS = WA_MARC-WERKS.
+  WA_FINAL-MTVFP = WA_MARC-MTVFP.
+  WA_FINAL-LADGR = WA_MARC-LADGR.
+  WA_FINAL-PRCTR = WA_MARC-PRCTR.
+  WA_FINAL-SERNP = WA_MARC-SERNP.
+  WA_FINAL-EKGRP = WA_MARC-EKGRP.
+  WA_FINAL-DISMM = WA_MARC-DISMM.
+  WA_FINAL-DISPO = WA_MARC-DISPO.
+  WA_FINAL-BSTMI = WA_MARC-BSTMI.
+  WA_FINAL-DISLS = WA_MARC-DISLS.
+  WA_FINAL-BESKZ = WA_MARC-BESKZ.
+  WA_FINAL-SOBSL = WA_MARC-SOBSL.
+  WA_FINAL-WZEIT = WA_MARC-WZEIT.
+  WA_FINAL-PLIFZ = WA_MARC-PLIFZ.
+  WA_FINAL-FHORI = WA_MARC-FHORI.
+  WA_FINAL-STRGR = WA_MARC-STRGR.
+  WA_FINAL-VRMOD = WA_MARC-VRMOD.
+  WA_FINAL-VINT1 = WA_MARC-VINT1.
+  WA_FINAL-VINT2 = WA_MARC-VINT2.
+  WA_FINAL-SBDKZ = WA_MARC-SBDKZ.
+  WA_FINAL-FEVOR = WA_MARC-FEVOR.
+  WA_FINAL-SFCPF = WA_MARC-SFCPF.
+  WA_FINAL-DZEIT = WA_MARC-DZEIT.
+  WA_FINAL-AUSME = WA_MARC-AUSME.
+  WA_FINAL-LOSGR = WA_MARC-LOSGR.
+  WA_FINAL-STEUC = WA_MARC-STEUC.
+  WA_FINAL-SSQSS = WA_MARC-SSQSS.
+  WA_FINAL-MISKZ = WA_MARC-MISKZ.
+
+  IF WA_FINAL-LVORM IS INITIAL.
+   WA_FINAL-LVORM = WA_MARC-LVORM.
+  ENDIF.
+
+ ENDIF.
+
+
+"---------------- Added by Pratyancha on 28.06.2024 logic by Keshav Deshmukh-----------------"
+         DATA:tabkey TYPE cdpos-tabkey.
+*    CLEAR:tabkey,it_cdpos,it_cdhdr,wa_cdpos,wa_cdhdr.
+
+*    CONCATENATE sy-mandt wa_final-matnr wa_final-matnr INTO tabkey.
+
+  IF wa_final-lvorm IS NOT INITIAL.
+
+*      SELECT objectclas
+*             objectid
+*             changenr
+*             tabname
+*             tabkey
+*             fname
+*             value_new  FROM cdpos INTO TABLE it_cdpos
+*             WHERE objectid = wa_final-matnr
+*               AND tabname IN ('MARA','MARC')
+**            AND TABKEY = TABKEY
+*               AND fname    = 'LVORM'
+*               AND value_new = 'X'.
+**       ENDIF.                                                              " ADDED BY PM ON 28.06.2024
+*      SELECT objectclas
+*             objectid
+*             changenr
+*             username
+*             udate
+*             tcode
+*             FROM cdhdr
+*             INTO TABLE it_cdhdr
+*             FOR ALL ENTRIES IN it_cdpos
+*             WHERE changenr = it_cdpos-changenr.
+
+      SORT it_cdpos BY changenr DESCENDING .
+
+      READ TABLE it_cdpos INTO wa_cdpos WITH KEY objectid = wa_final-matnr.
+      IF sy-subrc = 0.
+        READ TABLE it_cdhdr INTO wa_cdhdr WITH KEY changenr = wa_cdpos-changenr.
+        IF sy-subrc = 0.
+          wa_final-username  = wa_cdhdr-username.
+          wa_final-tcode     = wa_cdhdr-tcode.
+          wa_final-udate     = wa_cdhdr-udate.
+        ENDIF.                                                " ADDED BY PM ON 28.06.2024
+      ENDIF.                                                " ADDED BY PM ON 28.06.2024
+   ENDIF.
+
+"---------------- Added by Pratyancha on 28.06.2024 logic by Keshav Deshmukh-----------------"
+READ TABLE IT_MARD INTO WA_MARD WITH KEY MATNR = WA_MARA-MATNR WERKS = WA_MARA_MARD-WERKS.
+ IF SY-SUBRC = 0.
+   WA_FINAL-LGORT = WA_MARD-LGORT.
+   WA_FINAL-LGPBE = WA_MARD-LGPBE.
+
+
+ ENDIF.
+
+     LOOP AT IT_MARD INTO WA_MARD WHERE MATNR = WA_MARA-MATNR AND WERKS = WA_MARA_MARD-werks.
+
+      CASE WA_MARD-LGORT.
+        WHEN 'CS'.
+          WA_FINAL-CS = 'YES'.
+        WHEN 'FG'.
+          WA_FINAL-FG = 'YES'.
+        WHEN 'ODP'.
+          WA_FINAL-ODP = 'YES'.
+        WHEN 'RJ'.
+           WA_FINAL-RJ = 'YES'.
+        WHEN 'RM'.
+          WA_FINAL-RM = 'YES'.
+        WHEN 'SCR'.
+          WA_FINAL-SCR = 'YES'.
+        WHEN 'SFG'.
+          WA_FINAL-SFG = 'YES'.
+        WHEN 'SLR'.
+          WA_FINAL-SLR = 'YES'.
+        WHEN 'SP'.
+          WA_FINAL-SP = 'YES'.
+        WHEN 'UST1'.
+          WA_FINAL-UST1 = 'YES'.
+        WHEN 'UST2'.
+          WA_FINAL-UST2 = 'YES'.
+
+      ENDCASE.
+
+
+    ENDLOOP.
+
+    LOOP AT IT_MVKE INTO WA_MVKE WHERE MATNR = WA_MARA-MATNR.
+      CASE WA_MVKE-VTWEG.
+        WHEN '10'.
+          WA_FINAL-DIS10 = 'YES'.
+        WHEN '20'.
+          WA_FINAL-DIS20 = 'YES'.
+        WHEN '30'.
+          WA_FINAL-DIS30 = 'YES'.
+      ENDCASE.
+
+    ENDLOOP.
+*
+
+READ TABLE IT_MVKE INTO WA_MVKE WITH KEY MATNR = WA_MARA-MATNR.
+ IF SY-SUBRC = 0.
+   WA_FINAL-VKORG = WA_MVKE-VKORG.
+   WA_FINAL-VTWEG = WA_MVKE-VTWEG.
+   WA_FINAL-DWERK = WA_MVKE-DWERK.
+   WA_FINAL-VERSG = WA_MVKE-VERSG.
+   WA_FINAL-KTGRM = WA_MVKE-KTGRM.
+   WA_FINAL-MTPOS = WA_MVKE-MTPOS.
+
+ ENDIF.
+
+READ TABLE IT_MARM INTO WA_MARM WITH KEY MATNR = WA_MARA-MATNR." MEINH = WA_MARA-MEINS .
+ IF SY-SUBRC = 0.
+   IF WA_MARM-MEINH NE WA_MARA-MEINS.
+     WA_FINAL-MEINH = WA_MARM-MEINH.
+     WA_FINAL-UMREZ = WA_MARM-UMREZ.
+     WA_FINAL-UMREN = WA_MARM-UMREN.
+   ENDIF.
+ ENDIF.
+
+READ TABLE IT_MBEW INTO WA_MBEW WITH KEY MATNR = WA_MARA-MATNR BWKEY = WA_MARA_MARD-WERKS..
+ IF SY-SUBRC = 0.
+   WA_FINAL-BKLAS = WA_MBEW-BKLAS.
+   WA_FINAL-VPRSV = WA_MBEW-VPRSV.
+   WA_FINAL-VERPR = WA_MBEW-VERPR.
+   WA_FINAL-STPRS = WA_MBEW-STPRS.
+   WA_FINAL-EKALR = WA_MBEW-EKALR.
+
+ ENDIF.
+
+READ TABLE IT_MLAN INTO WA_MLAN WITH KEY MATNR = WA_MARA-MATNR.
+ IF SY-SUBRC = 0.
+   WA_FINAL-TAXM1 = WA_MLAN-TAXM1.
+   WA_FINAL-TAXM2 = WA_MLAN-TAXM2.
+   WA_FINAL-TAXM3 = WA_MLAN-TAXM3.
+*   WA_FINAL-TAXM4 = WA_MLAN-TAXM4.
+
+ ENDIF.
+
+READ TABLE IT_J_1IMTCHID INTO WA_J_1IMTCHID WITH KEY MATNR = WA_MARA-MATNR WERKS = WA_MARA_MARD-WERKS.
+ IF SY-SUBRC = 0.
+   WA_FINAL-J_1ICAPIND = WA_J_1IMTCHID-J_1ICAPIND.
+   WA_FINAL-J_1ISUBIND = WA_J_1IMTCHID-J_1ISUBIND.
+   WA_FINAL-J_1IGRXREF = WA_J_1IMTCHID-J_1IGRXREF.
+ ENDIF.
+
+READ TABLE IT_QMAT INTO WA_QMAT WITH KEY MATNR = WA_MARA-MATNR WERKS = WA_MARA_MARD-WERKS..
+ IF SY-SUBRC = 0.
+   WA_FINAL-ART = WA_QMAT-ART.
+   WA_FINAL-AKTIV = WA_QMAT-AKTIV.
+
+ ENDIF.
+
+READ TABLE IT_J_1IASSVAL INTO WA_J_1IASSVAL WITH KEY J_1IMATNR = WA_MARA-MATNR J_1IWERKS = WA_MARA_MARD-WERKS..
+ IF SY-SUBRC = 0.
+   WA_FINAL-J_1IVALASS = WA_J_1IASSVAL-J_1IVALASS.
+
+ ENDIF.
+
+READ TABLE IT_J_1IMODDET INTO WA_J_1IMODDET WITH KEY J_1IMOIM = WA_MARA-MATNR WERKS  =   WA_MARA_MARD-WERKS..
+ IF SY-SUBRC = 0.
+   WA_FINAL-J_1IMOOM = WA_J_1IMODDET-J_1IMOOM.
+
+ ENDIF.
+
+ WA_FINAL-REF = SY-DATUM.
+
+
+* CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+*    EXPORTING
+*      input         = wa_final-ref
+*   IMPORTING
+*     OUTPUT        = wa_final-ref
+*            .
+*
+*CONCATENATE wa_final-ref+0(2) wa_final-ref+2(3) wa_final-ref+5(4)
+*                INTO wa_final-ref SEPARATED BY '-'.
+*
+
+CLEAR: LV_LINES, LS_MATTXT.
+      REFRESH LV_LINES.
+      LV_NAME = WA_MARA-MATNR.
+      CALL FUNCTION 'READ_TEXT'
+        EXPORTING
+          CLIENT                  = SY-MANDT
+          ID                      = 'GRUN'
+          LANGUAGE                = SY-LANGU
+          NAME                    = LV_NAME
+          OBJECT                  = 'MATERIAL'
+        TABLES
+          LINES                   = LV_LINES
+        EXCEPTIONS
+          ID                      = 1
+          LANGUAGE                = 2
+          NAME                    = 3
+          NOT_FOUND               = 4
+          OBJECT                  = 5
+          REFERENCE_CHECK         = 6
+          WRONG_ACCESS_TO_ARCHIVE = 7
+          OTHERS                  = 8.
+      IF SY-SUBRC <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+      ENDIF.
+      IF NOT LV_LINES IS INITIAL.
+        LOOP AT LV_LINES INTO WA_LINES.
+          IF NOT WA_LINES-TDLINE IS INITIAL.
+            CONCATENATE WA_FINAL-MATTXT WA_LINES-TDLINE INTO WA_FINAL-MATTXT SEPARATED BY SPACE.
+          ENDIF.
+        ENDLOOP.
+        CONDENSE WA_FINAL-SPAN.
+      ENDIF.
+
+REPLACE ALL OCCURRENCES OF '<(>' IN WA_FINAL-MATTXT WITH SPACE.
+REPLACE ALL OCCURRENCES OF '<)>' IN WA_FINAL-MATTXT WITH SPACE.
+*
+*      READ TABLE lv_lines INTO ls_mattxt INDEX 1.
+*
+*WA_FINAL-mattxt = ls_mattxt-tdline.
+*DATA: material TYPE CHAR24.
+*BREAK PRIMUS.
+*CONCATENATE WA_FINAL-MATNR WA_FINAL-VKORG
+*            WA_FINAL-VTWEG INTO MATERIAL.
+
+CLEAR: LV_LINES, LS_MATTXT, LV_NAME.
+      REFRESH LV_LINES.
+      LV_NAME = WA_MARA-MATNR.
+            DATA: LANG TYPE SY-LANGU.
+      LANG = 'ES'.
+      CALL FUNCTION 'READ_TEXT'
+        EXPORTING
+          CLIENT                  = SY-MANDT
+          ID                      = 'GRUN'
+          LANGUAGE                = 'S'
+          NAME                    = LV_NAME
+          OBJECT                  = 'MATERIAL'
+        TABLES
+          LINES                   = LV_LINES
+        EXCEPTIONS
+          ID                      = 1
+          LANGUAGE                = 2
+          NAME                    = 3
+          NOT_FOUND               = 4
+          OBJECT                  = 5
+          REFERENCE_CHECK         = 6
+          WRONG_ACCESS_TO_ARCHIVE = 7
+          OTHERS                  = 8.
+      IF SY-SUBRC <> 0.
+* MESSAGE ID SY-MSGID TYPE SY-MSGTY NUMBER SY-MSGNO
+*         WITH SY-MSGV1 SY-MSGV2 SY-MSGV3 SY-MSGV4.
+      ENDIF.
+     IF NOT LV_LINES IS INITIAL.
+        LOOP AT LV_LINES INTO WA_LINES.
+          IF NOT WA_LINES-TDLINE IS INITIAL.
+            CONCATENATE WA_FINAL-SPAN WA_LINES-TDLINE INTO WA_FINAL-SPAN SEPARATED BY SPACE.
+          ENDIF.
+        ENDLOOP.
+        CONDENSE WA_FINAL-SPAN.
+      ENDIF.
+
+REPLACE ALL OCCURRENCES OF '<(>' IN WA_FINAL-SPAN WITH SPACE.
+REPLACE ALL OCCURRENCES OF '<)>' IN WA_FINAL-SPAN WITH SPACE.
+**************************************Download Structure Data*****************************
+LS_FINAL-MATNR  = WA_FINAL-MATNR .
+LS_FINAL-MTART  = WA_FINAL-MTART .
+
+
+ CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+    EXPORTING
+      INPUT         = WA_FINAL-ERSDA
+   IMPORTING
+     OUTPUT        = LS_FINAL-ERSDA
+            .
+
+CONCATENATE LS_FINAL-ERSDA+0(2) LS_FINAL-ERSDA+2(3) LS_FINAL-ERSDA+5(4)
+                INTO LS_FINAL-ERSDA SEPARATED BY '-'.
+LS_FINAL-ERNAM  = WA_FINAL-ERNAM .
+LS_FINAL-BISMT  = WA_FINAL-BISMT .
+LS_FINAL-EXTWG  = WA_FINAL-EXTWG .
+LS_FINAL-WRKST  = WA_FINAL-WRKST .
+LS_FINAL-MATKL  = WA_FINAL-MATKL .
+LS_FINAL-SPART  = WA_FINAL-SPART .
+LS_FINAL-BRGEW  = WA_FINAL-BRGEW .
+LS_FINAL-MEINS  = WA_FINAL-MEINS .
+LS_FINAL-NTGEW  = WA_FINAL-NTGEW .
+
+LS_FINAL-MTPOS_MARA = WA_FINAL-MTPOS_MARA.
+LS_FINAL-TRAGR   = WA_FINAL-TRAGR    .
+LS_FINAL-MAGRV   = WA_FINAL-MAGRV    .
+LS_FINAL-BSTME   = WA_FINAL-BSTME    .
+LS_FINAL-ZSERIES = WA_FINAL-ZSERIES.
+LS_FINAL-ZSIZE   = WA_FINAL-ZSIZE    .
+LS_FINAL-BRAND   = WA_FINAL-BRAND    .
+LS_FINAL-MOC     = WA_FINAL-MOC      .
+LS_FINAL-TYPE    = WA_FINAL-TYPE     .
+LS_FINAL-QMPUR   = WA_FINAL-QMPUR    .
+LS_FINAL-PSTAT   = WA_FINAL-PSTAT    .
+LS_FINAL-RAUBE   = WA_FINAL-RAUBE    .
+LS_FINAL-ZEINR   = WA_FINAL-ZEINR    .
+LS_FINAL-ZEIVR   = WA_FINAL-ZEIVR  .
+LS_FINAL-MAKTX   = WA_FINAL-MAKTX.
+LS_FINAL-WERKS   = WA_FINAL-WERKS.
+LS_FINAL-MTVFP   = WA_FINAL-MTVFP.
+LS_FINAL-LADGR   = WA_FINAL-LADGR.
+LS_FINAL-PRCTR   = WA_FINAL-PRCTR.
+LS_FINAL-SERNP   = WA_FINAL-SERNP.
+LS_FINAL-EKGRP   = WA_FINAL-EKGRP.
+LS_FINAL-DISMM   = WA_FINAL-DISMM.
+LS_FINAL-DISPO   = WA_FINAL-DISPO.
+LS_FINAL-BSTMI   = WA_FINAL-BSTMI.
+LS_FINAL-DISLS   = WA_FINAL-DISLS.
+LS_FINAL-BESKZ   = WA_FINAL-BESKZ.
+LS_FINAL-SOBSL   = WA_FINAL-SOBSL.
+LS_FINAL-WZEIT   = WA_FINAL-WZEIT.
+LS_FINAL-PLIFZ   = WA_FINAL-PLIFZ.
+LS_FINAL-FHORI   = WA_FINAL-FHORI.
+LS_FINAL-STRGR   = WA_FINAL-STRGR.
+LS_FINAL-VRMOD   = WA_FINAL-VRMOD.
+LS_FINAL-VINT1   = WA_FINAL-VINT1.
+LS_FINAL-VINT2   = WA_FINAL-VINT2.
+LS_FINAL-SBDKZ   = WA_FINAL-SBDKZ.
+LS_FINAL-FEVOR   = WA_FINAL-FEVOR.
+LS_FINAL-SFCPF   = WA_FINAL-SFCPF.
+LS_FINAL-DZEIT   = WA_FINAL-DZEIT.
+LS_FINAL-AUSME   = WA_FINAL-AUSME .
+LS_FINAL-LOSGR   = WA_FINAL-LOSGR.
+LS_FINAL-STEUC   = WA_FINAL-STEUC.
+LS_FINAL-SSQSS   = WA_FINAL-SSQSS.
+LS_FINAL-MISKZ   = WA_FINAL-MISKZ.
+LS_FINAL-LGORT   = WA_FINAL-LGORT .
+LS_FINAL-LGPBE   = WA_FINAL-LGPBE.
+LS_FINAL-VKORG   = WA_FINAL-VKORG.
+LS_FINAL-VTWEG   = WA_FINAL-VTWEG.
+LS_FINAL-DWERK   = WA_FINAL-DWERK.
+LS_FINAL-VERSG   = WA_FINAL-VERSG.
+LS_FINAL-KTGRM   = WA_FINAL-KTGRM .
+LS_FINAL-MTPOS   = WA_FINAL-MTPOS .
+LS_FINAL-MEINH   = WA_FINAL-MEINH.
+LS_FINAL-UMREZ   = WA_FINAL-UMREZ .
+LS_FINAL-UMREN   = WA_FINAL-UMREN.
+LS_FINAL-BKLAS   = WA_FINAL-BKLAS.
+LS_FINAL-VPRSV   = WA_FINAL-VPRSV.
+LS_FINAL-VERPR   = WA_FINAL-VERPR.
+LS_FINAL-STPRS   = WA_FINAL-STPRS.
+LS_FINAL-EKALR   = WA_FINAL-EKALR.
+LS_FINAL-TAXM1   = WA_FINAL-TAXM1.
+LS_FINAL-TAXM2   = WA_FINAL-TAXM2.
+LS_FINAL-TAXM3   = WA_FINAL-TAXM3.
+
+LS_FINAL-J_1ICAPIND   = WA_FINAL-J_1ICAPIND.
+LS_FINAL-J_1ISUBIND   = WA_FINAL-J_1ISUBIND.
+LS_FINAL-J_1IGRXREF   = WA_FINAL-J_1IGRXREF.
+
+LS_FINAL-ART     = WA_FINAL-ART  .
+LS_FINAL-AKTIV   = WA_FINAL-AKTIV.
+LS_FINAL-J_1IVALASS   = WA_FINAL-J_1IVALASS.
+LS_FINAL-J_1IMOOM   = WA_FINAL-J_1IMOOM.
+
+LS_FINAL-MATTXT     = WA_FINAL-MATTXT  .
+LS_FINAL-SPAN       = WA_FINAL-SPAN    .
+LS_FINAL-CLASS      = WA_FINAL-CLASS   .
+LS_FINAL-STEM       = WA_FINAL-STEM    .
+LS_FINAL-SEAT       = WA_FINAL-SEAT     .
+LS_FINAL-BODY       = WA_FINAL-BODY     .
+LS_FINAL-DISC       = WA_FINAL-DISC    .
+LS_FINAL-BALL       = WA_FINAL-BALL     .
+LS_FINAL-RATING     = WA_FINAL-RATING  .
+LS_FINAL-CLAS       = WA_FINAL-CLAS    .
+LS_FINAL-AIR_F      = WA_FINAL-AIR_F   .
+LS_FINAL-MAIN_AIR   = WA_FINAL-MAIN_AIR.
+LS_FINAL-LVORM      = WA_FINAL-LVORM   .
+LS_FINAL-CS         = WA_FINAL-CS .
+LS_FINAL-FG         = WA_FINAL-FG .
+LS_FINAL-ODP        = WA_FINAL-ODP.
+LS_FINAL-RJ         = WA_FINAL-RJ .
+LS_FINAL-RM         = WA_FINAL-RM .
+LS_FINAL-SCR        = WA_FINAL-SCR.
+LS_FINAL-SFG        = WA_FINAL-SFG.
+LS_FINAL-SLR        = WA_FINAL-SLR.
+LS_FINAL-SP         = WA_FINAL-SP .
+LS_FINAL-UST1       = WA_FINAL-UST1.
+LS_FINAL-UST2       = WA_FINAL-UST2 .
+LS_FINAL-DIS10      = WA_FINAL-DIS10.
+LS_FINAL-DIS20      = WA_FINAL-DIS20.
+LS_FINAL-DIS30      = WA_FINAL-DIS30.
+LS_FINAL-USERNAME   = WA_FINAL-USERNAME.         " ADEED BY PRATYANCHA ON 28.06.2024
+
+
+ CALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+    EXPORTING
+      INPUT         = WA_FINAL-REF
+   IMPORTING
+     OUTPUT        = LS_FINAL-REF
+            .
+
+CONCATENATE LS_FINAL-REF+0(2) LS_FINAL-REF+2(3) LS_FINAL-REF+5(4)
+                INTO LS_FINAL-REF SEPARATED BY '-'.
+if WA_FINAL-udate is not initial.
+cALL FUNCTION 'CONVERSION_EXIT_IDATE_OUTPUT'
+    EXPORTING
+      INPUT         = WA_FINAL-udate
+   IMPORTING
+     OUTPUT        = LS_FINAL-udate
+            .
+
+CONCATENATE LS_FINAL-udate+0(2) LS_FINAL-udate+2(3) LS_FINAL-udate+5(4)
+                INTO LS_FINAL-udate SEPARATED BY '-'.
+
+endif.
+
+ APPEND LS_FINAL TO LT_FINAL.
+ APPEND WA_FINAL TO IT_FINAL.
+ CLEAR: WA_FINAL,LS_FINAL.
+
+ENDLOOP.
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  GET_FCAT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM GET_FCAT .
+PERFORM FCAT USING : "mara table.
+                     '1'  'MATNR'         'IT_FINAL'  'Ext.Mat.No.'              '18' ,
+                     '2'  'MTART'         'IT_FINAL'  'Material Type'            '18',
+                     '3'  'ERSDA'         'IT_FINAL'  'Created On'               '18' ,
+                     '4'  'ERNAM'         'IT_FINAL'  'Created By'               '18' ,
+                     '5'  'BISMT'         'IT_FINAL'  'Old material number'      '18' ,
+                     '6'  'EXTWG'         'IT_FINAL'  'Ext.Material Group'       '18' ,
+                     '7'  'WRKST'         'IT_FINAL'  'USA Material Code'        '18' ,
+                     '8'  'MATKL'         'IT_FINAL'  'Material Group'           '18' ,
+                     '9'  'SPART'         'IT_FINAL'  'Divis'                      '5' ,
+                    '10'  'BRGEW'         'IT_FINAL'  'Gross Weight'             '18' ,
+                    '11'  'MEINS'         'IT_FINAL'  'Base Unit of Measure'     '18' ,
+                    '12'  'NTGEW'         'IT_FINAL'  'Net Weight'               '18' ,
+                    '13'  'MTPOS_MARA'    'IT_FINAL'  'Gen.item cat.group'       '18' ,
+                    '14'  'TRAGR  '       'IT_FINAL'  'Transportation Group'     '18' ,
+                    '15'  'MAGRV  '       'IT_FINAL'  'Matl.Grp.Pack.Matls'      '18',
+                    '16'  'BSTME  '       'IT_FINAL'  'Purc.Ord.Unit'            '18' ,
+                    '17'  'ZSERIES'       'IT_FINAL'  'series code'              '18' ,
+                    '18'  'ZSIZE  '       'IT_FINAL'  'Size'                     '18' ,
+                    '19'  'BRAND  '       'IT_FINAL'  'Brand'                    '18' ,
+                    '20'  'MOC    '       'IT_FINAL'  'MOC'                      '18' ,
+                    '21'  'TYPE   '       'IT_FINAL'  'TYPE'                     '18' ,
+                    '22'  'QMPUR   '       'IT_FINAL'  'QM proc active'          '18' ,
+                    '23'  'PSTAT   '       'IT_FINAL'  'Mainten status'          '18' ,
+                    '24'  'RAUBE   '       'IT_FINAL'  'Stor.cond'               '10' ,
+                    '25'  'ZEINR   '       'IT_FINAL'  'Drawing No'              '18' ,
+                    '26'  'ZEIVR   '       'IT_FINAL'  'Rev.No'                  '8' ,
+
+                      "MAKT TABLE"
+                    '27'  'MAKTX   '       'IT_FINAL'  'Mat.Descr'              '20' ,
+                    "marc Table
+                    '28'  'WERKS'         'IT_FINAL'  'Plant'                    '5' ,
+                    '29'  'MTVFP'         'IT_FINAL'  'Avail.Chk'                '10',
+                    '30'  'LADGR'         'IT_FINAL'  'Load.Group'               '10' ,
+                    '31'  'PRCTR'         'IT_FINAL'  'Profit Center'            '10' ,
+                    '32'  'SERNP'         'IT_FINAL'  'Ser.No.Prof'              '10' ,
+                    '33'  'EKGRP'         'IT_FINAL'  'Pur.Group'                '10' ,
+                    '34'  'DISMM'         'IT_FINAL'  'MRP Type'                 '7' ,
+                    '35'  'DISPO'         'IT_FINAL'  'MRP Cont'                 '8' ,
+                    '36'  'BSTMI'         'IT_FINAL'  'Min.Ord.Quntity'         '18' ,
+                    '37'  'DISLS'         'IT_FINAL'  'Lot size'                 '8' ,
+                    '38'  'BESKZ'         'IT_FINAL'  'Procur.Type'              '11' ,
+                    '39'  'SOBSL'         'IT_FINAL'  'Spec.proc.type'           '15' ,
+                    '40'  'WZEIT  '       'IT_FINAL'  'Repl.Lead Time'           '10' ,
+                    '41'  'PLIFZ  '       'IT_FINAL'  'Plan.Del.Time'            '18',
+                    '42'  'FHORI  '       'IT_FINAL'  'Sched.Margin'             '10' ,
+                    '43'  'STRGR  '       'IT_FINAL'  'strat.group'              '10' ,
+                    '44'  'VRMOD  '       'IT_FINAL'  'Consum.mode'              '10' ,
+                    '45'  'VINT1  '       'IT_FINAL'  'Consum.peri backward'     '18' ,
+                    '46'  'VINT2  '       'IT_FINAL'  'Consum.peri forward'      '18' ,
+                    '47'  'SBDKZ  '       'IT_FINAL'  'Indi/Coll'                '10' ,
+                    '48'  'FEVOR'         'IT_FINAL'  'Prod.Sched'               '10' ,
+                    '49'  'SFCPF'         'IT_FINAL'  'Prod.Sched.Prof'          '10',
+                    '50'  'DZEIT'         'IT_FINAL'  'Prod.Time'                '10' ,
+                    '51'  'AUSME'         'IT_FINAL'  'Unit of issue'            '15' ,
+                    '52'  'LOSGR'         'IT_FINAL'  'Costing Lot Size'         '18' ,
+                    '53'  'STEUC'         'IT_FINAL'  'HSN Code'                 '18' ,
+                    '54'  'SSQSS'         'IT_FINAL'  'QM Cont.Key'              '18' ,
+                    '55'  'MISKZ'         'IT_FINAL'  'Mix.MRP.Ind'              '10' ,
+
+
+                      "mard table.
+                    '56'  'LGORT'         'IT_FINAL'  'Stor.Loc'                 '10' ,
+                    '57'  'LGPBE'         'IT_FINAL'  'Stor.Bin'                 '10' ,
+
+                      "mvke table.
+                    '58'  'VKORG'         'IT_FINAL'  'Sale.Org.'                '10' ,
+                    '59'  'VTWEG'         'IT_FINAL'  'Dist.Chan'                '10',
+                    '60'  'DWERK'         'IT_FINAL'  'Deli.Plant'               '10' ,
+                    '61'  'VERSG'         'IT_FINAL'  'Mate.stat.group'          '10' ,
+                    '62'  'KTGRM'         'IT_FINAL'  'Ac.Ass'                   '6' ,
+                    '63'  'MTPOS'         'IT_FINAL'  'Itm.Cat.grp'              '10' ,
+
+
+                        "marm table
+                    '64'  'MEINH'         'IT_FINAL'  'Alt.UOM'                '8' ,
+                    '65'  'UMREZ'         'IT_FINAL'  'Conv Factor'            '8' ,
+                    '66'  'UMREN'         'IT_FINAL'  'Den.conv'               '8' ,
+
+                    "mbew table.
+                    '67'  'BKLAS'         'IT_FINAL'  'Val.Class'                '10' ,
+                    '68'  'VPRSV'         'IT_FINAL'  'Pri.cont.ind'             '10',
+                    '69'  'VERPR'         'IT_FINAL'  'Mov.price'                '15' ,
+                    '70'  'STPRS'         'IT_FINAL'  'Stand.price'              '15' ,
+                    '71'  'EKALR'         'IT_FINAL'  'With Qty Struc'           '8' ,
+
+                    "mlan table
+                    '72'  'TAXM1'         'IT_FINAL'  'Tax clas.mat'             '10',
+                    '73'  'TAXM2'         'IT_FINAL'  'Tax clas.mat'             '10' ,
+                    '74'  'TAXM3'         'IT_FINAL'  'Tax clas.mat'             '10' ,
+*                    '75'  'TAXM4'         'IT_FINAL'  'Tax clas.mat'             '10' ,
+
+                    "J_1IMTCHID table
+                    '75'  'J_1ICAPIND'    'IT_FINAL'  'Mat.Type'                 '10' ,
+                    '76'  'J_1ISUBIND'    'IT_FINAL'  'Subcontractors'           '10' ,
+                    '77'  'J_1IGRXREF'    'IT_FINAL'  'No.of GR per.EI'          '10' ,
+
+
+                    "QMAT TABLE
+
+                    '78'  'ART'           'IT_FINAL'  'Ins.Type'                 '10',
+                    '79'  'AKTIV'         'IT_FINAL'  'Ins.Active'               '10',
+
+                    "J_1IASSVAL table
+                    '80'  'J_1IVALASS'    'IT_FINAL'  'Assessable Value'         '15',
+
+                    "J_1IMODDET TABLE
+                    '81'  'J_1IMOOM'        'IT_FINAL'  'Output Mat.'                '18' ,
+
+                    " long txt
+                    '82'  'MATTXT'        'IT_FINAL'  'Long Text'                ' ' ,
+*                    '83'  'SPAN'          'IT_FINAL'  'Item.Span.txt'            ' ',   " commented by supriya on 16.07.2024
+
+                    "classification ausp table
+                    '83'  'CLASS'             'IT_FINAL'  'Class'               '8',
+                    '84'  'STEM    '          'IT_FINAL'  'Stem'                '18',
+                    '85'  'SEAT    '          'IT_FINAL'  'Seat'                '18',
+                    '86'  'BODY    '          'IT_FINAL'  'Body'                '18',
+                    '87'  'DISC    '          'IT_FINAL'  'Disc'                '18',
+                    '88'  'BALL    '          'IT_FINAL'  'Ball'                '18',
+                    '89'  'RATING  '          'IT_FINAL'  'Rating'              '18',
+                    '90'  'CLASS   '          'IT_FINAL'  'Class'               '18',
+                    '91'  'AIR_F   '          'IT_FINAL'  'Air_Fail_Position'   '18',
+                    '92'  'MAIN_AIR'          'IT_FINAL'  'Min_Air_Pressure'    '18',
+
+                    "REFRESH DATE"
+
+                    '93'  'LVORM'           'IT_FINAL'  'Deletion Ind'        '12' ,
+                    '94'  'REF'             'IT_FINAL'  'Refresh File Date'        '12' ,
+                    "Storage Location Added By Nilay On 23.03.2023
+                      '95'   'CS'           'IT_FINAL'     'CS'       '10',
+                      '96'   'FG'            'IT_FINAL'    'FG'       '10',
+                      '97'   'ODP'           'IT_FINAL'    'ODP'      '10',
+                      '98'   'RJ'            'IT_FINAL'    'RJ'       '10',
+                      '99'  'RM'            'IT_FINAL'    'RM'       '10',
+                      '100'  'SCR'           'IT_FINAL'    'SCR'      '10',
+                      '101'  'SFG'           'IT_FINAL'    'SFG'      '10',
+                      '102'  'SLR'           'IT_FINAL'    'SLR'      '10',
+                      '103'  'SP'            'IT_FINAL'    'SP'       '10',
+                      '104'  'UST1'          'IT_FINAL'    'UST1'     '10',
+                      '105'  'UST2'          'IT_FINAL'    'UST2'     '10',
+
+                      "Distribution Channel
+                      '106'  'DIS10'           'IT_FINAL'    'Dis.Ch.10'     '20',
+                      '107'  'DIS20'           'IT_FINAL'    'Dis.Ch.20'     '20',
+                      '108'  'DIS30'           'IT_FINAL'    'Dis.Ch.30'     '20',
+*                    Ended By Nilay On 23.03.2023
+
+                      '109'  'USERNAME'         'IT_FINAL'   'Deleted By'   '50', " Added by Pratyancha on 28.06.2024 logic by Keshav Deshmukh
+                      '110'  'UDATE'         'IT_FINAL'   'Deleted Date'   '11',  " Added by Pratyancha on 28.06.2024 logic by Keshav Deshmukh
+*                      Added by supriya jagtap on 16.07.2024
+                       '111'  'SPAN'          'IT_FINAL'  'Item.Span.txt'            ' '. " Added by supriya on 16.07.2024
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  GET_DISPLAY
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM GET_DISPLAY .
+  DELETE IT_FINAL WHERE WERKS = 'PL01'.
+  CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+   EXPORTING
+*     I_INTERFACE_CHECK                 = ' '
+*     I_BYPASSING_BUFFER                = ' '
+*     I_BUFFER_ACTIVE                   = ' '
+     I_CALLBACK_PROGRAM                = SY-REPID
+*     I_CALLBACK_PF_STATUS_SET          = ' '
+*     I_CALLBACK_USER_COMMAND           = 'USER_CMD'
+     I_CALLBACK_TOP_OF_PAGE            = 'TOP-OF-PAGE'
+*     I_CALLBACK_HTML_TOP_OF_PAGE       =
+*     I_CALLBACK_HTML_END_OF_LIST       = ' '
+*     I_STRUCTURE_NAME                  =
+*     I_BACKGROUND_ID                   = ' '
+*     I_GRID_TITLE                      =
+*     I_GRID_SETTINGS                   =
+     IS_LAYOUT                         = FS_LAYOUT
+     IT_FIELDCAT                       = IT_FCAT
+*     IT_EXCLUDING                      =
+*     IT_SPECIAL_GROUPS                 =
+*     IT_SORT                           =
+*     IT_FILTER                         =
+*     IS_SEL_HIDE                       =
+*     I_DEFAULT                         = 'X'
+      I_SAVE                            = 'X'
+*     IS_VARIANT                        =
+*     IT_EVENTS                         =
+*     IT_EVENT_EXIT                     =
+*     IS_PRINT                          =
+*     IS_REPREP_ID                      =
+*     I_SCREEN_START_COLUMN             = 0
+*     I_SCREEN_START_LINE               = 0
+*     I_SCREEN_END_COLUMN               = 0
+*     I_SCREEN_END_LINE                 = 0
+*     I_HTML_HEIGHT_TOP                 = 0
+*     I_HTML_HEIGHT_END                 = 0
+*     IT_ALV_GRAPHICS                   =
+*     IT_HYPERLINK                      =
+*     IT_ADD_FIELDCAT                   =
+*     IT_EXCEPT_QINFO                   =
+*     IR_SALV_FULLSCREEN_ADAPTER        =
+*   IMPORTING
+*     E_EXIT_CAUSED_BY_CALLER           =
+*     ES_EXIT_CAUSED_BY_USER            =
+    TABLES
+      T_OUTTAB                          = IT_FINAL
+*   EXCEPTIONS
+*     PROGRAM_ERROR                     = 1
+*     OTHERS                            = 2
+            .
+  IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+  ENDIF.
+IF P_DOWN = 'X'.
+
+    PERFORM DOWNLOAD.
+
+  ENDIF.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  FCAT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_1200   text
+*      -->P_1201   text
+*      -->P_1202   text
+*      -->P_1203   text
+*      -->P_1204   text
+*----------------------------------------------------------------------*
+FORM FCAT  USING    VALUE(P1)
+                    VALUE(P2)
+                    VALUE(P3)
+                    VALUE(P4)
+                    VALUE(P5).
+  WA_FCAT-COL_POS   = P1.
+  WA_FCAT-FIELDNAME = P2.
+  WA_FCAT-TABNAME   = P3.
+  WA_FCAT-SELTEXT_L = P4.
+*  wa_fcat-key       = .
+ WA_FCAT-OUTPUTLEN   = P5.
+
+  APPEND WA_FCAT TO IT_FCAT.
+  CLEAR WA_FCAT.
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  DOWNLOAD
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM DOWNLOAD .
+  TYPE-POOLS TRUXS.
+  DATA: IT_CSV TYPE TRUXS_T_TEXT_DATA,
+        WA_CSV TYPE LINE OF TRUXS_T_TEXT_DATA,
+        HD_CSV TYPE LINE OF TRUXS_T_TEXT_DATA.
+
+*  DATA: lv_folder(150).
+  DATA: LV_FILE(30).
+  DATA: LV_FULLFILE TYPE STRING,
+        LV_DAT(10),
+        LV_TIM(4).
+  DATA: LV_MSG(80).
+*BREAK PRIMUS.
+  CALL FUNCTION 'SAP_CONVERT_TO_TXT_FORMAT'
+*   EXPORTING
+*     I_FIELD_SEPERATOR          =
+*     I_LINE_HEADER              =
+*     I_FILENAME                 =
+*     I_APPL_KEEP                = ' '
+    TABLES
+      I_TAB_SAP_DATA       = LT_FINAL
+    CHANGING
+      I_TAB_CONVERTED_DATA = IT_CSV
+    EXCEPTIONS
+      CONVERSION_FAILED    = 1
+      OTHERS               = 2.
+  IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+  PERFORM CVS_HEADER USING HD_CSV.
+
+*  lv_folder = 'D:\usr\sap\DEV\D00\work'.
+  LV_FILE = 'ZUSITEM.TXT'.
+*BREAK primus.
+*  CONCATENATE P_FOLDER '\' LV_FILE
+  CONCATENATE P_FOLDER '/' LV_FILE
+    INTO LV_FULLFILE.
+
+  WRITE: / 'ZUS ITEM MASTER Download started on', SY-DATUM, 'at', SY-UZEIT.
+  OPEN DATASET LV_FULLFILE
+    FOR OUTPUT IN TEXT MODE ENCODING DEFAULT.  "NON-UNICODE.
+  IF SY-SUBRC = 0.
+DATA lv_string_1666 TYPE string.
+DATA lv_crlf_1666 TYPE string.
+lv_crlf_1666 = cl_abap_char_utilities=>cr_lf.
+lv_string_1666 = hd_csv.
+LOOP AT it_csv INTO wa_csv.
+CONCATENATE lv_string_1666 lv_crlf_1666 wa_csv INTO lv_string_1666.
+  CLEAR: wa_csv.
+ENDLOOP.
+TRANSFER lv_string_1666 TO lv_fullfile.
+*TRANSFER lv_string_2634 TO lv_fullfile.
+*TRANSFER lv_string_1666 TO lv_fullfile.
+    CONCATENATE 'File' LV_FULLFILE 'downloaded' INTO LV_MSG SEPARATED BY SPACE.
+    MESSAGE LV_MSG TYPE 'S'.
+  ENDIF.
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  CVS_HEADER
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*      -->P_HD_CSV  text
+*----------------------------------------------------------------------*
+FORM CVS_HEADER  USING    PD_CSV.
+  DATA: L_FIELD_SEPERATOR.
+  L_FIELD_SEPERATOR = CL_ABAP_CHAR_UTILITIES=>HORIZONTAL_TAB.
+  CONCATENATE 'Ext.Mat.No.'
+              'Material Type'
+              'Created On'
+              'Created By'
+              'Old material number'
+              'Ext.Material Group'
+              'USA Material Code'
+              'Material Group'
+              'Division'
+              'Gross Weight'
+              'Base Unit of Measure'
+              'Net Weight'
+              'Gen.item cat.group'
+              'Transportation Group'
+              'Matl.Grp.Pack.Matls'
+              'Purc.Ord.Unit'
+              'series code'
+              'Size'
+              'Brand'
+              'MOC'
+              'TYPE'
+              'QM proc active'
+              'Mainten status'
+              'Stor.cond'
+              'Drawing No'
+              'Rev.No'
+              'Mat.Descr'
+              'Plant'
+              'Avail.Chk'
+              'Load.Group'
+              'Profit Center'
+              'Ser.No.Prof'
+              'Pur.Group'
+              'MRP Type'
+              'MRP Cont'
+              'Min.Ord.Quntity'
+              'Lot size'
+              'Procur.Type'
+              'Spec.proc.type'
+              'Repl.Lead Time'
+              'Plan.Del.Time'
+              'Sched.Margin'
+              'strat.group'
+              'Consum.mode'
+              'Consum.peri backward'
+              'Consum.peri forward'
+              'Indi/Coll'
+              'Prod.Sched'
+              'Prod.Sched.Prof'
+              'Prod.Time'
+              'Unit of issue'
+              'Costing Lot Size'
+              'HSN Code'
+              'QM Cont.Key'
+              'Mix.MRP.Ind'
+              'Stor.Loc'
+              'Stor.Bin'
+              'Sale.Org.'
+              'Dist.Chan'
+              'Deli.Plant'
+              'Mate.stat.group'
+              'Ac.Ass'
+              'Itm.Cat.grp'
+              'Alt.UOM'
+              'Conv Factor'
+              'Den.conv'
+              'Val.Class'
+              'Pri.cont.ind'
+              'Mov.price'
+              'Stand.price'
+              'With Qty Struc'
+              'Tax clas.mat'
+              'Tax clas.mat'
+              'Tax clas.mat'
+              'Mat.Type'
+              'Subcontractors'
+              'No.of GR per.EI'
+              'Ins.Type'
+              'Ins.Active'
+              'Assessable Value'
+              'Output Mat.'
+              'Long Text'
+*              'Item.Span.txt'      " commented by supriya
+              'Class'
+              'Stem'
+              'Seat'
+              'Body'
+              'Disc'
+              'Ball'
+              'Rating'
+              'Class'
+              'Air_Fail_Position'
+              'Min_Air_Pressure'
+              'Deletion Ind'
+              'Refresh File Date'
+              'CS'
+              'FG'
+              'ODP'
+              'RJ'
+              'RM'
+              'SCR'
+              'SFG'
+              'SLR'
+              'SP'
+              'UST1'
+              'UST2'
+              'Dis.Ch.10'
+              'Dis.Ch.20'
+              'Dis.Ch.30'
+              'Deleted By'                                           " Added by Pratyancha on 28.06.2024 logic by Keshav Deshmukh
+              'Deleted Date'                                           " Added by Pratyancha on 28.06.2024 logic by Keshav Deshmukh
+              'Item.Span.txt'        " Add by supriya jagtap on 16.07.2024
+              INTO PD_CSV
+              SEPARATED BY L_FIELD_SEPERATOR.
+
+
+ENDFORM.
+*&---------------------------------------------------------------------*
+*&      Form  FILL_LAYOUT
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+*  -->  p1        text
+*  <--  p2        text
+*----------------------------------------------------------------------*
+FORM FILL_LAYOUT .
+  FS_LAYOUT-COLWIDTH_OPTIMIZE = 'X'.
+  FS_LAYOUT-ZEBRA             = 'X'.
+  FS_LAYOUT-DETAIL_POPUP      = 'X'.
+  FS_LAYOUT-SUBTOTALS_TEXT    = 'DR'.
+
+ENDFORM.
+
+
+
+*&---------------------------------------------------------------------*
+*&      Form  top-of-page
+*&---------------------------------------------------------------------*
+*       text
+*----------------------------------------------------------------------*
+FORM TOP-OF-PAGE.
+
+*  ALV Header declarations
+  DATA: T_HEADER      TYPE SLIS_T_LISTHEADER,
+        WA_HEADER     TYPE SLIS_LISTHEADER,
+        T_LINE        LIKE WA_HEADER-INFO,
+        LD_LINES      TYPE I,
+        LD_LINESC(10) TYPE C.
+
+*  Title
+  WA_HEADER-TYP  = 'H'.
+  WA_HEADER-INFO = 'Material Master Report'.
+  APPEND WA_HEADER TO T_HEADER.
+  CLEAR WA_HEADER.
+
+
+
+*  Date
+  WA_HEADER-TYP  = 'S'.
+  WA_HEADER-KEY  = 'Run Date : '.
+  CONCATENATE WA_HEADER-INFO SY-DATUM+6(2) '.' SY-DATUM+4(2) '.'
+                      SY-DATUM(4) INTO WA_HEADER-INFO.
+  APPEND WA_HEADER TO T_HEADER.
+  CLEAR: WA_HEADER.
+
+*  Time
+  WA_HEADER-TYP  = 'S'.
+  WA_HEADER-KEY  = 'Run Time: '.
+  CONCATENATE WA_HEADER-INFO SY-TIMLO(2) ':' SY-TIMLO+2(2) ':'
+                      SY-TIMLO+4(2) INTO WA_HEADER-INFO.
+  APPEND WA_HEADER TO T_HEADER.
+  CLEAR: WA_HEADER.
+
+*   Total No. of Records Selected
+  DESCRIBE TABLE IT_FINAL LINES LD_LINES.
+  LD_LINESC = LD_LINES.
+
+  CONCATENATE 'Total No. of Records Selected: ' LD_LINESC
+     INTO T_LINE SEPARATED BY SPACE.
+
+  WA_HEADER-TYP  = 'A'.
+  WA_HEADER-INFO = T_LINE.
+  APPEND WA_HEADER TO T_HEADER.
+  CLEAR: WA_HEADER, T_LINE.
+
+  CALL FUNCTION 'REUSE_ALV_COMMENTARY_WRITE'
+    EXPORTING
+      IT_LIST_COMMENTARY = T_HEADER.
+ENDFORM.                    " top-of-page

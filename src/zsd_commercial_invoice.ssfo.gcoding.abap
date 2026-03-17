@@ -1,0 +1,51 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+* set textnames for header, adress and footer
+PERFORM GET_TEXTNAME using    IS_BIL_INVOICE-HD_GEN-BIL_NUMBER
+                              IS_BIL_INVOICE-HD_ORG-SALESORG
+                     CHANGING GF_TXNAM_ADR
+                              GF_TXNAM_KOP
+                              GF_TXNAM_FUS
+                              GF_TXNAM_GRU
+                              GF_TXNAM_SDB.
+
+* object text name
+*GF_TDNAME = IS_BIL_INVOICE-HD_GEN-BIL_NUMBER.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

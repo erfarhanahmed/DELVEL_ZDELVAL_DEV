@@ -1,0 +1,9 @@
+PROCESS BEFORE OUTPUT.
+* MODULE STATUS_0101.
+  MODULE set_pf_status.
+  MODULE display_results.
+
+*
+PROCESS AFTER INPUT.
+* MODULE USER_COMMAND_0101.
+  MODULE handle_user_command.

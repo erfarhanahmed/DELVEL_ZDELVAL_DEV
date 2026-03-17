@@ -1,0 +1,76 @@
+*BREAK-POINT.
+
+  SELECT BUKRS
+         LIFNR
+         AUGBL
+         GJAHR
+         BELNR
+         BLART
+         DMBTR
+         BUDAT
+         WRBTR
+         AUGDT          " added by sonu
+    FROM BSAK
+    INTO TABLE IT_BSAK
+    WHERE BLART IN ('KR','RE')
+    AND AUGBL = WA_FINAL1-BELNR
+    AND AUGDT = WA_fINAL1-BUDAT  "added  by sonu
+    AND GJAHR = WA_FINAL1-GJAHR
+    AND BUKRS = 'SU00'.
+    DELETE ADJACENT DUPLICATES FROM IT_BSAK COMPARING ALL FIELDS.
+
+  SELECT BUKRS
+         LIFNR
+         AUGBL
+         GJAHR
+         BELNR
+         BLART
+    SUM( DMBTR )
+         BUDAT
+    FROM BSAK
+    INTO TABLE IT_BSAK1
+    WHERE BLART IN ('KR','RE','KG')
+    AND AUGBL = WA_FINAL1-BELNR
+    AND AUGDT = WA_fINAL1-BUDAT     "added  by sonu
+    AND GJAHR = WA_FINAL1-GJAHR
+    AND BUKRS EQ 'SU00'
+    GROUP BY AUGBL BUKRS LIFNR GJAHR BELNR BLART BUDAT.
+
+       SELECT BUKRS ,
+              GJAHR,
+              BELNR,
+              BLART,
+              BUDAT,
+              XBLNR
+         FROM BKPF
+         INTO TABLE @DATA(IT_BKPF)
+         FOR ALL ENTRIES IN @IT_BSAK1
+         WHERE BELNR = @IT_BSAK1-BELNR
+         AND GJAHR = @IT_BSAK1-GJAHR.
+
+       LOOP AT IT_BSAK1 INTO WA_BSAK1.
+         IF sy-tabix = 1.
+        WA_FINAL_N-BELNR = WA_BSAK1-BELNR.
+         ENDIF.
+
+        WA_FINAL_N-BLDAT = WA_BSAK1-BUDAT.
+
+        IF WA_BSAK1-BLART = 'KR'.
+          WA_FINAL_N-DMBTR = WA_BSAK1-DMBTR.
+        ENDIF.
+           IF WA_BSAK1-BLART = 'KG'.
+          WA_FINAL_N-DMBTR1 = WA_BSAK1-DMBTR.
+        ENDIF.
+        ON CHANGE OF WA_BSAK1-AUGBL.
+  READ TABLE IT_BKPF INTO DATA(WA_BKPF) WITH KEY BELNR = WA_BSAK1-BELNR.
+        WA_FINAL_N-XBLNR = WA_BKPF-XBLNR.
+        ENDON.
+        APPEND WA_FINAL_N TO IT_FINAL_N.
+         ENDLOOP.
+
+          DESCRIBE TABLE IT_FINAL_N LINES GV_TOT_LINES.
+          IF GV_TOT_LINES  NE 1.
+           DELETE IT_FINAL_N WHERE DMBTR1 EQ SPACE.
+          ENDIF.
+
+         GV_NET = WA_FINAL_N-DMBTR -  WA_FINAL_N-DMBTR1.

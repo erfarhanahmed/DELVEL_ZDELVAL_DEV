@@ -1,0 +1,23 @@
+clear:GV_DESC.
+SELECT SINGLE * FROM MAKT INTO WA_MAKT
+  WHERE MATNR = WA_FINAL-MATNR.
+
+GV_DESC = wa_makt-maktx.
+
+CONDENSE GV_DESC.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

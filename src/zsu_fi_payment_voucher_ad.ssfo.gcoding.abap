@@ -1,0 +1,25 @@
+
+*SELECT BUKRS
+*         LIFNR
+*         AUGBL
+*         GJAHR
+*         BELNR
+*         BLART
+*         DMBTR
+*         BUDAT
+*         WRBTR
+*    FROM BSAK
+*    INTO TABLE IT_BSAK
+*    WHERE BLART IN ('KR','RE')
+*    AND AUGBL = WA_FINAL1-BELNR
+*    AND GJAHR = WA_FINAL1-GJAHR.
+*
+*    DELETE ADJACENT DUPLICATES FROM IT_BSAK COMPARING ALL FIELDS
+
+
+
+
+
+
+
+

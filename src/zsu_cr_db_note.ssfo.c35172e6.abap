@@ -1,0 +1,21 @@
+*BREAK-POINT.
+CONCATENATE GS_ACCOUNTING_DOC_HDR-budat+0(4)'-'GS_ACCOUNTING_DOC_HDR-budat+4(2)'-'GS_ACCOUNTING_DOC_HDR-budat+6(2)  INTO LV_BUDAT.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

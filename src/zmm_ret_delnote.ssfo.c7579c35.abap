@@ -1,0 +1,39 @@
+*SELECT SINGLE ZEBELN
+*  FROM LIKP
+*  INTO V_ZEbelN
+*  WHERE VBELN = IS_DLV_DELNOTE-HD_GEN-DELIV_NUMB."V_DCS_NO.
+*  IF SY-SUBRC = 0.
+*    SELECT SINGLE MATNR
+*    FROM EKPO
+*    INTO V_MATNR
+*    WHERE EBELN = V_ZEBelN.
+*
+*    IF SY-SUBRC = 0.
+*      SELECT SINGLE MAKTX
+*     FROM MAKT
+*     INTO V_MAKTX
+*     WHERE MATNR = V_MATNR.
+*    ENDIF.
+*  ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,61 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_MSAG" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <T100A>
+    <ARBGB>ZFI_CONF</ARBGB>
+    <MASTERLANG>E</MASTERLANG>
+    <STEXT>CONF</STEXT>
+   </T100A>
+   <T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFI_CONF</ARBGB>
+     <MSGNR>000</MSGNR>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFI_CONF</ARBGB>
+     <MSGNR>001</MSGNR>
+     <TEXT>Balance does not exits against vendor &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFI_CONF</ARBGB>
+     <MSGNR>002</MSGNR>
+     <TEXT>Mail ID does not exist againts vendor &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFI_CONF</ARBGB>
+     <MSGNR>003</MSGNR>
+     <TEXT>Balance confirmation is succesfully, generated mail send to vendor &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFI_CONF</ARBGB>
+     <MSGNR>004</MSGNR>
+     <TEXT>Next available Log number not generated.</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFI_CONF</ARBGB>
+     <MSGNR>005</MSGNR>
+     <TEXT>Balance does not exits against Customer &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFI_CONF</ARBGB>
+     <MSGNR>006</MSGNR>
+     <TEXT>Mail ID does not exist againts Customer &amp;</TEXT>
+    </T100>
+    <T100>
+     <SPRSL>E</SPRSL>
+     <ARBGB>ZFI_CONF</ARBGB>
+     <MSGNR>007</MSGNR>
+     <TEXT>Balance confirmation is succesfully, generated mail send to Customer &amp;</TEXT>
+    </T100>
+   </T100>
+  </asx:values>
+ </asx:abap>
+</abapGit>

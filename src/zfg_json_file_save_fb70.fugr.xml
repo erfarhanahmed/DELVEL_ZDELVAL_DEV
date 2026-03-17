@@ -1,0 +1,107 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>Fg for JSON file Conversion</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZFG_JSON_FILE_SAVE_FB70F01</SOBJ_NAME>
+    <SOBJ_NAME>LZFG_JSON_FILE_SAVE_FB70TOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZFG_JSON_FILE_SAVE_FB70</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>ZJSON_FILE_FB70</FUNCNAME>
+     <SHORT_TEXT>Fm for JSON File Conversion</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>BELNR</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>BELNR_D</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>GJAHR</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <REFERENCE>X</REFERENCE>
+       <TYP>GJAHR</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>FILE_LOC</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <REFERENCE>X</REFERENCE>
+       <TYP>RLGRAP-FILENAME</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>LV_UCOMM</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>SY-UCOMM</TYP>
+      </RSIMP>
+      <RSIMP>
+       <PARAMETER>LV_MODE</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <REFERENCE>X</REFERENCE>
+       <TYP>FLAG</TYP>
+      </RSIMP>
+     </IMPORT>
+     <EXPORT>
+      <RSEXP>
+       <PARAMETER>STATUS</PARAMETER>
+       <REFERENCE>X</REFERENCE>
+       <TYP>STRING</TYP>
+      </RSEXP>
+     </EXPORT>
+     <TABLES>
+      <RSTBL>
+       <PARAMETER>LT_RETMSG</PARAMETER>
+       <DBSTRUCT>BAPIRET2</DBSTRUCT>
+      </RSTBL>
+      <RSTBL>
+       <PARAMETER>LT_JSONFILE</PARAMETER>
+       <DBSTRUCT>ZSTR_JSONFILE</DBSTRUCT>
+      </RSTBL>
+     </TABLES>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>BELNR</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Accounting Document Number</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>GJAHR</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Fiscal Year</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>FILE_LOC</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Local file for upload/download</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>LV_UCOMM</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>ABAP system field: Function code that raised PAI</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>LV_MODE</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>General Flag</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>STATUS</PARAMETER>
+       <KIND>P</KIND>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>LT_RETMSG</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Return Parameter</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>LT_JSONFILE</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Structure for JSON file</STEXT>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

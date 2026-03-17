@@ -1,0 +1,52 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_FUGR" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <AREAT>Json_Schema Map</AREAT>
+   <INCLUDES>
+    <SOBJ_NAME>LZEINV_SCHEMA_MAPTOP</SOBJ_NAME>
+    <SOBJ_NAME>SAPLZEINV_SCHEMA_MAP</SOBJ_NAME>
+   </INCLUDES>
+   <FUNCTIONS>
+    <item>
+     <FUNCNAME>ZEINV_SCHEMA_MAP</FUNCNAME>
+     <SHORT_TEXT>Json_Schema Map</SHORT_TEXT>
+     <IMPORT>
+      <RSIMP>
+       <PARAMETER>I_UPDATE</PARAMETER>
+       <OPTIONAL>X</OPTIONAL>
+       <TYP>ZEINV_UPDATE</TYP>
+      </RSIMP>
+     </IMPORT>
+     <TABLES>
+      <RSTBL>
+       <PARAMETER>JSON_IN</PARAMETER>
+       <TYP>ZEINV_JSON_TT</TYP>
+      </RSTBL>
+      <RSTBL>
+       <PARAMETER>JSON_OUT</PARAMETER>
+       <TYP>ZEINV_JSON_TT</TYP>
+      </RSTBL>
+     </TABLES>
+     <DOCUMENTATION>
+      <RSFDO>
+       <PARAMETER>I_UPDATE</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>update</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>JSON_IN</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Json_Schema Map</STEXT>
+      </RSFDO>
+      <RSFDO>
+       <PARAMETER>JSON_OUT</PARAMETER>
+       <KIND>P</KIND>
+       <STEXT>Json_Schema Map</STEXT>
+      </RSFDO>
+     </DOCUMENTATION>
+    </item>
+   </FUNCTIONS>
+  </asx:values>
+ </asx:abap>
+</abapGit>

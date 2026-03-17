@@ -1,0 +1,20 @@
+
+LV_SUBTOTAL_AMT = LV_BASE_AMT + LV_CMAT + LV_DISC + LV_ZDC1 + LV_ZIN1 + LV_ZPFO + LV_ZTE1 + LV_ZOTH + LV_ZFR1.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,24 @@
+CLEAR: GV_DEL_DT.
+
+CONCATENATE  WA_FINAL-DELDATE+4(2) WA_FINAL-DELDATE+6(2) WA_FINAL-DELDATE+0(4)
+                INTO GV_DEL_DT SEPARATED BY '-'.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

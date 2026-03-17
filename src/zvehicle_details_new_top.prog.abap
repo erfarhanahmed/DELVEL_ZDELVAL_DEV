@@ -1,0 +1,25 @@
+*&---------------------------------------------------------------------*
+*& Include ZVEHICAL_DETAILS_NEW_TOP                          Module Pool      ZVEHICAL_DETAILS_NEW
+*&
+*&---------------------------------------------------------------------*
+PROGRAM ZVEHICAL_DETAILS_NEW.
+*
+
+TYPES: BEGIN OF TS_ZVEHICLE_TB,
+        sel             TYPE char1,
+        SR_NO           TYPE ZVEHICLE_TB-SR_NO,
+        VEHICAL_NO      TYPE ZVEHICLE_TB-VEHICAL_NO,
+        QUANTITY        TYPE ZVEHICLE_TB-QUANTITY,
+        UNIT_OF_MEASURE TYPE ZVEHICLE_TB-UNIT_OF_MEASURE,
+      END OF TS_ZVEHICLE_TB.
+DATA:I_VEHICAL TYPE TABLE OF  ts_ZVEHICLE_TB,
+     S_VEHiCAL TYPE ts_ZVEHICLE_TB.
+
+
+*&SPWIZARD: DECLARATION OF TABLECONTROL 'TABC' ITSELF
+CONTROLS: TABC TYPE TABLEVIEW USING SCREEN 5001.
+
+*&SPWIZARD: LINES OF TABLECONTROL 'TABC'
+DATA:     G_TABC_LINES  LIKE SY-LOOPC.
+
+DATA:     OK_CODE LIKE SY-UCOMM.

@@ -1,0 +1,25 @@
+KOMVD-KOEI1 = GS_IT_KOND_W-KOEI1.
+KOMK-WAERK  = GS_HD_GEN-BIL_WAERK.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

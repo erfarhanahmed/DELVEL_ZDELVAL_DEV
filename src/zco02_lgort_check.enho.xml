@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<abapGit version="v1.0.0" serializer="LCL_OBJECT_ENHO" serializer_version="v1.0.0">
+ <asx:abap xmlns:asx="http://www.sap.com/abapxml" version="1.0">
+  <asx:values>
+   <TOOL>HOOK_IMPL</TOOL>
+   <ORIGINAL_OBJECT>
+    <PGMID>R3TR</PGMID>
+    <ORG_OBJ_TYPE>FUGR</ORG_OBJ_TYPE>
+    <ORG_OBJ_NAME>COKO1</ORG_OBJ_NAME>
+    <ORG_MAIN_TYPE>FUGR</ORG_MAIN_TYPE>
+    <ORG_MAIN_NAME>COKO1</ORG_MAIN_NAME>
+    <PROGRAMNAME>SAPLCOKO1</PROGRAMNAME>
+   </ORIGINAL_OBJECT>
+   <ENHANCEMENTS>
+    <ENH_HOOK_IMPL>
+     <PROGRAMNAME>SAPLCOKO1</PROGRAMNAME>
+     <ENHMODE>D</ENHMODE>
+     <FULL_NAME>\PR:SAPLCOKO1\FO:CHECK_BWTAR\SE:BEGIN\EI</FULL_NAME>
+    </ENH_HOOK_IMPL>
+    <ENH_HOOK_IMPL>
+     <PROGRAMNAME>SAPLCOKO1</PROGRAMNAME>
+     <ENHMODE>D</ENHMODE>
+     <FULL_NAME>\PR:SAPLCOKO1\FO:OK_CODE_PREP\SE:END\EI</FULL_NAME>
+    </ENH_HOOK_IMPL>
+   </ENHANCEMENTS>
+   <FILES>
+    <item>
+     <NAME>\PR:SAPLCOKO1\FO:CHECK_BWTAR\SE:BEGIN\EI</NAME>
+     <FILE>39a6863c</FILE>
+    </item>
+    <item>
+     <NAME>\PR:SAPLCOKO1\FO:OK_CODE_PREP\SE:END\EI</NAME>
+     <FILE>fba3a071</FILE>
+    </item>
+   </FILES>
+  </asx:values>
+ </asx:abap>
+</abapGit>

@@ -1,0 +1,35 @@
+
+*IF GS_MSEG-EBELN IS NOT INITIAL.
+*
+* SELECT SINGLE KNUMV
+*            FROM EKKO
+*            INTO @DATA(LV_KNUMV)
+*            WHERE EBELN = @GS_MSEG-EBELN.
+*
+*  SELECT SINGLE KBETR
+*                FROM KONV
+*                INTO LV_VAT
+*                WHERE KNUMV = LV_KNUMV
+*                AND  KNTYP = 'D' .
+*
+*ENDIF.
+
+
+IF LV_GRAMT IS NOT INITIAL.
+LV_VAT1 = ( LV_GRAMT * 15 ) / 100.
+ENDIF.
+
+IF LV_GRAMT  IS NOT INITIAL.
+LV_GRMT = LV_GRAMT  + LV_VAT1.
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+

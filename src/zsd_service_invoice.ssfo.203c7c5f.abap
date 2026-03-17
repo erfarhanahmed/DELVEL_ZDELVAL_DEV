@@ -1,0 +1,38 @@
+
+
+
+CLEAR GS_HD_ADR.
+* get customer adress number
+READ TABLE IS_BIL_INVOICE-HD_ADR INTO GS_HD_ADR
+           WITH KEY BIL_NUMBER = IS_BIL_INVOICE-HD_GEN-BIL_NUMBER
+                    PARTN_ROLE = 'WE'.
+ADRNR = GS_HD_ADR-ADDR_NO.
+
+CLEAR GS_HD_ADR.
+READ TABLE IS_BIL_INVOICE-HD_ADR INTO GS_HD_ADR
+           WITH KEY BIL_NUMBER = IS_BIL_INVOICE-HD_GEN-BIL_NUMBER
+                    PARTN_ROLE = 'RE'.
+IF  GS_HD_ADR-ADDR_NO EQ ADRNR.
+  CLEAR ADRNR.
+
+ENDIF.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

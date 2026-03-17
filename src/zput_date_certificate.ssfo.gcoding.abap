@@ -1,0 +1,24 @@
+break ctplmm.
+LOOP AT IT_FINAL INTO DATA(WA_FNL).
+V_ANLN1 = WA_FNL-ANLN1.
+GV_DATE = WA_FNL-BUDAT_MKPF.
+EXIT.
+ENDLOOP.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

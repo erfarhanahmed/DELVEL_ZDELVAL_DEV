@@ -1,0 +1,23 @@
+V_TEXT = WA_ITEM-ZEILE.
+SHIFT V_TEXT LEFT DELETING LEADING ' '.
+SHIFT V_TEXT LEFT DELETING LEADING '0'.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

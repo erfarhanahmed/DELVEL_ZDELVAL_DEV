@@ -1,0 +1,599 @@
+
+REPORT ZSU_FM_CS01_REPORT.
+
+TABLES: SSCRFIELDS.
+
+TABLES : MARC.
+TYPE-POOLS : SLIS.
+
+DATA: FIELDCATALOG TYPE SLIS_T_FIELDCAT_ALV WITH HEADER LINE,
+      GD_LAYOUT    TYPE SLIS_LAYOUT_ALV.
+
+
+
+DATA: IT_TAB   TYPE FILETABLE,
+      GD_SUBRC TYPE I,
+      L_FILE   TYPE RLGRAP-FILENAME.
+
+DATA MATERIAL           TYPE CSAP_MBOM-MATNR.
+DATA PLANT              TYPE CSAP_MBOM-WERKS.
+DATA BOM_USAGE          TYPE CSAP_MBOM-STLAN.
+DATA VALID_FROM         TYPE CSAP_MBOM-DATUV.
+DATA CHANGE_NO          TYPE CSAP_MBOM-AENNR.
+DATA REVISION_LEVEL     TYPE CSAP_MBOM-REVLV.
+DATA I_STKO             TYPE STKO_API01.
+
+DATA FL_NO_CHANGE_DOC   TYPE CAPIFLAG-NO_CHG_DOC.
+DATA FL_COMMIT_AND_WAIT TYPE CAPIFLAG-COMM_WAIT.
+DATA FL_CAD             TYPE CSDATA-CHAR1.
+DATA FL_DEFAULT_VALUES  TYPE CSDATA-XFELD.
+DATA FL_RECURSIVE       TYPE CSDATA-XFELD.
+DATA FL_WARNING         TYPE CAPIFLAG-FLWARNING.
+DATA BOM_NO             TYPE STKO_API02-BOM_NO.
+DATA T_STPO             TYPE TABLE OF STPO_API01.
+DATA T_DEP_DATA         TYPE STANDARD TABLE OF CSDEP_DAT.
+DATA T_DEP_DESCR        TYPE STANDARD TABLE OF CSDEP_DESC.
+DATA T_DEP_ORDER        TYPE STANDARD TABLE OF CSDEP_ORD.
+DATA T_DEP_SOURCE       TYPE STANDARD TABLE OF CSDEP_SORC.
+DATA T_DEP_DOC          TYPE STANDARD TABLE OF CSDEP_DOC.
+DATA T_LTX_LINE         TYPE STANDARD TABLE OF CSLTX_LINE.
+DATA T_STPU             TYPE STANDARD TABLE OF STPU_API01.
+DATA T_FSH_BOMD         TYPE FSH_TT_BOMVD_API.
+DATA T_SGT_BOMC         TYPE SGT_COMP_SEGMENT_T.
+*DATA LS_STPO             TYPE  STPO_API01.
+
+
+DATA: IT_RAW TYPE TRUXS_T_TEXT_DATA.
+
+TYPES : BEGIN OF GT_FINAL,
+          MATERIAL  TYPE CSAP_KBOM-MATNR,
+          BOM_USAGE TYPE CSAP_KBOM-STLAN,
+          COMPONENT TYPE STPO-IDNRK,
+          ITEM_CAT  TYPE STPO-POSTP,
+*          ITEM_LINE TYPE STPO-POSNR,
+          COMP_QTY  TYPE STPO-MENGE,
+          COMP_UNIT TYPE STPO-MEINS,
+          REL_COST  TYPE SANKA,
+          ISSUE_LOC TYPE CSLGO,
+
+
+        END OF GT_FINAL.
+
+TYPES : BEGIN OF GT_BOMAV,
+          MATERIAL  TYPE CSAP_KBOM-MATNR,
+*          BOM_USAGE TYPE CSAP_KBOM-STLAN,
+          COMPONENT TYPE STPO-IDNRK,
+*          ITEM_CAT  TYPE STPO-POSTP,
+**          ITEM_LINE TYPE STPO-POSNR,
+*          COMP_QTY  TYPE STPO-MENGE,
+*          COMP_UNIT TYPE STPO-MEINS,
+*          REL_COST  TYPE SANKA,
+*          ISSUE_LOC TYPE CSLGO,
+          REMARKS   TYPE STRING,
+        END OF GT_BOMAV.
+
+DATA : I_FILE   TYPE  TABLE  OF GT_FINAL,
+       WA_FILE  TYPE GT_FINAL,
+       LT_DATA  TYPE  TABLE  OF GT_FINAL,
+       LS_DATA  TYPE GT_FINAL,
+       LT_DATA1 TYPE  TABLE  OF GT_FINAL,
+       IT_FINAL TYPE TABLE OF GT_FINAL,
+       WA_FINAL TYPE GT_FINAL.
+
+DATA : IT_BOMAV TYPE TABLE OF GT_BOMAV,
+       WA_BOMAV TYPE GT_BOMAV.
+
+DATA : G_TOT_REC_CNT TYPE P,
+       G_SUC_REC_CNT TYPE P,
+       G_ERR_REC_CNT TYPE P.
+
+
+TYPES: BEGIN OF T_DATA,
+
+         FIELD1 TYPE STRING,
+         FIELD2 TYPE STRING,
+         FIELD3 TYPE STRING,
+         FIELD4 TYPE STRING,
+*         FIELD5 TYPE STRING,
+         FIELD6 TYPE STRING,
+         FIELD7 TYPE STRING,
+         FIELD8 TYPE STRING,
+         FIELD9 TYPE STRING,
+       END OF T_DATA.
+
+DATA: IT_COL_NO     TYPE STANDARD TABLE OF T_DATA,
+      WA_COL_NO     LIKE LINE OF IT_COL_NO,
+      IT_HEADER     TYPE STANDARD TABLE OF T_DATA,
+      WA_HEADER     LIKE LINE OF IT_HEADER,
+      IT_SUB_HEADER TYPE STANDARD TABLE OF T_DATA,
+      WA_SUB_HEADER LIKE LINE OF IT_SUB_HEADER,
+      IT_DATA       TYPE STANDARD TABLE OF T_DATA,
+      WA_DATA       LIKE LINE OF IT_DATA.
+
+FIELD-SYMBOLS: <FS>.
+
+DATA: BEGIN OF ITAB1 OCCURS 0, FIRST_NAME(10), END OF ITAB1.
+DATA: BEGIN OF ITAB2 OCCURS 0, LAST_NAME(10), END OF ITAB2.
+DATA: BEGIN OF ITAB3 OCCURS 0, FORMULA(50), END OF ITAB3.
+
+DATA INDEX TYPE I.
+DATA: LD_COLINDX TYPE I,
+      LD_ROWINDX TYPE I.
+
+DATA: APPLICATION TYPE OLE2_OBJECT,
+      WORKBOOK    TYPE OLE2_OBJECT,
+      SHEET       TYPE OLE2_OBJECT,
+      CELLS       TYPE OLE2_OBJECT,
+      CELL1       TYPE OLE2_OBJECT,
+      CELL2       TYPE OLE2_OBJECT,
+      RANGE       TYPE OLE2_OBJECT,
+      FONT        TYPE OLE2_OBJECT,
+      COLUMN      TYPE OLE2_OBJECT,
+      SHADING     TYPE OLE2_OBJECT,
+      BORDER      TYPE OLE2_OBJECT.
+
+CONSTANTS: ROW_MAX TYPE I VALUE 256.
+
+SELECTION-SCREEN BEGIN OF BLOCK B1 WITH FRAME TITLE TEXT-001.
+PARAMETERS: P_UNAME LIKE RLGRAP-FILENAME,
+            P_TEST  AS CHECKBOX.
+SELECTION-SCREEN END OF BLOCK B1.
+
+SELECTION-SCREEN BEGIN OF LINE.
+SELECTION-SCREEN PUSHBUTTON (25) W_BUTTON USER-COMMAND BUT1.
+SELECTION-SCREEN END OF LINE.
+
+INITIALIZATION.
+*  G_TOT_REC_CNT = 0.
+*  G_SUC_REC_CNT = 0.
+*  G_ERR_REC_CNT = 0.
+
+
+  W_BUTTON = 'Download Excel Template'.
+
+AT SELECTION-SCREEN .
+  IF SSCRFIELDS-UCOMM EQ 'BUT1' .
+*PERFORM excel_download.\
+    PERFORM DOWNLOAD_XL .
+  ENDIF.
+
+AT SELECTION-SCREEN ON VALUE-REQUEST FOR P_UNAME.
+  CALL FUNCTION 'F4_FILENAME'
+    EXPORTING
+      PROGRAM_NAME  = SYST-CPROG
+      DYNPRO_NUMBER = SYST-DYNNR
+*     FIELD_NAME    = ' '
+    IMPORTING
+      FILE_NAME     = P_UNAME.
+
+*
+*  CALL FUNCTION 'CONVERSION_EXIT_ALPHA_INPUT'
+*    EXPORTING
+*      INPUT  = P_UNAME
+*    IMPORTING
+*      OUTPUT = L_FILE.
+START-OF-SELECTION.
+
+  CALL FUNCTION 'TEXT_CONVERT_XLS_TO_SAP'
+    EXPORTING
+      I_TAB_RAW_DATA       = IT_RAW
+      I_LINE_HEADER        = 'X'
+      I_FILENAME           = P_UNAME
+    TABLES
+      I_TAB_CONVERTED_DATA = I_FILE[]
+    EXCEPTIONS
+      CONVERSION_FAILED    = 1
+      OTHERS               = 2.
+  IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+  ENDIF.
+
+  IF SY-SUBRC = 0.
+    DATA : V_BOMAVM TYPE N.
+    DATA : V_BOMAV TYPE N.
+    LOOP AT I_FILE INTO WA_FILE.
+      SELECT COUNT(*) INTO V_BOMAVM FROM MARC WHERE MATNR = WA_FILE-MATERIAL AND WERKS = 'SU01'.
+      SELECT COUNT(*) INTO V_BOMAV FROM MARC WHERE MATNR = WA_FILE-COMPONENT AND WERKS = 'SU01'.
+
+      IF V_BOMAVM = 0 AND V_BOMAV = 0.
+        WA_BOMAV-MATERIAL = WA_FILE-MATERIAL.
+        WA_BOMAV-COMPONENT = WA_FILE-COMPONENT.
+        WA_BOMAV-REMARKS  = 'Header Material and Components Not Created or Exended for Saudi Plant'.
+        APPEND WA_BOMAV TO IT_BOMAV.
+        CLEAR WA_BOMAV.
+        CLEAR V_BOMAVM.
+        CLEAR V_BOMAV.
+       ELSEIF V_BOMAVM = 0 AND V_BOMAV > 0.
+        WA_BOMAV-MATERIAL = WA_FILE-MATERIAL.
+        WA_BOMAV-COMPONENT = WA_FILE-COMPONENT.
+        WA_BOMAV-REMARKS  = 'Header Material Not Created or Exended for Saudi Plant'.
+        APPEND WA_BOMAV TO IT_BOMAV.
+        CLEAR WA_BOMAV.
+        CLEAR V_BOMAVM.
+        CLEAR V_BOMAV.
+      ELSEIF V_BOMAVM > 0 AND V_BOMAV = 0.
+         WA_BOMAV-MATERIAL = WA_FILE-MATERIAL.
+        WA_BOMAV-COMPONENT = WA_FILE-COMPONENT.
+        WA_BOMAV-REMARKS  = 'Component Not Created or Exended for Saudi Plant'.
+        APPEND WA_BOMAV TO IT_BOMAV.
+        CLEAR WA_BOMAV.
+        CLEAR V_BOMAVM.
+        CLEAR V_BOMAV.
+      ENDIF.
+    ENDLOOP.
+
+    IF SY-SUBRC = 0  AND IT_BOMAV IS INITIAL.
+      MESSAGE 'Data Uploaded Successfully' TYPE 'S' DISPLAY LIKE 'S'.
+
+    ELSEIF SY-SUBRC = 0  AND IT_BOMAV IS NOT INITIAL.
+
+      FIELDCATALOG-FIELDNAME   = 'MATERIAL'.
+      FIELDCATALOG-SELTEXT_M   = 'Header Material'.
+      FIELDCATALOG-COL_POS     = 1.
+      FIELDCATALOG-OUTPUTLEN   = 20.
+      APPEND FIELDCATALOG TO FIELDCATALOG.
+      CLEAR  FIELDCATALOG.
+
+      FIELDCATALOG-FIELDNAME   = 'COMPONENT'.
+      FIELDCATALOG-SELTEXT_M   = 'Components'.
+      FIELDCATALOG-COL_POS     = 2.
+      FIELDCATALOG-OUTPUTLEN   = 20.
+      APPEND FIELDCATALOG TO FIELDCATALOG.
+      CLEAR  FIELDCATALOG.
+      FIELDCATALOG-FIELDNAME   = 'REMARKS'.
+      FIELDCATALOG-SELTEXT_M   = 'Remarks'.
+      FIELDCATALOG-COL_POS     = 3.
+      FIELDCATALOG-OUTPUTLEN   = 100.
+      APPEND FIELDCATALOG TO FIELDCATALOG.
+      CLEAR  FIELDCATALOG.
+
+
+
+*      CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+*        EXPORTING
+*          I_CALLBACK_PROGRAM = SY-REPID
+*          IS_LAYOUT          = GD_LAYOUT
+*          IT_FIELDCAT        = FIELDCATALOG[]
+*          I_SAVE             = ' '
+*
+*        TABLES
+*          T_OUTTAB           = IT_BOMAV[]
+** EXCEPTIONS
+**         PROGRAM_ERROR      = 1
+**         OTHERS             = 2
+*        .
+*      IF SY-SUBRC <> 0.
+** Implement suitable error handling here
+*      ENDIF.
+
+*  MESSAGE 'Data Upload Failed' TYPE 'E' DISPLAY LIKE 'E'.
+    ENDIF.
+  ENDIF.
+
+*IF SY-SUBRC = 0 .
+*MESSAGE 'Data Uploaded Successfully' TYPE 'S' DISPLAY LIKE 'S'.
+*
+*ELSE.
+*
+*  MESSAGE 'Data Upload Failed' TYPE 'E' DISPLAY LIKE 'E'.
+*ENDIF.
+
+
+
+  DATA: LV_DATE     TYPE CSAP_MBOM-DATUV.
+
+  LT_DATA1 = I_FILE[].
+
+  SORT I_FILE BY MATERIAL.
+  DELETE ADJACENT DUPLICATES FROM I_FILE COMPARING MATERIAL.
+
+  LOOP AT I_FILE INTO WA_FILE .
+    LOOP AT IT_BOMAV INTO WA_BOMAV WHERE MATERIAL = WA_FILE-MATERIAL.
+      IF SY-SUBRC = 0.
+        DELETE I_FILE WHERE MATERIAL = WA_BOMAV-MATERIAL.
+      ENDIF.
+     ENDLOOP.
+    ENDLOOP.
+
+*  DELETE I_FILE WHERE MATERIAL = IT_BOMAV-MATERIAL.
+
+
+
+  DATA : W_DATE      TYPE SY-DATUM,
+         W_DATE1(10).
+*  data: lv_date     TYPE csap_mbom-datuv .
+  CONSTANTS : c(1) VALUE '.'.
+  W_DATE = SY-DATUM.
+
+  CONCATENATE W_DATE+6(2) W_DATE+4(2) W_DATE+0(4) INTO W_DATE1 SEPARATED BY C.
+  LV_DATE = W_DATE1.
+  DATA: LS_STKO   TYPE STKO_API01,
+        LT_STPO   TYPE TABLE OF STPO_API01,
+        LS_STPO   TYPE STPO_API01,
+*        LS_SHADE_TY TYPE ZPP_SHADE_TYPE,
+        LV_MATNR  TYPE MATNR,
+        LV_MATNR2 TYPE MATNR.
+*        LV_DATE     TYPE CSAP_MBOM-DATUV
+  .
+
+  LOOP AT I_FILE INTO WA_FILE .
+
+
+    BOM_USAGE = WA_FILE-BOM_USAGE.
+    PLANT = 'SU01'.
+    LS_STKO-BASE_QUAN = '1.000'.
+    LS_STKO-BASE_UNIT = 'NOS'.
+    LS_STKO-BOM_STATUS = '01'.
+
+    CLEAR: LT_STPO ,LS_STPO.
+    LOOP AT LT_DATA1 INTO DATA(LS_DATA1) WHERE MATERIAL = WA_FILE-MATERIAL
+                                          AND BOM_USAGE = WA_FILE-BOM_USAGE.
+      CLEAR LS_STPO.
+      LS_STPO-ITEM_CATEG = LS_DATA1-ITEM_CAT. "'L'.
+*      LS_STPO-ITEM_NO = LS_DATA1-ITEM_LINE.
+
+*       CALL FUNCTION 'CONVERSION_EXIT_MATN1_INPUT'
+*      EXPORTING
+*        INPUT        = LS_DATA1-COMPONENT
+*      IMPORTING
+*        OUTPUT       = LV_MATNR2
+
+      LS_STPO-COMPONENT = LS_DATA1-COMPONENT.
+      LS_STPO-COMP_QTY = LS_DATA1-COMP_QTY.
+      LS_STPO-COMP_UNIT = LS_DATA1-COMP_UNIT .
+      LS_STPO-ISSUE_LOC = LS_DATA1-ISSUE_LOC.
+*    LS_STPO-ITEM_TEXT1 = GS_SHADE-ALTV_TEXT.
+      LS_STPO-VALID_FROM = LV_DATE.
+*    LS_STPO-REL_PROD = GC_X.
+      LS_STPO-REL_COST = 'X'.
+      APPEND LS_STPO TO LT_STPO.
+    ENDLOOP.
+
+    CALL FUNCTION 'CONVERSION_EXIT_MATN1_INPUT'
+      EXPORTING
+        INPUT        = WA_FILE-MATERIAL
+      IMPORTING
+        OUTPUT       = LV_MATNR
+      EXCEPTIONS
+        LENGTH_ERROR = 1
+        OTHERS       = 2.
+    IF SY-SUBRC <> 0.
+      CLEAR : LV_MATNR.
+    ENDIF.
+
+
+*    BREAK-POINT.
+    CHECK LT_STPO IS NOT INITIAL.
+    CALL FUNCTION 'CSAP_MAT_BOM_CREATE'
+      EXPORTING
+        MATERIAL          = LV_MATNR
+        PLANT             = PLANT
+        BOM_USAGE         = WA_FILE-BOM_USAGE
+*       ALTERNATIVE       = '01'
+        VALID_FROM        = LV_DATE
+*       CHANGE_NO         =
+*       REVISION_LEVEL    =
+        I_STKO            = LS_STKO
+*       FL_NO_CHANGE_DOC  = ' '
+*       FL_COMMIT_AND_WAIT       = ' '
+*       FL_CAD            = ' '
+        FL_DEFAULT_VALUES = ' '
+*       FL_RECURSIVE      = ' '
+*     IMPORTING
+*       FL_WARNING        =
+*       BOM_NO            =
+      TABLES
+        T_STPO            = LT_STPO
+*       T_DEP_DATA        =
+*       T_DEP_DESCR       =
+*       T_DEP_ORDER       =
+*       T_DEP_SOURCE      =
+*       T_DEP_DOC         =
+*       T_LTX_LINE        =
+*       T_STPU            =
+*       T_FSH_BOMD        =
+*       T_SGT_BOMC        =
+      EXCEPTIONS
+        ERROR             = 1
+        OTHERS            = 2.
+    IF LV_MATNR IS NOT INITIAL AND PLANT NE 'SU01'..
+
+    ELSE.
+
+    ENDIF.
+    CLEAR WA_FILE.
+  ENDLOOP.
+
+IF IT_BOMAV[] IS NOT INITIAL.
+ CALL FUNCTION 'REUSE_ALV_GRID_DISPLAY'
+        EXPORTING
+          I_CALLBACK_PROGRAM = SY-REPID
+          IS_LAYOUT          = GD_LAYOUT
+          IT_FIELDCAT        = FIELDCATALOG[]
+          I_SAVE             = ' '
+
+        TABLES
+          T_OUTTAB           = IT_BOMAV[]
+* EXCEPTIONS
+*         PROGRAM_ERROR      = 1
+*         OTHERS             = 2
+        .
+      IF SY-SUBRC <> 0.
+* Implement suitable error handling here
+      ENDIF.
+ENDIF.
+*&---------------------------------------------------------------------*
+*& form download_xl
+*&---------------------------------------------------------------------*
+*& text
+*&---------------------------------------------------------------------*
+*& -->  p1        text
+*& <--  p2        text
+*&---------------------------------------------------------------------*
+FORM DOWNLOAD_XL .
+**start of column numbers
+
+  WA_DATA-FIELD1  = 'Material Number'.
+  WA_DATA-FIELD2  = 'BOM Usage'.
+  WA_DATA-FIELD3  = 'BOM component'.
+  WA_DATA-FIELD4  = 'Item category'.
+*  WA_DATA-FIELD5  = 'line item'.
+  WA_DATA-FIELD6  = 'Component quantity'.
+  WA_DATA-FIELD7  = 'Component unit'.
+  WA_DATA-FIELD8  = 'Cost Relavancy'.
+  WA_DATA-FIELD9  = 'Issue location'.
+  APPEND WA_DATA TO IT_DATA.
+
+  CREATE OBJECT APPLICATION 'excel.application'.
+  SET PROPERTY OF APPLICATION 'visible' = 1.
+  CALL METHOD OF
+    APPLICATION
+      'workbooks' = WORKBOOK.
+
+  SET PROPERTY OF APPLICATION 'sheetsinnewworkbook' = 1.
+  CALL METHOD OF
+    WORKBOOK
+    'add'.
+
+  CALL METHOD OF
+  APPLICATION
+  'worksheets' = SHEET
+  EXPORTING
+    #1           = 1.
+  CALL METHOD OF
+    SHEET
+    'activate'.
+  SET PROPERTY OF SHEET 'name' = 'BOM Upload - Cs01'.
+
+
+  LD_ROWINDX = 1.
+  LOOP AT IT_DATA INTO WA_DATA.
+    LD_ROWINDX = SY-TABIX .
+
+    CLEAR LD_COLINDX.
+    DO.
+      ASSIGN COMPONENT SY-INDEX OF STRUCTURE WA_DATA TO <FS>.
+      IF SY-SUBRC NE 0.
+        EXIT.
+      ENDIF.
+      LD_COLINDX = SY-INDEX.
+      CALL METHOD OF
+      SHEET
+      'cells' = CELLS
+      EXPORTING
+        #1      = LD_ROWINDX
+        #2      = LD_COLINDX.
+      SET PROPERTY OF CELLS 'value' = <FS>.
+    ENDDO.
+  ENDLOOP.
+
+
+  CALL METHOD OF
+  APPLICATION
+  'cells'     = CELL1
+  EXPORTING
+    #1          = 1     "down
+    #2          = 1.    "across
+*end of range cell
+  CALL METHOD OF
+  APPLICATION
+  'cells'     = CELL2
+  EXPORTING
+    #1          = 1     "down
+    #2          = 35.   "across
+
+  CALL METHOD OF
+  APPLICATION
+  'range'     = RANGE
+  EXPORTING
+    #1          = CELL1
+    #2          = CELL2.
+
+  GET PROPERTY OF RANGE 'font' = FONT.
+  SET PROPERTY OF FONT 'size' = 12.
+
+  CALL METHOD OF
+    RANGE
+      'interior' = SHADING.
+  SET PROPERTY OF SHADING 'colorindex' = 6.
+  SET PROPERTY OF SHADING 'pattern' = 1.
+  FREE OBJECT SHADING.
+
+
+  FREE RANGE.
+  CALL METHOD OF APPLICATION 'cells' = CELL1  "start cell
+  EXPORTING
+    #1 = 1     "down
+    #2 = 1.    "across
+
+  CALL METHOD OF APPLICATION 'cells' = CELL2 "end cell
+  EXPORTING
+    #1 = 1    "down
+    #2 = 35.   "across
+
+  CALL METHOD OF
+  APPLICATION
+  'range'     = RANGE
+  EXPORTING
+    #1          = CELL1
+    #2          = CELL2.
+
+
+  CALL METHOD OF
+  RANGE
+  'borders' = BORDER
+  EXPORTING
+    #1        = '1'.  "left
+  SET PROPERTY OF BORDER 'linestyle' = '1'.
+  SET PROPERTY OF BORDER 'weight' = 1.                      "max = 4
+  FREE OBJECT BORDER.
+
+  CALL METHOD OF
+  RANGE
+  'borders' = BORDER
+  EXPORTING
+    #1        = '2'.  "right
+  SET PROPERTY OF BORDER 'linestyle' = '1'.
+  SET PROPERTY OF BORDER 'weight' = 2.                      "max = 4
+  FREE OBJECT BORDER.
+
+  CALL METHOD OF
+  RANGE
+  'borders' = BORDER
+  EXPORTING
+    #1        = '3'.   "top
+  SET PROPERTY OF BORDER 'linestyle' = '1'.
+  SET PROPERTY OF BORDER 'weight' = 2.                      "max = 4
+  FREE OBJECT BORDER.
+
+  CALL METHOD OF
+  RANGE
+  'borders' = BORDER
+  EXPORTING
+    #1        = '4'.   "bottom
+  SET PROPERTY OF BORDER 'linestyle' = '1'.
+  SET PROPERTY OF BORDER 'weight' = 2.                      "max = 4
+  FREE OBJECT BORDER.
+
+  CALL METHOD OF
+    APPLICATION
+      'columns' = COLUMN.
+  CALL METHOD OF
+    COLUMN
+    'autofit'.
+
+  FREE OBJECT COLUMN.
+
+  CALL METHOD OF
+    SHEET
+    'saveas'
+    EXPORTING
+      #1 = 'd:\sap_data\upload_sales_order_lineitem.xls'     "filename
+**       #1       = '/home/lalit/upload_fert_finished_material.xls'     "filename
+      #2 = 1.                          "fileformat
+
+  FREE OBJECT SHEET.
+  FREE OBJECT WORKBOOK.
+  FREE OBJECT APPLICATION.
+
+ENDFORM.
